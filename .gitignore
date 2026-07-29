@@ -39,3 +39,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local JSON "database" and uploaded files (runtime data, not source)
+/data/db.json
+/public/uploads/
