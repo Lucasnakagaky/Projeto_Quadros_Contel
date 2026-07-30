@@ -3,8 +3,8 @@ import { Toaster } from "sonner";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Quadros Kanban",
-  description: "Gerencie seus projetos e tarefas com quadros Kanban",
+  title: "Pipes",
+  description: "Gerencie seus processos com pipes estilo Kanban, com cards pai e filho",
 };
 
 export default function RootLayout({

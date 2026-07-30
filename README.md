@@ -1,36 +1,36 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Pipes — clone funcional de um board estilo Pipefy/Kanban
 
-## Getting Started
+Aplicação Next.js (App Router) + TypeScript com um construtor de formulários por pipe, fases coloridas com drag-and-drop e — o ponto central — **conexões pai/filho entre cards**, bidirecionais e sincronizadas.
 
-First, run the development server:
+## Como rodar
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Abra [http://localhost:3000](http://localhost:3000) — você será redirecionado para `/pipes`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Persistência
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Sem banco de dados externo: os dados ficam em `data/db.json`, lidos/escritos por `src/lib/db.ts` (fila de escrita serializada para evitar corrupção em gravações concorrentes). Ao rodar pela primeira vez, o arquivo é criado automaticamente com um pipe de exemplo (fases "Caixa de entrada", "Fazendo" e "Concluído").
 
-## Learn More
+## Modelo de dados
 
-To learn more about Next.js, take a look at the following resources:
+`Pipe → Fase → Card`, com `Campo` definindo os campos configuráveis de cada pipe (form builder) e `Conexao` representando a relação pai/filho entre dois cards (`cardPaiId` → `cardFilhoId`), criada através de um campo do tipo **"Conexão de pipe"**.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- Um card pai pode ter vários filhos (conforme a cardinalidade configurada no campo de conexão: único ou vários).
+- No card pai, a seção de conexão lista os filhos como chips (título, pipe de origem, criado em, fase atual) e permite criar um novo filho ou conectar um card já existente.
+- No card filho, a seção "Este card está conectado a" mostra o(s) pai(s). Como fase/título são lidos ao vivo do card pai (sem cópia duplicada), mover o pai de fase reflete automaticamente no filho.
+- Mover um card para a lixeira (soft delete) não apaga a conexão: o filho passa a mostrar um aviso de "conexão quebrada", que se resolve sozinho ao restaurar o pai. A exclusão definitiva só acontece a partir da lixeira, com confirmação extra.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Estrutura
 
-## Deploy on Vercel
+- `src/lib/types.ts` — tipos e paletas de cor (`CORES_FASE`, `CORES_ETIQUETA`, `TIPOS_CAMPO`).
+- `src/lib/db.ts` / `src/lib/store.ts` — persistência e regras de negócio (pipes, fases, campos, cards, conexões, etiquetas, checklists, comentários, anexos).
+- `src/app/api/**` — rotas REST finas sobre `store.ts`.
+- `src/components/pipe/**` — UI do board (fases, cards, popovers de fase), do modal de detalhe do card (`card-modal/`) e do construtor de formulário (`form-builder/`).
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Escopo
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Views da barra superior (Mapa, Fluxo, Lista, Relatórios, Emails, Painéis), abas Email/PDF do card, sugestões de IA, compartilhamento e "Configurar condicionais nos campos" são placeholders visuais ("em breve") — o foco foi colocar o board, o construtor de formulário e a relação pai/filho funcionando de ponta a ponta (criar, editar, mover, excluir/restaurar).

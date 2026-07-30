@@ -38,76 +38,128 @@ export interface Anexo {
 
 export interface Etiqueta {
   id: string;
-  boardId: string;
+  pipeId: string;
   nome: string;
   cor: string;
+}
+
+export type TipoCampo =
+  | "texto_curto"
+  | "texto_longo"
+  | "conteudo_dinamico"
+  | "anexo"
+  | "checkbox"
+  | "responsavel"
+  | "data"
+  | "data_hora"
+  | "data_vencimento"
+  | "etiquetas"
+  | "email"
+  | "telefone"
+  | "selecao_lista"
+  | "selecao_unica"
+  | "tempo"
+  | "numerico"
+  | "moeda"
+  | "documentos"
+  | "id"
+  | "conexao_pipe"
+  | "conexao_database";
+
+export interface CampoConfig {
+  // selecao_lista / selecao_unica
+  opcoes?: string[];
+  // conexao_pipe
+  nomeConexao?: string;
+  pipeDestinoId?: string;
+  modoConexao?: "criar" | "pesquisar_criar";
+  cardinalidade?: "unico" | "varios";
+}
+
+export interface Campo {
+  id: string;
+  pipeId: string;
+  tipo: TipoCampo;
+  titulo: string;
+  obrigatorio: boolean;
+  descricao: string;
+  textoAjuda: string;
+  visualizacaoCompacta: boolean;
+  ordem: number;
+  config: CampoConfig;
+}
+
+export interface Fase {
+  id: string;
+  pipeId: string;
+  nome: string;
+  cor: string;
+  ordem: number;
+  ehFinal: boolean;
+  permiteCriarCards: boolean;
+}
+
+export interface Pipe {
+  id: string;
+  nome: string;
+  criadoEm: string;
+}
+
+export interface EventoHistorico {
+  id: string;
+  faseId: string;
+  faseNome: string;
+  entradaEm: string;
+}
+
+export interface Conexao {
+  id: string;
+  campoId: string;
+  cardPaiId: string;
+  cardFilhoId: string;
+  criadoEm: string;
 }
 
 export interface Card {
   id: string;
-  listId: string;
-  boardId: string;
+  pipeId: string;
+  faseId: string;
   titulo: string;
-  descricao: string;
-  concluido: boolean;
-  dataInicio: string | null;
-  duracaoHoras: number | null;
-  duracaoDias: number | null;
-  dataEntregaPrevista: string | null;
-  ordem: number;
-  etiquetaIds: string[];
-  responsavelIds: string[];
-  predecessorIds: string[];
+  valoresCampos: Record<string, unknown>;
+  criadoPorId: string;
   criadoEm: string;
-}
-
-export interface Lista {
-  id: string;
-  boardId: string;
-  nome: string;
+  historico: EventoHistorico[];
   ordem: number;
-}
-
-export interface Board {
-  id: string;
-  nome: string;
-  descricao: string;
-  cor: string;
-  arquivado: boolean;
-  ownerId: string;
-  membroIds: string[];
-  criadoEm: string;
-}
-
-export interface Template {
-  id: string;
-  nome: string;
-  titulo: string;
-  descricao: string;
+  excluido: boolean;
+  excluidoEm: string | null;
 }
 
 export interface DbSchema {
   usuarios: Usuario[];
-  boards: Board[];
-  listas: Lista[];
+  pipes: Pipe[];
+  fases: Fase[];
+  campos: Campo[];
   cards: Card[];
+  conexoes: Conexao[];
+  etiquetas: Etiqueta[];
   checklists: Checklist[];
   comentarios: Comentario[];
   anexos: Anexo[];
-  etiquetas: Etiqueta[];
-  templates: Template[];
 }
 
-export const CORES_QUADRO = [
-  "#2563eb",
-  "#7c3aed",
-  "#db2777",
-  "#dc2626",
-  "#ea580c",
-  "#d97706",
-  "#16a34a",
-  "#0d9488",
-  "#475569",
+export const CORES_FASE = [
+  "#06B6D4",
+  "#3B82F6",
+  "#6366F1",
+  "#8B5CF6",
+  "#A855F7",
+  "#EC4899",
+  "#F43F5E",
+  "#F97316",
+  "#F59E0B",
+  "#84CC16",
+  "#10B981",
+  "#64748B",
 ];
 
 export const CORES_ETIQUETA = [
@@ -119,4 +171,28 @@ export const CORES_ETIQUETA = [
   "#3b82f6",
   "#14b8a6",
   "#64748b",
+];
+
+export const TIPOS_CAMPO: { tipo: TipoCampo; label: string }[] = [
+  { tipo: "texto_curto", label: "Texto curto" },
+  { tipo: "texto_longo", label: "Texto longo" },
+  { tipo: "conteudo_dinamico", label: "Conteúdo dinâmico" },
+  { tipo: "anexo", label: "Anexo" },
+  { tipo: "checkbox", label: "Checkbox" },
+  { tipo: "responsavel", label: "Responsável" },
+  { tipo: "data", label: "Data" },
+  { tipo: "data_hora", label: "Data e hora" },
+  { tipo: "data_vencimento", label: "Data de vencimento" },
+  { tipo: "etiquetas", label: "Etiquetas" },
+  { tipo: "email", label: "Email" },
+  { tipo: "telefone", label: "Número de telefone" },
+  { tipo: "selecao_lista", label: "Seleção de lista" },
+  { tipo: "selecao_unica", label: "Seleção de única opção" },
+  { tipo: "tempo", label: "Tempo" },
+  { tipo: "numerico", label: "Numérico" },
+  { tipo: "moeda", label: "Moeda" },
+  { tipo: "documentos", label: "Documentos" },
+  { tipo: "id", label: "ID" },
+  { tipo: "conexao_pipe", label: "Conexão de pipe" },
+  { tipo: "conexao_database", label: "Conexão de database" },
 ];

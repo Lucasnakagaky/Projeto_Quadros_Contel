@@ -1,5 +1,12 @@
 import { NextResponse } from "next/server";
-import { deleteCard, getCard, updateCard, CardPatch } from "@/lib/store";
+import {
+  CardPatch,
+  getCard,
+  listConexoesFilhos,
+  listConexoesPais,
+  permanentDeleteCard,
+  updateCard,
+} from "@/lib/store";
 import { readDb } from "@/lib/db";
 import { handleError, readJson } from "@/lib/api-utils";
 
@@ -10,34 +17,31 @@ export async function GET(_req: Request, { params }: Ctx) {
     const { cardId } = await params;
     const card = await getCard(cardId);
     const db = await readDb();
+
+    const pipe = db.pipes.find((p) => p.id === card.pipeId);
+    const fases = db.fases.filter((f) => f.pipeId === card.pipeId).sort((a, b) => a.ordem - b.ordem);
+    const campos = db.campos.filter((c) => c.pipeId === card.pipeId).sort((a, b) => a.ordem - b.ordem);
+    const etiquetas = db.etiquetas.filter((e) => e.pipeId === card.pipeId);
     const checklists = db.checklists.filter((c) => c.cardId === cardId);
     const comentarios = db.comentarios
       .filter((c) => c.cardId === cardId)
       .sort((a, b) => (a.criadoEm < b.criadoEm ? -1 : 1));
     const anexos = db.anexos.filter((a) => a.cardId === cardId);
-    const etiquetas = db.etiquetas.filter((e) => e.boardId === card.boardId);
-    const membros = db.usuarios.filter((u) => {
-      const board = db.boards.find((b) => b.id === card.boardId);
-      return board?.membroIds.includes(u.id);
-    });
-    const listas = db.listas
-      .filter((l) => l.boardId === card.boardId)
-      .sort((a, b) => a.ordem - b.ordem);
-    const predecessores = db.cards.filter((c) => card.predecessorIds.includes(c.id));
-    const candidatosPredecessores = db.cards.filter(
-      (c) => c.boardId === card.boardId && c.id !== card.id
-    );
+    const conexoesFilhos = await listConexoesFilhos(cardId);
+    const conexoesPais = await listConexoesPais(cardId);
 
     return NextResponse.json({
       card,
+      pipe,
+      fases,
+      campos,
+      etiquetas,
+      usuarios: db.usuarios,
       checklists,
       comentarios,
       anexos,
-      etiquetas,
-      membros,
-      listas,
-      predecessores,
-      candidatosPredecessores,
+      conexoesFilhos,
+      conexoesPais,
     });
   } catch (err) {
     return handleError(err);
@@ -58,7 +62,7 @@ export async function PATCH(req: Request, { params }: Ctx) {
 export async function DELETE(_req: Request, { params }: Ctx) {
   try {
     const { cardId } = await params;
-    await deleteCard(cardId);
+    await permanentDeleteCard(cardId);
     return NextResponse.json({ ok: true });
   } catch (err) {
     return handleError(err);

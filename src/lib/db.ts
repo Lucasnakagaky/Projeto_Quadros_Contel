@@ -1,10 +1,90 @@
 import { promises as fs } from "fs";
 import path from "path";
-import { DbSchema } from "./types";
+import { v4 as uuid } from "uuid";
+import { Campo, DbSchema, Fase, Pipe } from "./types";
 
 const DB_PATH = path.join(process.cwd(), "data", "db.json");
 
+function seedPipe(): { pipe: Pipe; fases: Fase[]; campos: Campo[] } {
+  const pipeId = uuid();
+  const now = new Date().toISOString();
+
+  const pipe: Pipe = { id: pipeId, nome: "Meu Pipe", criadoEm: now };
+
+  const fases: Fase[] = [
+    {
+      id: uuid(),
+      pipeId,
+      nome: "Caixa de entrada",
+      cor: "#06B6D4",
+      ordem: 0,
+      ehFinal: false,
+      permiteCriarCards: true,
+    },
+    {
+      id: uuid(),
+      pipeId,
+      nome: "Fazendo",
+      cor: "#F97316",
+      ordem: 1,
+      ehFinal: false,
+      permiteCriarCards: false,
+    },
+    {
+      id: uuid(),
+      pipeId,
+      nome: "Concluído",
+      cor: "#8B5CF6",
+      ordem: 2,
+      ehFinal: true,
+      permiteCriarCards: false,
+    },
+  ];
+
+  const campos: Campo[] = [
+    {
+      id: uuid(),
+      pipeId,
+      tipo: "responsavel",
+      titulo: "Responsável",
+      obrigatorio: false,
+      descricao: "",
+      textoAjuda: "",
+      visualizacaoCompacta: false,
+      ordem: 0,
+      config: {},
+    },
+    {
+      id: uuid(),
+      pipeId,
+      tipo: "data_vencimento",
+      titulo: "Vencimento",
+      obrigatorio: false,
+      descricao: "",
+      textoAjuda: "",
+      visualizacaoCompacta: false,
+      ordem: 1,
+      config: {},
+    },
+    {
+      id: uuid(),
+      pipeId,
+      tipo: "etiquetas",
+      titulo: "Etiquetas",
+      obrigatorio: false,
+      descricao: "",
+      textoAjuda: "",
+      visualizacaoCompacta: false,
+      ordem: 2,
+      config: {},
+    },
+  ];
+
+  return { pipe, fases, campos };
+}
+
 function emptyDb(): DbSchema {
+  const { pipe, fases, campos } = seedPipe();
   return {
     usuarios: [
       {
@@ -14,18 +94,15 @@ function emptyDb(): DbSchema {
         corAvatar: "#2563eb",
       },
     ],
-    boards: [],
-    listas: [],
+    pipes: [pipe],
+    fases,
+    campos,
     cards: [],
+    conexoes: [],
+    etiquetas: [],
     checklists: [],
     comentarios: [],
     anexos: [],
-    etiquetas: [],
-    templates: [
-      { id: "tpl-1", nome: "Bug", titulo: "[Bug] ", descricao: "Descreva o passo a passo para reproduzir o problema." },
-      { id: "tpl-2", nome: "Tarefa", titulo: "", descricao: "" },
-      { id: "tpl-3", nome: "Reunião", titulo: "[Reunião] ", descricao: "Pauta:\n- " },
-    ],
   };
 }
 
