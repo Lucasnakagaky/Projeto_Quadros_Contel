@@ -128,6 +128,7 @@ export interface Card {
   valoresCampos: Record<string, unknown>;
   criadoPorId: string;
   criadoEm: string;
+  atualizadoEm: string;
   historico: EventoHistorico[];
   ordem: number;
   excluido: boolean;

@@ -276,6 +276,7 @@ export async function createCard(input: {
       valoresCampos: input.valoresCampos ?? {},
       criadoPorId: CURRENT_USER_ID,
       criadoEm: now(),
+      atualizadoEm: now(),
       historico: [{ id: uuid(), faseId: fase.id, faseNome: fase.nome, entradaEm: now() }],
       ordem: maxOrdem + 1,
       excluido: false,
@@ -296,6 +297,7 @@ export async function updateCard(id: string, patch: CardPatch): Promise<Card> {
     if (patch.valoresCampos !== undefined) {
       card.valoresCampos = { ...card.valoresCampos, ...patch.valoresCampos };
     }
+    card.atualizadoEm = now();
     return card;
   });
 }
@@ -331,6 +333,7 @@ export async function moveCard(
       c.ordem = index;
     });
 
+    card.atualizadoEm = now();
     return card;
   });
 }
@@ -353,6 +356,7 @@ export async function trashCard(id: string): Promise<Card> {
     if (!card) notFound("Card");
     card.excluido = true;
     card.excluidoEm = now();
+    card.atualizadoEm = now();
     return card;
   });
 }
@@ -363,6 +367,7 @@ export async function restoreCard(id: string): Promise<Card> {
     if (!card) notFound("Card");
     card.excluido = false;
     card.excluidoEm = null;
+    card.atualizadoEm = now();
     return card;
   });
 }
@@ -429,6 +434,7 @@ export async function createConexaoComNovoCard(
       valoresCampos: novoCard.valoresCampos ?? {},
       criadoPorId: CURRENT_USER_ID,
       criadoEm: now(),
+      atualizadoEm: now(),
       historico: [{ id: uuid(), faseId: fase.id, faseNome: fase.nome, entradaEm: now() }],
       ordem: maxOrdem + 1,
       excluido: false,

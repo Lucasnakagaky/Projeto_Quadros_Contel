@@ -137,8 +137,7 @@ export function FormBuilder({
 
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-bold text-slate-900">Campos do formulário</h2>
+      <div className="flex items-center justify-end">
         <Button onClick={abrirCriacao}>
           <Plus size={16} />
           Adicionar campo

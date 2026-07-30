@@ -21,9 +21,11 @@ export default async function PipePage({
   const etiquetas = db.etiquetas.filter((e) => e.pipeId === pipeId);
 
   const cardIdsDoPipe = new Set(cards.map((c) => c.id));
-  const paisComFilhos = Array.from(
-    new Set(db.conexoes.filter((cx) => cardIdsDoPipe.has(cx.cardPaiId)).map((cx) => cx.cardPaiId))
-  );
+  const contagemFilhosPorCard: Record<string, number> = {};
+  db.conexoes.forEach((cx) => {
+    if (!cardIdsDoPipe.has(cx.cardPaiId)) return;
+    contagemFilhosPorCard[cx.cardPaiId] = (contagemFilhosPorCard[cx.cardPaiId] ?? 0) + 1;
+  });
 
   return (
     <Suspense fallback={null}>
@@ -34,7 +36,7 @@ export default async function PipePage({
         camposIniciais={campos}
         etiquetasIniciais={etiquetas}
         usuariosIniciais={db.usuarios}
-        paisComFilhosIniciais={paisComFilhos}
+        contagemFilhosIniciais={contagemFilhosPorCard}
       />
     </Suspense>
   );

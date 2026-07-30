@@ -19,6 +19,7 @@ import { Plus } from "lucide-react";
 import { Campo, Card, Etiqueta, Fase, Pipe, Usuario } from "@/lib/types";
 import { api } from "@/lib/api-client";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { PipeHeader } from "./pipe-header";
 import { ViewTabs, VIEWS, ViewValue } from "./view-tabs";
 import { FaseColumn } from "./fase-column";
@@ -27,6 +28,7 @@ import { NovaFaseModal, NovaFaseValues } from "./nova-fase-modal";
 import { EmBrevePanel } from "./em-breve-panel";
 import { FormBuilder } from "./form-builder/form-builder";
 import { CardDetailModal } from "./card-modal/card-detail-modal";
+import { TableView } from "./list-view/table-view";
 
 type ColumnsMap = Record<string, string[]>;
 
@@ -48,7 +50,7 @@ export function PipeBoard({
   camposIniciais,
   etiquetasIniciais,
   usuariosIniciais,
-  paisComFilhosIniciais,
+  contagemFilhosIniciais,
 }: {
   pipeInicial: Pipe;
   fasesIniciais: Fase[];
@@ -56,7 +58,7 @@ export function PipeBoard({
   camposIniciais: Campo[];
   etiquetasIniciais: Etiqueta[];
   usuariosIniciais: Usuario[];
-  paisComFilhosIniciais: string[];
+  contagemFilhosIniciais: Record<string, number>;
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -74,11 +76,12 @@ export function PipeBoard({
   const [campos, setCampos] = useState(camposIniciais);
   const [etiquetas, setEtiquetas] = useState(etiquetasIniciais);
   const [usuarios] = useState(usuariosIniciais);
-  const [paisComFilhos, setPaisComFilhos] = useState<Set<string>>(
-    () => new Set(paisComFilhosIniciais)
+  const [contagemFilhos, setContagemFilhos] = useState<Record<string, number>>(
+    () => ({ ...contagemFilhosIniciais })
   );
   const [view, setView] = useState<ViewValue>("kanban");
   const [novaFaseAberta, setNovaFaseAberta] = useState(false);
+  const [camposAberto, setCamposAberto] = useState(false);
   const [activeCard, setActiveCard] = useState<Card | null>(null);
   const [activeFase, setActiveFase] = useState<Fase | null>(null);
 
@@ -290,6 +293,27 @@ export function PipeBoard({
     });
   }
 
+  async function handleBulkMoverCards(cardIds: string[], faseId: string) {
+    const atualizados = await Promise.all(
+      cardIds.map((id) => api.post<Card>(`/api/cards/${id}/mover`, { faseId, index: 0 }))
+    );
+    atualizados.forEach(handleCardUpdatedLocally);
+  }
+
+  async function handleBulkExcluirCards(cardIds: string[]) {
+    await Promise.all(cardIds.map((id) => api.post(`/api/cards/${id}/lixeira`)));
+    cardIds.forEach(handleCardTrashedLocally);
+  }
+
+  async function handleBulkEditarCampo(cardIds: string[], campoId: string, valor: unknown) {
+    const atualizados = await Promise.all(
+      cardIds.map((id) =>
+        api.patch<Card>(`/api/cards/${id}`, { valoresCampos: { [campoId]: valor } })
+      )
+    );
+    atualizados.forEach(handleCardUpdatedLocally);
+  }
+
   function handleCardTrashedLocally(id: string) {
     setCardsById((prev) => {
       const next = { ...prev };
@@ -308,7 +332,7 @@ export function PipeBoard({
 
   return (
     <div className="flex h-full flex-1 flex-col overflow-hidden">
-      <PipeHeader pipe={pipe} />
+      <PipeHeader pipe={pipe} onAbrirCampos={() => setCamposAberto(true)} />
 
       <Tabs
         value={view}
@@ -335,7 +359,7 @@ export function PipeBoard({
                     campos={campos}
                     etiquetas={etiquetas}
                     usuarios={usuarios}
-                    paisComFilhos={paisComFilhos}
+                    contagemFilhos={contagemFilhos}
                     onOpenCard={openCard}
                     onCreateCard={handleCreateCard}
                     onAddFase={() => setNovaFaseAberta(true)}
@@ -369,11 +393,23 @@ export function PipeBoard({
           </DndContext>
         </TabsContent>
 
-        <TabsContent value="formulario" className="flex flex-1 flex-col overflow-y-auto p-6">
-          <FormBuilder pipeId={pipe.id} campos={campos} onCamposChanged={setCampos} />
+        <TabsContent value="lista" className="flex flex-1 flex-col overflow-hidden">
+          <TableView
+            pipeId={pipe.id}
+            cards={Object.values(cardsById)}
+            fases={fases}
+            campos={campos}
+            etiquetas={etiquetas}
+            usuarios={usuarios}
+            onOpenCard={openCard}
+            onCreateCard={handleCreateCard}
+            onMoverCards={handleBulkMoverCards}
+            onExcluirCards={handleBulkExcluirCards}
+            onEditarEmMassa={handleBulkEditarCampo}
+          />
         </TabsContent>
 
-        {VIEWS.filter((v) => v.value !== "kanban" && v.value !== "formulario").map((v) => (
+        {VIEWS.filter((v) => v.value !== "kanban" && v.value !== "lista").map((v) => (
           <TabsContent key={v.value} value={v.value} className="flex flex-1 flex-col">
             <EmBrevePanel titulo={v.label} />
           </TabsContent>
@@ -387,6 +423,17 @@ export function PipeBoard({
         onSubmit={handleAddFase}
       />
 
+      <Dialog open={camposAberto} onOpenChange={setCamposAberto}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle className="text-lg font-bold">Campos do formulário</DialogTitle>
+          </DialogHeader>
+          <div className="max-h-[70vh] overflow-y-auto px-6 pb-6">
+            <FormBuilder pipeId={pipe.id} campos={campos} onCamposChanged={setCampos} />
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {cardId && (
         <CardDetailModal
           cardId={cardId}
@@ -395,7 +442,7 @@ export function PipeBoard({
           onCardTrashed={handleCardTrashedLocally}
           onEtiquetasChanged={setEtiquetas}
           onConexaoCriada={(cardPaiId) =>
-            setPaisComFilhos((prev) => new Set(prev).add(cardPaiId))
+            setContagemFilhos((prev) => ({ ...prev, [cardPaiId]: (prev[cardPaiId] ?? 0) + 1 }))
           }
           onNavigateToCard={openCard}
         />

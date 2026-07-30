@@ -3,14 +3,10 @@
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export const VIEWS = [
-  { value: "mapa", label: "Mapa" },
   { value: "fluxo", label: "Fluxo" },
   { value: "kanban", label: "Kanban" },
   { value: "lista", label: "Lista" },
   { value: "relatorios", label: "Relatórios" },
-  { value: "formulario", label: "Formulário" },
-  { value: "emails", label: "Emails" },
-  { value: "paineis", label: "Painéis" },
 ] as const;
 
 export type ViewValue = (typeof VIEWS)[number]["value"];
