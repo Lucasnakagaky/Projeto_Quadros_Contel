@@ -58,9 +58,9 @@ export async function createPipe(nome: string): Promise<Pipe> {
     db.pipes.push(pipe);
 
     const fases: Fase[] = [
-      { id: uuid(), pipeId, nome: "Caixa de entrada", cor: "#06B6D4", ordem: 0, ehFinal: false, permiteCriarCards: true },
-      { id: uuid(), pipeId, nome: "Fazendo", cor: "#F97316", ordem: 1, ehFinal: false, permiteCriarCards: false },
-      { id: uuid(), pipeId, nome: "Concluído", cor: "#8B5CF6", ordem: 2, ehFinal: true, permiteCriarCards: false },
+      { id: uuid(), pipeId, nome: "Caixa de entrada", cor: "#06B6D4", ordem: 0, ehFinal: false, permiteCriarCards: true, descricao: "Aqui chegam os cards criados para iniciar o processo.", responsavelIds: [] },
+      { id: uuid(), pipeId, nome: "Fazendo", cor: "#F97316", ordem: 1, ehFinal: false, permiteCriarCards: false, descricao: "Hora do show! Aqui ficam os cards que estão em andamento.", responsavelIds: [] },
+      { id: uuid(), pipeId, nome: "Concluído", cor: "#8B5CF6", ordem: 2, ehFinal: true, permiteCriarCards: false, descricao: "Descanse em paz. Aqui ficam os cards finalizados.", responsavelIds: [] },
     ];
     db.fases.push(...fases);
 
@@ -112,13 +112,17 @@ export async function createFase(
       ordem: maxOrdem + 1,
       ehFinal: input.ehFinal ?? false,
       permiteCriarCards: input.permiteCriarCards ?? false,
+      descricao: "",
+      responsavelIds: [],
     };
     db.fases.push(fase);
     return fase;
   });
 }
 
-export type FasePatch = Partial<Pick<Fase, "nome" | "cor" | "ehFinal" | "permiteCriarCards">>;
+export type FasePatch = Partial<
+  Pick<Fase, "nome" | "cor" | "ehFinal" | "permiteCriarCards" | "descricao" | "responsavelIds">
+>;
 
 export async function updateFase(id: string, patch: FasePatch): Promise<Fase> {
   return mutateDb((db) => {
@@ -128,6 +132,8 @@ export async function updateFase(id: string, patch: FasePatch): Promise<Fase> {
     if (patch.cor !== undefined) fase.cor = patch.cor;
     if (patch.ehFinal !== undefined) fase.ehFinal = patch.ehFinal;
     if (patch.permiteCriarCards !== undefined) fase.permiteCriarCards = patch.permiteCriarCards;
+    if (patch.descricao !== undefined) fase.descricao = patch.descricao;
+    if (patch.responsavelIds !== undefined) fase.responsavelIds = patch.responsavelIds;
     return fase;
   });
 }

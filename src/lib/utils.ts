@@ -41,3 +41,40 @@ export function formatarDataHora(iso: string | null | undefined): string {
   if (Number.isNaN(d.getTime())) return "";
   return `${d.toLocaleDateString("pt-BR")} ${d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}`;
 }
+
+/** Duração humana entre duas datas, ex.: "4 minutos", "2 horas", "3 dias". */
+export function duracaoEntre(inicio: Date, fim: Date): string {
+  if (Number.isNaN(inicio.getTime()) || Number.isNaN(fim.getTime())) return "";
+  return formatDistanceStrict(inicio, fim, { locale: ptBR });
+}
+
+const MESES_ABREV = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"];
+
+/** Data curta no formato "jul 30". */
+export function dataCurta(data: Date): string {
+  if (Number.isNaN(data.getTime())) return "";
+  return `${MESES_ABREV[data.getMonth()]} ${data.getDate()}`;
+}
+
+const MESES_EXTENSO = [
+  "Janeiro",
+  "Fevereiro",
+  "Março",
+  "Abril",
+  "Maio",
+  "Junho",
+  "Julho",
+  "Agosto",
+  "Setembro",
+  "Outubro",
+  "Novembro",
+  "Dezembro",
+];
+
+/** Data por extenso no formato "30 de Julho de 2026". */
+export function dataPorExtenso(iso: string | null | undefined): string {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  return `${d.getDate()} de ${MESES_EXTENSO[d.getMonth()]} de ${d.getFullYear()}`;
+}

@@ -97,6 +97,8 @@ export interface Fase {
   ordem: number;
   ehFinal: boolean;
   permiteCriarCards: boolean;
+  descricao: string;
+  responsavelIds: string[];
 }
 
 export interface Pipe {

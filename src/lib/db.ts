@@ -20,6 +20,8 @@ function seedPipe(): { pipe: Pipe; fases: Fase[]; campos: Campo[] } {
       ordem: 0,
       ehFinal: false,
       permiteCriarCards: true,
+      descricao: "Aqui chegam os cards criados para iniciar o processo.",
+      responsavelIds: [],
     },
     {
       id: uuid(),
@@ -29,6 +31,8 @@ function seedPipe(): { pipe: Pipe; fases: Fase[]; campos: Campo[] } {
       ordem: 1,
       ehFinal: false,
       permiteCriarCards: false,
+      descricao: "Hora do show! Aqui ficam os cards que estão em andamento.",
+      responsavelIds: [],
     },
     {
       id: uuid(),
@@ -38,6 +42,8 @@ function seedPipe(): { pipe: Pipe; fases: Fase[]; campos: Campo[] } {
       ordem: 2,
       ehFinal: true,
       permiteCriarCards: false,
+      descricao: "Descanse em paz. Aqui ficam os cards finalizados.",
+      responsavelIds: [],
     },
   ];
 

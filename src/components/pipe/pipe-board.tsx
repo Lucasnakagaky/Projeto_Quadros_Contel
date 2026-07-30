@@ -29,6 +29,7 @@ import { EmBrevePanel } from "./em-breve-panel";
 import { FormBuilder } from "./form-builder/form-builder";
 import { CardDetailModal } from "./card-modal/card-detail-modal";
 import { TableView } from "./list-view/table-view";
+import { FlowCanvas } from "./flow-view/flow-canvas";
 
 type ColumnsMap = Record<string, string[]>;
 
@@ -162,15 +163,7 @@ export function PipeBoard({
       const oldIndex = fases.findIndex((f) => f.id === activeFaseId);
       const newIndex = fases.findIndex((f) => f.id === overFaseId);
       if (oldIndex === -1 || newIndex === -1) return;
-      const reordered = arrayMove(fases, oldIndex, newIndex);
-      setFases(reordered);
-      try {
-        await api.post(`/api/pipes/${pipe.id}/fases/reorder`, {
-          orderedIds: reordered.map((f) => f.id),
-        });
-      } catch {
-        toast.error("Erro ao reordenar fases");
-      }
+      await handleReorderFases(arrayMove(fases, oldIndex, newIndex));
       return;
     }
 
@@ -218,6 +211,17 @@ export function PipeBoard({
     }
   }
 
+  async function handleReorderFases(reordered: Fase[]) {
+    setFases(reordered);
+    try {
+      await api.post(`/api/pipes/${pipe.id}/fases/reorder`, {
+        orderedIds: reordered.map((f) => f.id),
+      });
+    } catch {
+      toast.error("Erro ao reordenar fases");
+    }
+  }
+
   async function handleAddFase(values: NovaFaseValues) {
     try {
       const fase = await api.post<Fase>(`/api/pipes/${pipe.id}/fases`, values);
@@ -231,7 +235,9 @@ export function PipeBoard({
 
   async function handleUpdateFase(
     faseId: string,
-    patch: Partial<NovaFaseValues> & { cor?: string }
+    patch: Partial<
+      Pick<Fase, "nome" | "cor" | "ehFinal" | "permiteCriarCards" | "descricao" | "responsavelIds">
+    >
   ) {
     try {
       const fase = await api.patch<Fase>(`/api/pipes/${pipe.id}/fases/${faseId}`, patch);
@@ -409,7 +415,18 @@ export function PipeBoard({
           />
         </TabsContent>
 
-        {VIEWS.filter((v) => v.value !== "kanban" && v.value !== "lista").map((v) => (
+        <TabsContent value="fluxo" className="flex flex-1 flex-col overflow-hidden">
+          <FlowCanvas
+            fases={fases}
+            campos={campos}
+            usuarios={usuarios}
+            onReorderFases={handleReorderFases}
+            onUpdateFase={handleUpdateFase}
+            onAbrirCampos={() => setCamposAberto(true)}
+          />
+        </TabsContent>
+
+        {VIEWS.filter((v) => v.value !== "kanban" && v.value !== "lista" && v.value !== "fluxo").map((v) => (
           <TabsContent key={v.value} value={v.value} className="flex flex-1 flex-col">
             <EmBrevePanel titulo={v.label} />
           </TabsContent>

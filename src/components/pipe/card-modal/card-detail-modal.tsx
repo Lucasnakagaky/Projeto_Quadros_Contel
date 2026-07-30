@@ -19,9 +19,9 @@ import { campoPorTipo } from "@/lib/campo-utils";
 import { tempoRelativo } from "@/lib/utils";
 import { CardDetail, ConexaoResolvida } from "./types";
 import { CampoValueList } from "./campo-value-list";
-import { ConexaoSection } from "./conexao-section";
+import { ChildCardsField } from "./child-cards-field";
 import { PaisSection } from "./pais-section";
-import { HistoricoSection } from "./historico-section";
+import { PhaseHistory } from "./phase-history";
 import { MoverFasePopover } from "./mover-fase-popover";
 import { ChecklistSection } from "./checklist-section";
 import { CommentsSection } from "./comments-section";
@@ -224,7 +224,7 @@ export function CardDetailModal({
                 />
 
                 {camposConexaoPipe.map((campo) => (
-                  <ConexaoSection
+                  <ChildCardsField
                     key={campo.id}
                     campoId={campo.id}
                     nomeConexao={campo.config.nomeConexao || campo.titulo}
@@ -243,7 +243,7 @@ export function CardDetailModal({
               </TabsContent>
 
               <TabsContent value="atividades" className="pt-3">
-                <HistoricoSection historico={card.historico} />
+                <PhaseHistory historico={card.historico} fases={fases} />
               </TabsContent>
 
               <TabsContent value="anexos" className="pt-3">
