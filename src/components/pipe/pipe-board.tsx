@@ -64,7 +64,18 @@ export function PipeBoard({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const cardId = searchParams.get("cardId");
+  const cardIdParam = searchParams.get("cardId");
+
+  // cardId é estado local (não deriva direto do useSearchParams) para que abrir/trocar de
+  // card dentro do modal seja instantâneo, sem depender do ciclo de navegação do Next.js —
+  // que, ao trocar o cardId enquanto o modal já está aberto, podia remontar a árvore e
+  // causar o efeito de "abre e fecha". A URL continua sincronizada (compartilhamento/voltar).
+  const [cardId, setCardId] = useState(cardIdParam);
+  const [cardIdParamAnterior, setCardIdParamAnterior] = useState(cardIdParam);
+  if (cardIdParam !== cardIdParamAnterior) {
+    setCardIdParamAnterior(cardIdParam);
+    setCardId(cardIdParam);
+  }
 
   const [pipe] = useState(pipeInicial);
   const [fases, setFases] = useState(fasesIniciais);
@@ -98,10 +109,12 @@ export function PipeBoard({
   }
 
   function openCard(id: string) {
+    setCardId(id);
     router.push(`${pathname}?cardId=${id}`, { scroll: false });
   }
 
   function closeCard() {
+    setCardId(null);
     router.push(pathname, { scroll: false });
   }
 
