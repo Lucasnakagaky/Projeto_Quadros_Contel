@@ -52,6 +52,7 @@ export function PipeBoard({
   etiquetasIniciais,
   usuariosIniciais,
   contagemFilhosIniciais,
+  cardsFilhosIniciais,
 }: {
   pipeInicial: Pipe;
   fasesIniciais: Fase[];
@@ -60,6 +61,7 @@ export function PipeBoard({
   etiquetasIniciais: Etiqueta[];
   usuariosIniciais: Usuario[];
   contagemFilhosIniciais: Record<string, number>;
+  cardsFilhosIniciais: string[];
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -91,6 +93,7 @@ export function PipeBoard({
   const [contagemFilhos, setContagemFilhos] = useState<Record<string, number>>(
     () => ({ ...contagemFilhosIniciais })
   );
+  const [cardsFilhos, setCardsFilhos] = useState<Set<string>>(() => new Set(cardsFilhosIniciais));
   const [view, setView] = useState<ViewValue>("kanban");
   const [novaFaseAberta, setNovaFaseAberta] = useState(false);
   const [camposAberto, setCamposAberto] = useState(false);
@@ -379,6 +382,7 @@ export function PipeBoard({
                     etiquetas={etiquetas}
                     usuarios={usuarios}
                     contagemFilhos={contagemFilhos}
+                    cardsFilhos={cardsFilhos}
                     onOpenCard={openCard}
                     onCreateCard={handleCreateCard}
                     onAddFase={() => setNovaFaseAberta(true)}
@@ -420,6 +424,7 @@ export function PipeBoard({
             campos={campos}
             etiquetas={etiquetas}
             usuarios={usuarios}
+            cardsFilhos={cardsFilhos}
             onOpenCard={openCard}
             onCreateCard={handleCreateCard}
             onMoverCards={handleBulkMoverCards}
@@ -471,9 +476,10 @@ export function PipeBoard({
           onCardUpdated={handleCardUpdatedLocally}
           onCardTrashed={handleCardTrashedLocally}
           onEtiquetasChanged={setEtiquetas}
-          onConexaoCriada={(cardPaiId) =>
-            setContagemFilhos((prev) => ({ ...prev, [cardPaiId]: (prev[cardPaiId] ?? 0) + 1 }))
-          }
+          onConexaoCriada={(cardPaiId, cardFilhoId) => {
+            setContagemFilhos((prev) => ({ ...prev, [cardPaiId]: (prev[cardPaiId] ?? 0) + 1 }));
+            setCardsFilhos((prev) => new Set(prev).add(cardFilhoId));
+          }}
           onNavigateToCard={openCard}
         />
       )}

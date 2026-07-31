@@ -2,17 +2,11 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
-import { CalendarClock, MoreVertical, Settings, Share2, Sparkles, Tag, Trash2, User } from "lucide-react";
+import { CalendarClock, Share2, Tag, Trash2, User } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { api } from "@/lib/api-client";
 import { Card, Etiqueta } from "@/lib/types";
 import { campoPorTipo } from "@/lib/campo-utils";
@@ -42,7 +36,7 @@ export function CardDetailModal({
   onCardUpdated: (card: Card) => void;
   onCardTrashed: (cardId: string) => void;
   onEtiquetasChanged: (etiquetas: Etiqueta[]) => void;
-  onConexaoCriada: (cardPaiId: string) => void;
+  onConexaoCriada: (cardPaiId: string, cardFilhoId: string) => void;
   onNavigateToCard: (cardId: string) => void;
 }) {
   const [detail, setDetail] = useState<CardDetail | null>(null);
@@ -136,7 +130,7 @@ export function CardDetailModal({
 
   function handleConexaoCriada(r: ConexaoResolvida) {
     setDetail((prev) => (prev ? { ...prev, conexoesFilhos: [...prev.conexoesFilhos, r] } : prev));
-    onConexaoCriada(cardId);
+    onConexaoCriada(cardId, r.card?.id ?? r.conexao.cardFilhoId);
   }
 
   function handleConexaoRemovida(conexaoId: string) {
@@ -308,37 +302,14 @@ export function CardDetailModal({
                   </span>
                 )}
               </div>
-              <div className="flex items-center gap-1">
-                <button
-                  onClick={() => toast("Configurações — em breve")}
-                  className="rounded p-1.5 text-slate-400 hover:bg-slate-100"
-                  aria-label="Configurações"
-                >
-                  <Settings size={16} />
-                </button>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <button
-                      className="rounded p-1.5 text-slate-400 hover:bg-slate-100"
-                      aria-label="Mais opções"
-                    >
-                      <MoreVertical size={16} />
-                    </button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem onSelect={() => toast("Configurar condicionais — em breve")}>
-                      Configurar condicionais nos campos
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      className="text-red-600 data-[highlighted]:bg-red-50"
-                      onSelect={moverParaLixeira}
-                    >
-                      <Trash2 size={14} />
-                      Mover card para a lixeira
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
+              <button
+                onClick={moverParaLixeira}
+                className="rounded p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600"
+                aria-label="Mover card para a lixeira"
+                title="Mover card para a lixeira"
+              >
+                <Trash2 size={16} />
+              </button>
             </div>
 
             <button
@@ -348,19 +319,6 @@ export function CardDetailModal({
               <Share2 size={14} />
               Compartilhar
             </button>
-
-            <div className="flex flex-col gap-2 rounded-md border border-dashed border-slate-200 p-3">
-              <span className="flex items-center gap-1.5 text-sm font-medium text-slate-600">
-                <Sparkles size={14} className="text-blue-500" />
-                Adicionar campos com IA
-              </span>
-              <button
-                onClick={() => toast("Sugestões de IA — em breve")}
-                className="self-start text-xs text-blue-600 hover:underline"
-              >
-                Sugerir campos
-              </button>
-            </div>
 
             <MoverFasePopover fases={fases} faseAtualId={card.faseId} onMover={moverFase} />
 

@@ -32,6 +32,7 @@ export function TableView({
   campos,
   etiquetas,
   usuarios,
+  cardsFilhos,
   onOpenCard,
   onCreateCard,
   onMoverCards,
@@ -44,6 +45,7 @@ export function TableView({
   campos: Campo[];
   etiquetas: Etiqueta[];
   usuarios: Usuario[];
+  cardsFilhos: Set<string>;
   onOpenCard: (cardId: string) => void;
   onCreateCard: (faseId: string) => void;
   onMoverCards: (cardIds: string[], faseId: string) => Promise<void>;
@@ -200,6 +202,7 @@ export function TableView({
                     campos={campos}
                     etiquetas={etiquetas}
                     usuarios={usuarios}
+                    ehFilho={cardsFilhos.has(card.id)}
                     selecionado={selecionados.has(card.id)}
                     onToggleSelecao={() => toggleCard(card.id)}
                     onAbrir={() => onOpenCard(card.id)}

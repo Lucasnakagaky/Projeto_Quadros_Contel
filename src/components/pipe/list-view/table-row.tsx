@@ -1,5 +1,6 @@
 "use client";
 
+import { CornerDownRight } from "lucide-react";
 import { Campo, Card, Etiqueta, Fase, Usuario } from "@/lib/types";
 import { campoPorTipo, stringArray } from "@/lib/campo-utils";
 import { duracao, formatarData, formatarDataHora, cn } from "@/lib/utils";
@@ -19,6 +20,7 @@ export function TableRow({
   campos,
   etiquetas,
   usuarios,
+  ehFilho = false,
   selecionado,
   onToggleSelecao,
   onAbrir,
@@ -29,6 +31,7 @@ export function TableRow({
   campos: Campo[];
   etiquetas: Etiqueta[];
   usuarios: Usuario[];
+  ehFilho?: boolean;
   selecionado: boolean;
   onToggleSelecao: () => void;
   onAbrir: () => void;
@@ -59,7 +62,17 @@ export function TableRow({
       case "fase":
         return <PhaseBadge fase={fase} />;
       case "titulo":
-        return <span className="font-medium text-slate-800">{card.titulo}</span>;
+        return (
+          <div className="flex flex-col gap-0.5">
+            {ehFilho && (
+              <span className="inline-flex w-fit items-center gap-1 rounded-full bg-violet-50 px-1.5 py-0.5 text-[10px] font-semibold text-violet-600">
+                <CornerDownRight size={9} />
+                Card filho
+              </span>
+            )}
+            <span className="font-medium text-slate-800">{card.titulo}</span>
+          </div>
+        );
       case "criadoEm":
         return <span className="text-slate-700">{formatarData(card.criadoEm)}</span>;
       case "vencimento":

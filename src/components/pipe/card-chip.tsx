@@ -2,7 +2,7 @@
 
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { CalendarClock, Link2 } from "lucide-react";
+import { CalendarClock, CornerDownRight, Link2 } from "lucide-react";
 import { Campo, Card, Etiqueta, Usuario } from "@/lib/types";
 import { campoPorTipo, stringArray } from "@/lib/campo-utils";
 import { cn, iniciais } from "@/lib/utils";
@@ -36,6 +36,7 @@ export function CardChip({
   etiquetas = [],
   usuarios = [],
   contagemFilhos = 0,
+  ehFilho = false,
   onOpen,
   dragOverlay = false,
 }: {
@@ -44,6 +45,7 @@ export function CardChip({
   etiquetas?: Etiqueta[];
   usuarios?: Usuario[];
   contagemFilhos?: number;
+  ehFilho?: boolean;
   onOpen: () => void;
   dragOverlay?: boolean;
 }) {
@@ -88,6 +90,13 @@ export function CardChip({
         isDragging && "opacity-40"
       )}
     >
+      {ehFilho && (
+        <span className="inline-flex w-fit items-center gap-1 rounded-full bg-violet-50 px-2 py-0.5 text-[10px] font-semibold text-violet-600">
+          <CornerDownRight size={10} />
+          Card filho
+        </span>
+      )}
+
       {etiquetaIds.length > 0 && (
         <div className="flex flex-wrap gap-1">
           {etiquetaIds.map((id) => {

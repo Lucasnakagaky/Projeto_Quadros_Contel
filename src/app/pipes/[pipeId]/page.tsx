@@ -27,6 +27,10 @@ export default async function PipePage({
     contagemFilhosPorCard[cx.cardPaiId] = (contagemFilhosPorCard[cx.cardPaiId] ?? 0) + 1;
   });
 
+  const cardsFilhosIds = Array.from(
+    new Set(db.conexoes.filter((cx) => cardIdsDoPipe.has(cx.cardFilhoId)).map((cx) => cx.cardFilhoId))
+  );
+
   return (
     <Suspense fallback={null}>
       <PipeBoard
@@ -37,6 +41,7 @@ export default async function PipePage({
         etiquetasIniciais={etiquetas}
         usuariosIniciais={db.usuarios}
         contagemFilhosIniciais={contagemFilhosPorCard}
+        cardsFilhosIniciais={cardsFilhosIds}
       />
     </Suspense>
   );

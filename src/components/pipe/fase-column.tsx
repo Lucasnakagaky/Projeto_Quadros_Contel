@@ -18,6 +18,7 @@ export function FaseColumn({
   etiquetas,
   usuarios,
   contagemFilhos,
+  cardsFilhos,
   onOpenCard,
   onCreateCard,
   onAddFase,
@@ -30,6 +31,7 @@ export function FaseColumn({
   etiquetas: Etiqueta[];
   usuarios: Usuario[];
   contagemFilhos: Record<string, number>;
+  cardsFilhos: Set<string>;
   onOpenCard: (id: string) => void;
   onCreateCard: (faseId: string) => void;
   onAddFase: () => void;
@@ -105,6 +107,7 @@ export function FaseColumn({
               etiquetas={etiquetas}
               usuarios={usuarios}
               contagemFilhos={contagemFilhos[card.id] ?? 0}
+              ehFilho={cardsFilhos.has(card.id)}
               onOpen={() => onOpenCard(card.id)}
             />
           ))}
