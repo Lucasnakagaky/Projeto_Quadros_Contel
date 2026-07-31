@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
-import { Paperclip, X } from "lucide-react";
+import { Paperclip, Pencil, Trash2, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -33,6 +33,8 @@ export function CampoValueRow({
   usuarios,
   onSave,
   onEtiquetaCriada,
+  onEtiquetaAtualizada,
+  onEtiquetaExcluida,
 }: {
   campo: Campo;
   cardId: string;
@@ -42,12 +44,17 @@ export function CampoValueRow({
   usuarios: Usuario[];
   onSave: (valor: unknown) => void;
   onEtiquetaCriada: (etiqueta: Etiqueta) => void;
+  onEtiquetaAtualizada: (etiqueta: Etiqueta) => void;
+  onEtiquetaExcluida: (etiquetaId: string) => void;
 }) {
   const [editing, setEditing] = useState(false);
   const [rascunho, setRascunho] = useState<string>(typeof valor === "string" ? valor : "");
   const [criandoEtiqueta, setCriandoEtiqueta] = useState(false);
   const [nomeEtiqueta, setNomeEtiqueta] = useState("");
   const [corEtiqueta, setCorEtiqueta] = useState(CORES_ETIQUETA[0]);
+  const [editandoEtiquetaId, setEditandoEtiquetaId] = useState<string | null>(null);
+  const [nomeEdicaoEtiqueta, setNomeEdicaoEtiqueta] = useState("");
+  const [corEdicaoEtiqueta, setCorEdicaoEtiqueta] = useState(CORES_ETIQUETA[0]);
   const [enviando, setEnviando] = useState(false);
 
   function iniciarEdicao() {
@@ -80,6 +87,44 @@ export function CampoValueRow({
       setCriandoEtiqueta(false);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Erro ao criar etiqueta");
+    }
+  }
+
+  function iniciarEdicaoEtiqueta(etiqueta: Etiqueta) {
+    setCriandoEtiqueta(false);
+    setEditandoEtiquetaId(etiqueta.id);
+    setNomeEdicaoEtiqueta(etiqueta.nome);
+    setCorEdicaoEtiqueta(etiqueta.cor);
+  }
+
+  async function salvarEdicaoEtiqueta() {
+    if (!editandoEtiquetaId || !nomeEdicaoEtiqueta.trim()) return;
+    try {
+      const atualizada = await api.patch<Etiqueta>(
+        `/api/pipes/${pipeId}/etiquetas/${editandoEtiquetaId}`,
+        { nome: nomeEdicaoEtiqueta.trim(), cor: corEdicaoEtiqueta }
+      );
+      onEtiquetaAtualizada(atualizada);
+      setEditandoEtiquetaId(null);
+      toast.success("Etiqueta atualizada");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Erro ao atualizar etiqueta");
+    }
+  }
+
+  async function excluirEtiqueta(etiquetaId: string) {
+    if (!confirm("Excluir esta etiqueta? Ela será removida de todos os cards.")) return;
+    try {
+      await api.delete(`/api/pipes/${pipeId}/etiquetas/${etiquetaId}`);
+      onEtiquetaExcluida(etiquetaId);
+      const atuais = stringArray(valor);
+      if (atuais.includes(etiquetaId)) {
+        onSave(atuais.filter((id) => id !== etiquetaId));
+      }
+      if (editandoEtiquetaId === etiquetaId) setEditandoEtiquetaId(null);
+      toast.success("Etiqueta excluída");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Erro ao excluir etiqueta");
     }
   }
 
@@ -154,23 +199,74 @@ export function CampoValueRow({
     );
   }
 
-  // Etiquetas: multi-seleção + criar nova
+  // Etiquetas: multi-seleção + criar/editar/excluir
   if (campo.tipo === "etiquetas") {
     const ids = stringArray(valor);
     return linha(
       <div className="flex flex-col gap-1">
-        {etiquetas.map((e) => (
-          <label key={e.id} className="flex cursor-pointer items-center gap-2">
-            <Checkbox
-              checked={ids.includes(e.id)}
-              onCheckedChange={() =>
-                onSave(ids.includes(e.id) ? ids.filter((id) => id !== e.id) : [...ids, e.id])
-              }
-            />
-            <span className="h-3 w-3 rounded-full" style={{ backgroundColor: e.cor }} />
-            <span className="text-sm text-slate-700">{e.nome}</span>
-          </label>
-        ))}
+        {etiquetas.map((e) =>
+          editandoEtiquetaId === e.id ? (
+            <div key={e.id} className="flex flex-col gap-2 rounded-md border border-slate-200 p-2">
+              <Input
+                autoFocus
+                value={nomeEdicaoEtiqueta}
+                onChange={(ev) => setNomeEdicaoEtiqueta(ev.target.value)}
+                onKeyDown={(ev) => ev.key === "Enter" && salvarEdicaoEtiqueta()}
+              />
+              <div className="flex flex-wrap gap-1.5">
+                {CORES_ETIQUETA.map((c) => (
+                  <button
+                    key={c}
+                    type="button"
+                    onClick={() => setCorEdicaoEtiqueta(c)}
+                    className={cn(
+                      "h-6 w-6 rounded-full",
+                      corEdicaoEtiqueta === c && "ring-2 ring-slate-900 ring-offset-1"
+                    )}
+                    style={{ backgroundColor: c }}
+                  />
+                ))}
+              </div>
+              <div className="flex gap-2">
+                <Button size="sm" onClick={salvarEdicaoEtiqueta}>
+                  Salvar
+                </Button>
+                <Button size="sm" variant="ghost" onClick={() => setEditandoEtiquetaId(null)}>
+                  Cancelar
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div key={e.id} className="group flex items-center gap-2 rounded px-1 py-0.5 hover:bg-slate-50">
+              <label className="flex flex-1 cursor-pointer items-center gap-2 min-w-0">
+                <Checkbox
+                  checked={ids.includes(e.id)}
+                  onCheckedChange={() =>
+                    onSave(ids.includes(e.id) ? ids.filter((id) => id !== e.id) : [...ids, e.id])
+                  }
+                />
+                <span className="h-3 w-3 shrink-0 rounded-full" style={{ backgroundColor: e.cor }} />
+                <span className="truncate text-sm text-slate-700">{e.nome}</span>
+              </label>
+              <button
+                type="button"
+                onClick={() => iniciarEdicaoEtiqueta(e)}
+                className="shrink-0 text-slate-400 opacity-0 hover:text-slate-700 group-hover:opacity-100"
+                aria-label="Editar etiqueta"
+              >
+                <Pencil size={12} />
+              </button>
+              <button
+                type="button"
+                onClick={() => excluirEtiqueta(e.id)}
+                className="shrink-0 text-slate-400 opacity-0 hover:text-red-600 group-hover:opacity-100"
+                aria-label="Excluir etiqueta"
+              >
+                <Trash2 size={12} />
+              </button>
+            </div>
+          )
+        )}
 
         {criandoEtiqueta ? (
           <div className="flex flex-col gap-2 rounded-md border border-slate-200 p-2">

@@ -1,11 +1,12 @@
 import type { LucideIcon } from "lucide-react";
-import { CalendarClock, Clock, History, Tag, Type, User, Workflow } from "lucide-react";
+import { CalendarClock, CalendarPlus, Clock, History, Tag, Type, User, Workflow } from "lucide-react";
 import { Campo, Card, Etiqueta, Fase, Usuario } from "@/lib/types";
 import { campoPorTipo, stringArray } from "@/lib/campo-utils";
 
 export type ColunaId =
   | "fase"
   | "titulo"
+  | "criadoEm"
   | "vencimento"
   | "responsaveis"
   | "etiquetas"
@@ -39,6 +40,12 @@ export const COLUNAS: ColunaDef[] = [
     label: "Título",
     icon: Type,
     sortValue: (card) => card.titulo.toLowerCase(),
+  },
+  {
+    id: "criadoEm",
+    label: "Data de criação",
+    icon: CalendarPlus,
+    sortValue: (card) => new Date(card.criadoEm).getTime(),
   },
   {
     id: "vencimento",

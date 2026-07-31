@@ -11,6 +11,8 @@ export function CampoValueList({
   usuarios,
   onSalvarValor,
   onEtiquetaCriada,
+  onEtiquetaAtualizada,
+  onEtiquetaExcluida,
 }: {
   campos: Campo[];
   card: Card;
@@ -19,6 +21,8 @@ export function CampoValueList({
   usuarios: Usuario[];
   onSalvarValor: (campoId: string, valor: unknown) => void;
   onEtiquetaCriada: (etiqueta: Etiqueta) => void;
+  onEtiquetaAtualizada: (etiqueta: Etiqueta) => void;
+  onEtiquetaExcluida: (etiquetaId: string) => void;
 }) {
   const visiveis = campos.filter((c) => c.tipo !== "conexao_pipe");
 
@@ -35,6 +39,8 @@ export function CampoValueList({
           usuarios={usuarios}
           onSave={(valor) => onSalvarValor(campo.id, valor)}
           onEtiquetaCriada={onEtiquetaCriada}
+          onEtiquetaAtualizada={onEtiquetaAtualizada}
+          onEtiquetaExcluida={onEtiquetaExcluida}
         />
       ))}
     </div>

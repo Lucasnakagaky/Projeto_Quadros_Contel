@@ -129,6 +129,11 @@ export function CardDetailModal({
     }
   }
 
+  function atualizarEtiquetas(next: Etiqueta[]) {
+    setDetail((prev) => (prev ? { ...prev, etiquetas: next } : prev));
+    onEtiquetasChanged(next);
+  }
+
   function handleConexaoCriada(r: ConexaoResolvida) {
     setDetail((prev) => (prev ? { ...prev, conexoesFilhos: [...prev.conexoesFilhos, r] } : prev));
     onConexaoCriada(cardId);
@@ -216,11 +221,11 @@ export function CardDetailModal({
                   etiquetas={etiquetas}
                   usuarios={usuarios}
                   onSalvarValor={salvarValorCampo}
-                  onEtiquetaCriada={(e) => {
-                    const next = [...etiquetas, e];
-                    setDetail((prev) => (prev ? { ...prev, etiquetas: next } : prev));
-                    onEtiquetasChanged(next);
-                  }}
+                  onEtiquetaCriada={(e) => atualizarEtiquetas([...etiquetas, e])}
+                  onEtiquetaAtualizada={(e) =>
+                    atualizarEtiquetas(etiquetas.map((et) => (et.id === e.id ? e : et)))
+                  }
+                  onEtiquetaExcluida={(id) => atualizarEtiquetas(etiquetas.filter((et) => et.id !== id))}
                 />
 
                 {camposConexaoPipe.map((campo) => (

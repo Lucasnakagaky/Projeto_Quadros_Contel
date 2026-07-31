@@ -60,6 +60,8 @@ export function TableRow({
         return <PhaseBadge fase={fase} />;
       case "titulo":
         return <span className="font-medium text-slate-800">{card.titulo}</span>;
+      case "criadoEm":
+        return <span className="text-slate-700">{formatarData(card.criadoEm)}</span>;
       case "vencimento":
         return vencimento ? <span className="text-slate-700">{formatarData(vencimento)}</span> : <Vazio />;
       case "responsaveis":

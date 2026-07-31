@@ -78,3 +78,12 @@ export function dataPorExtenso(iso: string | null | undefined): string {
   if (Number.isNaN(d.getTime())) return "";
   return `${d.getDate()} de ${MESES_EXTENSO[d.getMonth()]} de ${d.getFullYear()}`;
 }
+
+/** Escolhe uma cor da paleta de forma determinística a partir de um id (mesmo id = mesma cor sempre). */
+export function corDeterministica(id: string, paleta: string[]): string {
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) {
+    hash = (hash * 31 + id.charCodeAt(i)) >>> 0;
+  }
+  return paleta[hash % paleta.length];
+}

@@ -37,7 +37,8 @@ export default async function PipesPage() {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {pipes.map((pipe) => {
             const faseCount = db.fases.filter((f) => f.pipeId === pipe.id).length;
-            return <PipeCard key={pipe.id} pipe={pipe} faseCount={faseCount} />;
+            const cardCount = db.cards.filter((c) => c.pipeId === pipe.id && !c.excluido).length;
+            return <PipeCard key={pipe.id} pipe={pipe} faseCount={faseCount} cardCount={cardCount} />;
           })}
         </div>
       )}
