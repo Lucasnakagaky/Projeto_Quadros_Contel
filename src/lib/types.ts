@@ -74,6 +74,11 @@ export interface CampoConfig {
   pipeDestinoId?: string;
   modoConexao?: "criar" | "pesquisar_criar";
   cardinalidade?: "unico" | "varios";
+  // moeda
+  moeda?: string;
+  // conexao_database
+  identificadorDatabase?: string;
+  campoIdentificador?: string;
 }
 
 export interface Campo {
@@ -85,6 +90,12 @@ export interface Campo {
   descricao: string;
   textoAjuda: string;
   visualizacaoCompacta: boolean;
+  /** Metadado hoje sem efeito de renderização — só existe um formulário compartilhado por pipe; passa a valer quando houver formulários por fase. */
+  editavelEmOutrasFases: boolean;
+  valorUnico: boolean;
+  /** Regex opcional; string vazia = sem validação customizada. */
+  validacaoCustomizada: string;
+  arquivado: boolean;
   ordem: number;
   config: CampoConfig;
 }
@@ -176,26 +187,28 @@ export const CORES_ETIQUETA = [
   "#64748b",
 ];
 
-export const TIPOS_CAMPO: { tipo: TipoCampo; label: string }[] = [
-  { tipo: "texto_curto", label: "Texto curto" },
-  { tipo: "texto_longo", label: "Texto longo" },
-  { tipo: "conteudo_dinamico", label: "Conteúdo dinâmico" },
-  { tipo: "anexo", label: "Anexo" },
-  { tipo: "checkbox", label: "Checkbox" },
-  { tipo: "responsavel", label: "Responsável" },
-  { tipo: "data", label: "Data" },
-  { tipo: "data_hora", label: "Data e hora" },
-  { tipo: "data_vencimento", label: "Data de vencimento" },
-  { tipo: "etiquetas", label: "Etiquetas" },
-  { tipo: "email", label: "Email" },
-  { tipo: "telefone", label: "Número de telefone" },
-  { tipo: "selecao_lista", label: "Seleção de lista" },
-  { tipo: "selecao_unica", label: "Seleção de única opção" },
-  { tipo: "tempo", label: "Tempo" },
-  { tipo: "numerico", label: "Numérico" },
-  { tipo: "moeda", label: "Moeda" },
-  { tipo: "documentos", label: "Documentos" },
-  { tipo: "id", label: "ID" },
-  { tipo: "conexao_pipe", label: "Conexão de pipe" },
-  { tipo: "conexao_database", label: "Conexão de database" },
+export type GrupoTipoCampo = "campo" | "conexao";
+
+export const TIPOS_CAMPO: { tipo: TipoCampo; label: string; grupo: GrupoTipoCampo }[] = [
+  { tipo: "texto_curto", label: "Texto curto", grupo: "campo" },
+  { tipo: "texto_longo", label: "Texto longo", grupo: "campo" },
+  { tipo: "conteudo_dinamico", label: "Conteúdo dinâmico", grupo: "campo" },
+  { tipo: "anexo", label: "Anexo", grupo: "campo" },
+  { tipo: "checkbox", label: "Checkbox", grupo: "campo" },
+  { tipo: "responsavel", label: "Responsável", grupo: "campo" },
+  { tipo: "data", label: "Data", grupo: "campo" },
+  { tipo: "data_hora", label: "Data e hora", grupo: "campo" },
+  { tipo: "data_vencimento", label: "Data de vencimento", grupo: "campo" },
+  { tipo: "etiquetas", label: "Etiquetas", grupo: "campo" },
+  { tipo: "email", label: "Email", grupo: "campo" },
+  { tipo: "telefone", label: "Número de telefone", grupo: "campo" },
+  { tipo: "selecao_lista", label: "Seleção de lista", grupo: "campo" },
+  { tipo: "selecao_unica", label: "Seleção de única opção", grupo: "campo" },
+  { tipo: "tempo", label: "Tempo", grupo: "campo" },
+  { tipo: "numerico", label: "Numérico", grupo: "campo" },
+  { tipo: "moeda", label: "Moeda", grupo: "campo" },
+  { tipo: "documentos", label: "Documentos", grupo: "campo" },
+  { tipo: "id", label: "ID", grupo: "campo" },
+  { tipo: "conexao_pipe", label: "Conexão de pipe", grupo: "conexao" },
+  { tipo: "conexao_database", label: "Conexão de database", grupo: "conexao" },
 ];

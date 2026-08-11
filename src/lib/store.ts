@@ -65,9 +65,9 @@ export async function createPipe(nome: string): Promise<Pipe> {
     db.fases.push(...fases);
 
     const campos: Campo[] = [
-      { id: uuid(), pipeId, tipo: "responsavel", titulo: "Responsável", obrigatorio: false, descricao: "", textoAjuda: "", visualizacaoCompacta: false, ordem: 0, config: {} },
-      { id: uuid(), pipeId, tipo: "data_vencimento", titulo: "Vencimento", obrigatorio: false, descricao: "", textoAjuda: "", visualizacaoCompacta: false, ordem: 1, config: {} },
-      { id: uuid(), pipeId, tipo: "etiquetas", titulo: "Etiquetas", obrigatorio: false, descricao: "", textoAjuda: "", visualizacaoCompacta: false, ordem: 2, config: {} },
+      { id: uuid(), pipeId, tipo: "responsavel", titulo: "Responsável", obrigatorio: false, descricao: "", textoAjuda: "", visualizacaoCompacta: false, editavelEmOutrasFases: false, valorUnico: false, validacaoCustomizada: "", arquivado: false, ordem: 0, config: {} },
+      { id: uuid(), pipeId, tipo: "data_vencimento", titulo: "Vencimento", obrigatorio: false, descricao: "", textoAjuda: "", visualizacaoCompacta: false, editavelEmOutrasFases: false, valorUnico: false, validacaoCustomizada: "", arquivado: false, ordem: 1, config: {} },
+      { id: uuid(), pipeId, tipo: "etiquetas", titulo: "Etiquetas", obrigatorio: false, descricao: "", textoAjuda: "", visualizacaoCompacta: false, editavelEmOutrasFases: false, valorUnico: false, validacaoCustomizada: "", arquivado: false, ordem: 2, config: {} },
     ];
     db.campos.push(...campos);
 
@@ -177,6 +177,9 @@ export async function createCampo(
     descricao?: string;
     textoAjuda?: string;
     visualizacaoCompacta?: boolean;
+    editavelEmOutrasFases?: boolean;
+    valorUnico?: boolean;
+    validacaoCustomizada?: string;
     config?: CampoConfig;
   }
 ): Promise<Campo> {
@@ -195,6 +198,10 @@ export async function createCampo(
       descricao: input.descricao?.trim() ?? "",
       textoAjuda: input.textoAjuda?.trim() ?? "",
       visualizacaoCompacta: input.visualizacaoCompacta ?? false,
+      editavelEmOutrasFases: input.editavelEmOutrasFases ?? false,
+      valorUnico: input.valorUnico ?? false,
+      validacaoCustomizada: input.validacaoCustomizada?.trim() ?? "",
+      arquivado: false,
       ordem: maxOrdem + 1,
       config: input.config ?? {},
     };
@@ -204,7 +211,19 @@ export async function createCampo(
 }
 
 export type CampoPatch = Partial<
-  Pick<Campo, "titulo" | "obrigatorio" | "descricao" | "textoAjuda" | "visualizacaoCompacta" | "config">
+  Pick<
+    Campo,
+    | "titulo"
+    | "obrigatorio"
+    | "descricao"
+    | "textoAjuda"
+    | "visualizacaoCompacta"
+    | "editavelEmOutrasFases"
+    | "valorUnico"
+    | "validacaoCustomizada"
+    | "arquivado"
+    | "config"
+  >
 >;
 
 export async function updateCampo(id: string, patch: CampoPatch): Promise<Campo> {
@@ -216,6 +235,10 @@ export async function updateCampo(id: string, patch: CampoPatch): Promise<Campo>
     if (patch.descricao !== undefined) campo.descricao = patch.descricao;
     if (patch.textoAjuda !== undefined) campo.textoAjuda = patch.textoAjuda;
     if (patch.visualizacaoCompacta !== undefined) campo.visualizacaoCompacta = patch.visualizacaoCompacta;
+    if (patch.editavelEmOutrasFases !== undefined) campo.editavelEmOutrasFases = patch.editavelEmOutrasFases;
+    if (patch.valorUnico !== undefined) campo.valorUnico = patch.valorUnico;
+    if (patch.validacaoCustomizada !== undefined) campo.validacaoCustomizada = patch.validacaoCustomizada.trim();
+    if (patch.arquivado !== undefined) campo.arquivado = patch.arquivado;
     if (patch.config !== undefined) campo.config = { ...campo.config, ...patch.config };
     return campo;
   });
@@ -301,6 +324,15 @@ export async function updateCard(id: string, patch: CardPatch): Promise<Card> {
     if (!card) notFound("Card");
     if (patch.titulo !== undefined) card.titulo = patch.titulo.trim() || card.titulo;
     if (patch.valoresCampos !== undefined) {
+      for (const [campoId, valor] of Object.entries(patch.valoresCampos)) {
+        if (valor === undefined || valor === null || valor === "") continue;
+        const campo = db.campos.find((c) => c.id === campoId);
+        if (!campo?.valorUnico) continue;
+        const duplicado = db.cards.some(
+          (c) => c.id !== id && c.pipeId === card.pipeId && c.valoresCampos[campoId] === valor
+        );
+        if (duplicado) badRequest(`"${campo.titulo}" precisa ter um valor único — este já está em uso em outro card`);
+      }
       card.valoresCampos = { ...card.valoresCampos, ...patch.valoresCampos };
     }
     card.atualizadoEm = now();

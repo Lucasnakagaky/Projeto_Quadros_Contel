@@ -10,9 +10,7 @@ import {
   type DragEndEvent,
 } from "@dnd-kit/core";
 import { SortableContext, arrayMove, horizontalListSortingStrategy } from "@dnd-kit/sortable";
-import { Button } from "@/components/ui/button";
-import { Campo, Fase, Usuario } from "@/lib/types";
-import { StartFormCard } from "./start-form-card";
+import { Fase, Usuario } from "@/lib/types";
 import { PhaseCard } from "./phase-card";
 import { FlowConnector } from "./flow-connector";
 import { ZoomControls } from "./zoom-controls";
@@ -25,14 +23,12 @@ type FasePatch = Partial<
 
 export function FlowCanvas({
   fases,
-  campos,
   usuarios,
   onReorderFases,
   onUpdateFase,
   onAbrirCampos,
 }: {
   fases: Fase[];
-  campos: Campo[];
   usuarios: Usuario[];
   onReorderFases: (reordered: Fase[]) => Promise<void>;
   onUpdateFase: (faseId: string, patch: FasePatch) => Promise<void>;
@@ -97,16 +93,6 @@ export function FlowCanvas({
 
   return (
     <div className="relative flex flex-1 flex-col overflow-hidden bg-slate-50">
-      <div className="flex items-center justify-end px-6 py-3">
-        <Button
-          variant="outline"
-          className="rounded-full border-blue-500 text-blue-600 hover:bg-blue-50"
-          onClick={() => setDrawerFaseId(fases[0]?.id ?? null)}
-        >
-          Visão geral do processo
-        </Button>
-      </div>
-
       <div
         className="relative flex-1 overflow-hidden"
         style={{ cursor: arrastando ? "grabbing" : "grab" }}
@@ -120,8 +106,6 @@ export function FlowCanvas({
           }}
         >
           <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-            <StartFormCard quantidadeCampos={campos.length} onAbrirCampos={onAbrirCampos} />
-            <FlowConnector />
             <SortableContext items={faseIds} strategy={horizontalListSortingStrategy}>
               {fases.map((fase, i) => (
                 <div key={fase.id} className="flex items-center">

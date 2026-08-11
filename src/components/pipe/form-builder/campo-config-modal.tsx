@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { X } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -25,10 +26,20 @@ export interface CampoFormValues {
   descricao: string;
   textoAjuda: string;
   visualizacaoCompacta: boolean;
+  editavelEmOutrasFases: boolean;
+  valorUnico: boolean;
+  validacaoCustomizada: string;
   config: CampoConfig;
 }
 
 const TIPOS_COM_OPCOES = new Set<TipoCampo>(["selecao_lista", "selecao_unica"]);
+
+const MOEDAS = [
+  { codigo: "BRL", label: "Real brasileiro (BRL)" },
+  { codigo: "USD", label: "Dólar americano (USD)" },
+  { codigo: "EUR", label: "Euro (EUR)" },
+  { codigo: "GBP", label: "Libra esterlina (GBP)" },
+];
 
 export function CampoConfigModal({
   open,
@@ -51,6 +62,12 @@ export function CampoConfigModal({
   const [textoAjuda, setTextoAjuda] = useState(campo?.textoAjuda ?? "");
   const [obrigatorio, setObrigatorio] = useState(campo?.obrigatorio ?? false);
   const [visualizacaoCompacta, setVisualizacaoCompacta] = useState(campo?.visualizacaoCompacta ?? false);
+  const [editavelEmOutrasFases, setEditavelEmOutrasFases] = useState(campo?.editavelEmOutrasFases ?? false);
+  const [valorUnico, setValorUnico] = useState(campo?.valorUnico ?? false);
+  const [comValidacaoCustomizada, setComValidacaoCustomizada] = useState(
+    Boolean(campo?.validacaoCustomizada)
+  );
+  const [validacaoCustomizada, setValidacaoCustomizada] = useState(campo?.validacaoCustomizada ?? "");
   const [opcoes, setOpcoes] = useState<string[]>(campo?.config.opcoes ?? []);
   const [novaOpcao, setNovaOpcao] = useState("");
   const [nomeConexao, setNomeConexao] = useState(campo?.config.nomeConexao ?? "");
@@ -61,6 +78,11 @@ export function CampoConfigModal({
   const [cardinalidade, setCardinalidade] = useState<"unico" | "varios">(
     campo?.config.cardinalidade ?? "varios"
   );
+  const [moeda, setMoeda] = useState(campo?.config.moeda ?? "BRL");
+  const [identificadorDatabase, setIdentificadorDatabase] = useState(
+    campo?.config.identificadorDatabase ?? ""
+  );
+  const [campoIdentificador, setCampoIdentificador] = useState(campo?.config.campoIdentificador ?? "");
   const [pipes, setPipes] = useState<Pipe[]>([]);
 
   const [openAnterior, setOpenAnterior] = useState(open);
@@ -75,11 +97,18 @@ export function CampoConfigModal({
       setTextoAjuda(campo?.textoAjuda ?? "");
       setObrigatorio(campo?.obrigatorio ?? false);
       setVisualizacaoCompacta(campo?.visualizacaoCompacta ?? false);
+      setEditavelEmOutrasFases(campo?.editavelEmOutrasFases ?? false);
+      setValorUnico(campo?.valorUnico ?? false);
+      setComValidacaoCustomizada(Boolean(campo?.validacaoCustomizada));
+      setValidacaoCustomizada(campo?.validacaoCustomizada ?? "");
       setOpcoes(campo?.config.opcoes ?? []);
       setNomeConexao(campo?.config.nomeConexao ?? "Subtarefas (Cards Filhos)");
       setPipeDestinoId(campo?.config.pipeDestinoId ?? pipeId);
       setModoConexao(campo?.config.modoConexao ?? "criar");
       setCardinalidade(campo?.config.cardinalidade ?? "varios");
+      setMoeda(campo?.config.moeda ?? "BRL");
+      setIdentificadorDatabase(campo?.config.identificadorDatabase ?? "");
+      setCampoIdentificador(campo?.config.campoIdentificador ?? "");
     }
   }
 
@@ -96,6 +125,14 @@ export function CampoConfigModal({
 
   function submit() {
     if (!titulo.trim()) return;
+    if (comValidacaoCustomizada && validacaoCustomizada.trim()) {
+      try {
+        new RegExp(validacaoCustomizada.trim());
+      } catch {
+        toast.error("Expressão regular inválida");
+        return;
+      }
+    }
     const config: CampoConfig = {};
     if (TIPOS_COM_OPCOES.has(tipo)) config.opcoes = opcoes;
     if (tipo === "conexao_pipe") {
@@ -104,6 +141,14 @@ export function CampoConfigModal({
       config.modoConexao = modoConexao;
       config.cardinalidade = cardinalidade;
     }
+    if (tipo === "conexao_database") {
+      config.nomeConexao = nomeConexao.trim() || "Conexão";
+      config.identificadorDatabase = identificadorDatabase.trim();
+      config.campoIdentificador = campoIdentificador.trim();
+    }
+    if (tipo === "moeda") {
+      config.moeda = moeda;
+    }
     onSalvar({
       tipo,
       titulo: titulo.trim(),
@@ -111,6 +156,9 @@ export function CampoConfigModal({
       descricao: comDescricao ? descricao : "",
       textoAjuda: comAjuda ? textoAjuda : "",
       visualizacaoCompacta,
+      editavelEmOutrasFases,
+      valorUnico,
+      validacaoCustomizada: comValidacaoCustomizada ? validacaoCustomizada.trim() : "",
       config,
     });
     onOpenChange(false);
@@ -252,6 +300,54 @@ export function CampoConfigModal({
             </div>
           )}
 
+          {tipo === "conexao_database" && (
+            <div className="flex flex-col gap-3 rounded-md border border-slate-200 p-3">
+              <div className="flex flex-col gap-1.5">
+                <Label>Nome da conexão</Label>
+                <Input value={nomeConexao} onChange={(e) => setNomeConexao(e.target.value)} />
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <Label>Identificador do database de destino</Label>
+                <Input
+                  value={identificadorDatabase}
+                  onChange={(e) => setIdentificadorDatabase(e.target.value)}
+                  placeholder="Ex.: CRM Externo, ERP Financeiro"
+                />
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <Label>Campo identificador do registro</Label>
+                <Input
+                  value={campoIdentificador}
+                  onChange={(e) => setCampoIdentificador(e.target.value)}
+                  placeholder="Ex.: external_id"
+                />
+                <span className="text-xs text-slate-400">
+                  Nome do campo usado para casar o registro no sistema externo.
+                </span>
+              </div>
+            </div>
+          )}
+
+          {tipo === "moeda" && (
+            <div className="flex flex-col gap-1.5">
+              <Label>Moeda</Label>
+              <Select value={moeda} onValueChange={setMoeda}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {MOEDAS.map((m) => (
+                    <SelectItem key={m.codigo} value={m.codigo}>
+                      {m.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
           <label className="flex cursor-pointer items-center justify-between text-sm text-slate-700">
             Descrição
             <Checkbox checked={comDescricao} onCheckedChange={(v) => setComDescricao(Boolean(v))} />
@@ -281,9 +377,44 @@ export function CampoConfigModal({
             />
           </label>
 
+          <label className="flex cursor-pointer items-center justify-between text-sm text-slate-700">
+            Validação customizada
+            <Checkbox
+              checked={comValidacaoCustomizada}
+              onCheckedChange={(v) => setComValidacaoCustomizada(Boolean(v))}
+            />
+          </label>
+          {comValidacaoCustomizada && (
+            <div className="flex flex-col gap-1">
+              <Input
+                value={validacaoCustomizada}
+                onChange={(e) => setValidacaoCustomizada(e.target.value)}
+                placeholder="Expressão regular, ex.: ^[0-9]+$"
+              />
+              <span className="text-xs text-slate-400">
+                O valor digitado precisa combinar com esta expressão regular (regex).
+              </span>
+            </div>
+          )}
+
+          <label className="flex cursor-pointer items-center justify-between text-sm text-slate-700">
+            Editável em outras fases
+            <Checkbox
+              checked={editavelEmOutrasFases}
+              onCheckedChange={(v) => setEditavelEmOutrasFases(Boolean(v))}
+            />
+          </label>
+
+          <label className="flex cursor-pointer items-center justify-between text-sm text-slate-700">
+            Deve ter valor único
+            <Checkbox checked={valorUnico} onCheckedChange={(v) => setValorUnico(Boolean(v))} />
+          </label>
+
           <button
             type="button"
-            className="self-start text-xs text-blue-600 hover:underline"
+            disabled
+            title="Em breve"
+            className="self-start text-xs text-slate-400 cursor-not-allowed"
             onClick={(e) => e.preventDefault()}
           >
             Dependências do campo

@@ -19,6 +19,7 @@ export function FaseColumn({
   usuarios,
   contagemFilhos,
   cardsFilhos,
+  isDropTarget = false,
   onOpenCard,
   onCreateCard,
   onAddFase,
@@ -32,6 +33,7 @@ export function FaseColumn({
   usuarios: Usuario[];
   contagemFilhos: Record<string, number>;
   cardsFilhos: Set<string>;
+  isDropTarget?: boolean;
   onOpenCard: (id: string) => void;
   onCreateCard: (faseId: string) => void;
   onAddFase: () => void;
@@ -56,7 +58,7 @@ export function FaseColumn({
       ref={setNodeRef}
       style={style}
       className={cn(
-        "flex w-72 shrink-0 flex-col overflow-hidden rounded-lg bg-slate-100",
+        "flex w-[88vw] shrink-0 snap-start flex-col overflow-hidden rounded-lg bg-slate-100 sm:w-72",
         isDragging && "opacity-50"
       )}
     >
@@ -96,7 +98,10 @@ export function FaseColumn({
 
       <div
         ref={setDroppableRef}
-        className="flex min-h-[8px] flex-1 flex-col gap-2 overflow-y-auto px-2 py-2"
+        className={cn(
+          "flex min-h-[8px] flex-1 flex-col gap-2 overflow-y-auto rounded-md px-2 py-2 transition-colors",
+          isDropTarget && "bg-blue-50 ring-2 ring-inset ring-blue-300"
+        )}
       >
         <SortableContext items={cards.map((c) => c.id)} strategy={verticalListSortingStrategy}>
           {cards.map((card) => (

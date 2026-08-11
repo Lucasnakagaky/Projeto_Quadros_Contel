@@ -22,6 +22,9 @@ type Body = {
   descricao?: string;
   textoAjuda?: string;
   visualizacaoCompacta?: boolean;
+  editavelEmOutrasFases?: boolean;
+  valorUnico?: boolean;
+  validacaoCustomizada?: string;
   config?: CampoConfig;
 };
 
@@ -46,6 +49,9 @@ export async function POST(req: Request, { params }: Ctx) {
       descricao: body.descricao,
       textoAjuda: body.textoAjuda,
       visualizacaoCompacta: body.visualizacaoCompacta,
+      editavelEmOutrasFases: body.editavelEmOutrasFases,
+      valorUnico: body.valorUnico,
+      validacaoCustomizada: body.validacaoCustomizada,
       config: body.config,
     });
     return NextResponse.json(campo, { status: 201 });

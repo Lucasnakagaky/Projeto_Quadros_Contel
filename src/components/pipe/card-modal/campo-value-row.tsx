@@ -21,8 +21,19 @@ import { stringArray } from "@/lib/campo-utils";
 import { cn, iniciais } from "@/lib/utils";
 
 type Anexo = { nome: string; url: string };
+type RelacaoExterna = { id: string; rotulo: string };
 
-const TIPOS_TEXTO = new Set(["texto_curto", "conteudo_dinamico", "email", "telefone", "numerico", "moeda", "tempo"]);
+const TIPOS_TEXTO = new Set(["texto_curto", "conteudo_dinamico", "email", "telefone", "numerico", "tempo"]);
+
+function formatarMoeda(valor: unknown, codigoMoeda: string): string {
+  const numero = typeof valor === "number" ? valor : parseFloat(String(valor));
+  if (Number.isNaN(numero)) return String(valor);
+  try {
+    return new Intl.NumberFormat("pt-BR", { style: "currency", currency: codigoMoeda }).format(numero);
+  } catch {
+    return String(valor);
+  }
+}
 
 export function CampoValueRow({
   campo,
@@ -56,6 +67,8 @@ export function CampoValueRow({
   const [nomeEdicaoEtiqueta, setNomeEdicaoEtiqueta] = useState("");
   const [corEdicaoEtiqueta, setCorEdicaoEtiqueta] = useState(CORES_ETIQUETA[0]);
   const [enviando, setEnviando] = useState(false);
+  const [relacionandoDb, setRelacionandoDb] = useState(false);
+  const [novaRelacaoDb, setNovaRelacaoDb] = useState("");
 
   function iniciarEdicao() {
     setRascunho(typeof valor === "string" ? valor : "");
@@ -63,12 +76,38 @@ export function CampoValueRow({
   }
 
   function salvar() {
-    onSave(rascunho.trim() || null);
+    const valorTrimado = rascunho.trim();
+    if (campo.obrigatorio && !valorTrimado) {
+      toast.error(`"${campo.titulo}" é obrigatório`);
+      return;
+    }
+    if (valorTrimado && campo.validacaoCustomizada) {
+      try {
+        if (!new RegExp(campo.validacaoCustomizada).test(valorTrimado)) {
+          toast.error(`"${campo.titulo}" não passou na validação customizada`);
+          return;
+        }
+      } catch {
+        // regex inválida salva no campo — ignora e deixa passar
+      }
+    }
+    onSave(valorTrimado || null);
     setEditing(false);
   }
 
   function cancelar() {
     setEditing(false);
+  }
+
+  function adicionarRelacaoDb() {
+    if (!novaRelacaoDb.trim()) return;
+    const atuais: RelacaoExterna[] = Array.isArray(valor) ? (valor as RelacaoExterna[]) : [];
+    onSave([
+      ...atuais,
+      { id: `ext-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, rotulo: novaRelacaoDb.trim() },
+    ]);
+    setNovaRelacaoDb("");
+    setRelacionandoDb(false);
   }
 
   const vazio = valor === undefined || valor === null || valor === "";
@@ -151,7 +190,14 @@ export function CampoValueRow({
         <CampoIcon tipo={campo.tipo} />
       </div>
       <div className="flex-1 min-w-0">
-        <span className="block text-xs font-medium text-slate-500">{campo.titulo}</span>
+        <span className="block text-xs font-medium text-slate-500">
+          {campo.titulo}
+          {campo.obrigatorio && (
+            <span className="ml-0.5 text-red-500" aria-label="obrigatório">
+              *
+            </span>
+          )}
+        </span>
         {conteudo}
       </div>
     </div>
@@ -389,10 +435,61 @@ export function CampoValueRow({
     );
   }
 
-  // Conexão com database: placeholder inerte
+  // Conexão com database externo: relaciona registros externos (não é um valor simples)
   if (campo.tipo === "conexao_database") {
+    const relacoes: RelacaoExterna[] = Array.isArray(valor) ? (valor as RelacaoExterna[]) : [];
     return linha(
-      <span className="text-sm italic text-slate-400">Conexão com banco de dados externo — não configurada</span>
+      <div className="flex flex-col gap-1.5">
+        {campo.config.identificadorDatabase && (
+          <span className="text-xs text-slate-400">
+            Conectado a: <span className="text-slate-600">{campo.config.identificadorDatabase}</span>
+          </span>
+        )}
+
+        {relacoes.length > 0 && (
+          <div className="flex flex-wrap gap-1.5">
+            {relacoes.map((r) => (
+              <span
+                key={r.id}
+                className="flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-xs text-slate-700"
+              >
+                {r.rotulo}
+                <button
+                  onClick={() => onSave(relacoes.filter((x) => x.id !== r.id))}
+                  aria-label={`Remover relação com ${r.rotulo}`}
+                >
+                  <X size={11} />
+                </button>
+              </span>
+            ))}
+          </div>
+        )}
+
+        {relacionandoDb ? (
+          <div className="flex gap-2">
+            <Input
+              autoFocus
+              placeholder="Identificador ou nome do registro externo"
+              value={novaRelacaoDb}
+              onChange={(e) => setNovaRelacaoDb(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && adicionarRelacaoDb()}
+            />
+            <Button size="sm" onClick={adicionarRelacaoDb}>
+              Adicionar
+            </Button>
+            <Button size="sm" variant="ghost" onClick={() => setRelacionandoDb(false)}>
+              Cancelar
+            </Button>
+          </div>
+        ) : (
+          <button
+            onClick={() => setRelacionandoDb(true)}
+            className="self-start text-xs text-blue-600 hover:underline"
+          >
+            {relacoes.length === 0 ? "Nenhum registro relacionado — " : ""}+ Relacionar registro externo
+          </button>
+        )}
+      </div>
     );
   }
 
@@ -433,6 +530,42 @@ export function CampoValueRow({
     );
   }
 
+  // Moeda: formata exibição com o código configurado (padrão BRL)
+  if (campo.tipo === "moeda") {
+    const codigoMoeda = campo.config.moeda || "BRL";
+    if (!editing) {
+      return linha(
+        <button onClick={iniciarEdicao} className="text-sm text-slate-700 hover:underline">
+          {vazio ? (
+            <span className="text-slate-400">Clique aqui para adicionar</span>
+          ) : (
+            formatarMoeda(valor, codigoMoeda)
+          )}
+        </button>
+      );
+    }
+    return linha(
+      <div className="flex items-center gap-2">
+        <span className="text-xs font-medium text-slate-400">{codigoMoeda}</span>
+        <Input
+          autoFocus
+          type="number"
+          step="0.01"
+          value={rascunho}
+          onChange={(e) => setRascunho(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && salvar()}
+          className="h-8 max-w-xs text-sm"
+        />
+        <Button size="sm" onClick={salvar}>
+          Salvar
+        </Button>
+        <Button size="sm" variant="ghost" onClick={cancelar}>
+          Cancelar
+        </Button>
+      </div>
+    );
+  }
+
   // Texto longo
   if (campo.tipo === "texto_longo") {
     if (!editing) {
@@ -460,7 +593,7 @@ export function CampoValueRow({
     );
   }
 
-  // Tipos de texto curto (padrão): texto_curto, conteudo_dinamico, email, telefone, numerico, moeda, tempo
+  // Tipos de texto curto (padrão): texto_curto, conteudo_dinamico, email, telefone, numerico, tempo
   if (TIPOS_TEXTO.has(campo.tipo)) {
     if (!editing) {
       return linha(
@@ -473,7 +606,7 @@ export function CampoValueRow({
       <div className="flex items-center gap-2">
         <Input
           autoFocus
-          type={campo.tipo === "numerico" || campo.tipo === "moeda" ? "number" : "text"}
+          type={campo.tipo === "numerico" ? "number" : "text"}
           value={rascunho}
           onChange={(e) => setRascunho(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && salvar()}

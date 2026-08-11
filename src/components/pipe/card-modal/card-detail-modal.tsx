@@ -2,17 +2,18 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
-import { CalendarClock, Share2, Tag, Trash2, User } from "lucide-react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { CalendarClock, Settings2, Share2, Tag, Trash2, User } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { api } from "@/lib/api-client";
-import { Card, Etiqueta } from "@/lib/types";
+import { Campo, Card, Etiqueta } from "@/lib/types";
 import { campoPorTipo } from "@/lib/campo-utils";
 import { tempoRelativo } from "@/lib/utils";
 import { CardDetail, ConexaoResolvida } from "./types";
 import { CampoValueList } from "./campo-value-list";
+import { FormBuilder } from "../form-builder/form-builder";
 import { ChildCardsField } from "./child-cards-field";
 import { PaisSection } from "./pais-section";
 import { PhaseHistory } from "./phase-history";
@@ -28,6 +29,7 @@ export function CardDetailModal({
   onCardUpdated,
   onCardTrashed,
   onEtiquetasChanged,
+  onCamposChanged,
   onConexaoCriada,
   onNavigateToCard,
 }: {
@@ -36,6 +38,7 @@ export function CardDetailModal({
   onCardUpdated: (card: Card) => void;
   onCardTrashed: (cardId: string) => void;
   onEtiquetasChanged: (etiquetas: Etiqueta[]) => void;
+  onCamposChanged: (campos: Campo[]) => void;
   onConexaoCriada: (cardPaiId: string, cardFilhoId: string) => void;
   onNavigateToCard: (cardId: string) => void;
 }) {
@@ -43,6 +46,7 @@ export function CardDetailModal({
   const [loading, setLoading] = useState(true);
   const [titulo, setTitulo] = useState("");
   const [tabAtiva, setTabAtiva] = useState("form");
+  const [configurandoCampos, setConfigurandoCampos] = useState(false);
 
   const carregar = useCallback(async () => {
     try {
@@ -128,6 +132,11 @@ export function CardDetailModal({
     onEtiquetasChanged(next);
   }
 
+  function atualizarCampos(next: Campo[]) {
+    setDetail((prev) => (prev ? { ...prev, campos: next } : prev));
+    onCamposChanged(next);
+  }
+
   function handleConexaoCriada(r: ConexaoResolvida) {
     setDetail((prev) => (prev ? { ...prev, conexoesFilhos: [...prev.conexoesFilhos, r] } : prev));
     onConexaoCriada(cardId, r.card?.id ?? r.conexao.cardFilhoId);
@@ -162,6 +171,7 @@ export function CardDetailModal({
   void pipe;
 
   return (
+    <>
     <Dialog open onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-5xl">
         <div className="grid grid-cols-1 gap-6 p-6 md:grid-cols-[1fr_280px]">
@@ -323,9 +333,10 @@ export function CardDetailModal({
             <MoverFasePopover fases={fases} faseAtualId={card.faseId} onMover={moverFase} />
 
             <button
-              onClick={() => toast("Configurações — em breve")}
-              className="text-left text-sm text-slate-500 hover:text-slate-700"
+              onClick={() => setConfigurandoCampos(true)}
+              className="flex items-center gap-1.5 text-left text-sm text-slate-500 hover:text-slate-700"
             >
+              <Settings2 size={14} />
               Configurações
             </button>
             <button
@@ -338,5 +349,17 @@ export function CardDetailModal({
         </div>
       </DialogContent>
     </Dialog>
+
+    <Dialog open={configurandoCampos} onOpenChange={setConfigurandoCampos}>
+      <DialogContent className="max-w-4xl">
+        <DialogHeader>
+          <DialogTitle className="text-lg font-bold">Campos do formulário</DialogTitle>
+        </DialogHeader>
+        <div className="max-h-[70vh] overflow-y-auto px-6 pb-6">
+          <FormBuilder pipeId={card.pipeId} campos={campos} onCamposChanged={atualizarCampos} />
+        </div>
+      </DialogContent>
+    </Dialog>
+    </>
   );
 }

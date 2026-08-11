@@ -17,6 +17,23 @@ const TIPOS_SEM_PREVIA_COMPACTA = new Set([
   "documentos",
 ]);
 
+function formatarValorPreview(campo: Campo, valor: unknown): string {
+  if (campo.tipo === "moeda") {
+    const numero = typeof valor === "number" ? valor : parseFloat(String(valor));
+    if (!Number.isNaN(numero)) {
+      try {
+        return new Intl.NumberFormat("pt-BR", {
+          style: "currency",
+          currency: campo.config.moeda || "BRL",
+        }).format(numero);
+      } catch {
+        // moeda inválida — cai no fallback abaixo
+      }
+    }
+  }
+  return String(valor);
+}
+
 function statusVencimento(iso?: string): "atrasado" | "proximo" | "normal" | null {
   if (!iso) return null;
   const data = new Date(iso);
@@ -86,8 +103,8 @@ export function CardChip({
       {...(dragOverlay ? {} : listeners)}
       onClick={onOpen}
       className={cn(
-        "flex cursor-pointer touch-none flex-col gap-1.5 rounded-lg border border-slate-200 bg-white p-3 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md",
-        isDragging && "opacity-40"
+        "flex cursor-grab touch-none flex-col gap-1.5 rounded-lg border border-slate-200 bg-white p-3 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-lg active:cursor-grabbing",
+        isDragging && "cursor-grabbing opacity-40"
       )}
     >
       {ehFilho && (
@@ -121,7 +138,7 @@ export function CardChip({
         <div className="flex flex-col gap-0.5">
           {previasCompactas.map(({ campo, valor }) => (
             <p key={campo.id} className="truncate text-[11px] text-slate-400">
-              {campo.titulo}: <span className="text-slate-600">{String(valor)}</span>
+              {campo.titulo}: <span className="text-slate-600">{formatarValorPreview(campo, valor)}</span>
             </p>
           ))}
         </div>

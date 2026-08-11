@@ -30,6 +30,7 @@ import { FormBuilder } from "./form-builder/form-builder";
 import { CardDetailModal } from "./card-modal/card-detail-modal";
 import { TableView } from "./list-view/table-view";
 import { FlowCanvas } from "./flow-view/flow-canvas";
+import { ScrollFade } from "@/components/ui/scroll-fade";
 
 type ColumnsMap = Record<string, string[]>;
 
@@ -99,6 +100,7 @@ export function PipeBoard({
   const [camposAberto, setCamposAberto] = useState(false);
   const [activeCard, setActiveCard] = useState<Card | null>(null);
   const [activeFase, setActiveFase] = useState<Fase | null>(null);
+  const [overFaseId, setOverFaseId] = useState<string | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } })
@@ -142,6 +144,8 @@ export function PipeBoard({
     const activeContainer = findContainer(activeId);
     const overContainer = findContainer(overId);
 
+    setOverFaseId(overContainer ?? null);
+
     if (!activeContainer || !overContainer || activeContainer === overContainer) {
       return;
     }
@@ -170,6 +174,7 @@ export function PipeBoard({
     const { active, over } = event;
     setActiveCard(null);
     setActiveFase(null);
+    setOverFaseId(null);
     if (!over) return;
 
     if (active.data.current?.type === "fase") {
@@ -371,7 +376,7 @@ export function PipeBoard({
             onDragOver={handleDragOver}
             onDragEnd={handleDragEnd}
           >
-            <div className="flex flex-1 items-start gap-4 overflow-x-auto px-6 py-4">
+            <ScrollFade className="flex items-start gap-4 px-6 py-4 snap-x snap-mandatory scroll-px-6 scroll-smooth">
               <SortableContext items={faseIds} strategy={horizontalListSortingStrategy}>
                 {fases.map((fase) => (
                   <FaseColumn
@@ -383,6 +388,7 @@ export function PipeBoard({
                     usuarios={usuarios}
                     contagemFilhos={contagemFilhos}
                     cardsFilhos={cardsFilhos}
+                    isDropTarget={Boolean(activeCard) && overFaseId === fase.id}
                     onOpenCard={openCard}
                     onCreateCard={handleCreateCard}
                     onAddFase={() => setNovaFaseAberta(true)}
@@ -394,21 +400,21 @@ export function PipeBoard({
 
               <button
                 onClick={() => setNovaFaseAberta(true)}
-                className="flex h-10 w-72 shrink-0 items-center gap-1.5 rounded-lg bg-slate-100/70 px-3 text-sm font-medium text-slate-500 hover:bg-slate-200 cursor-pointer"
+                className="flex h-10 w-[88vw] shrink-0 snap-start items-center gap-1.5 rounded-lg bg-slate-100/70 px-3 text-sm font-medium text-slate-500 hover:bg-slate-200 cursor-pointer sm:w-72"
               >
                 <Plus size={16} />
                 Adicionar Fase
               </button>
-            </div>
+            </ScrollFade>
 
             <DragOverlay>
               {activeCard ? (
-                <div className="w-72 rotate-2 opacity-90">
+                <div className="w-[88vw] rotate-2 opacity-90 sm:w-72">
                   <CardChip card={activeCard} campos={campos} onOpen={() => {}} dragOverlay />
                 </div>
               ) : null}
               {activeFase ? (
-                <div className="w-72 rotate-1 rounded-lg border border-slate-200 bg-slate-100 p-3 opacity-90">
+                <div className="w-[88vw] rotate-1 rounded-lg border border-slate-200 bg-slate-100 p-3 opacity-90 sm:w-72">
                   <span className="font-semibold text-slate-700">{activeFase.nome}</span>
                 </div>
               ) : null}
@@ -436,7 +442,6 @@ export function PipeBoard({
         <TabsContent value="fluxo" className="flex flex-1 flex-col overflow-hidden">
           <FlowCanvas
             fases={fases}
-            campos={campos}
             usuarios={usuarios}
             onReorderFases={handleReorderFases}
             onUpdateFase={handleUpdateFase}
@@ -459,7 +464,7 @@ export function PipeBoard({
       />
 
       <Dialog open={camposAberto} onOpenChange={setCamposAberto}>
-        <DialogContent className="max-w-3xl">
+        <DialogContent className="max-w-4xl">
           <DialogHeader>
             <DialogTitle className="text-lg font-bold">Campos do formulário</DialogTitle>
           </DialogHeader>
@@ -476,6 +481,7 @@ export function PipeBoard({
           onCardUpdated={handleCardUpdatedLocally}
           onCardTrashed={handleCardTrashedLocally}
           onEtiquetasChanged={setEtiquetas}
+          onCamposChanged={setCampos}
           onConexaoCriada={(cardPaiId, cardFilhoId) => {
             setContagemFilhos((prev) => ({ ...prev, [cardPaiId]: (prev[cardPaiId] ?? 0) + 1 }));
             setCardsFilhos((prev) => new Set(prev).add(cardFilhoId));
