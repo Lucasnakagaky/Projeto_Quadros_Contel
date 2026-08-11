@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { CalendarClock, Settings2, Share2, Tag, Trash2, User } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -181,6 +181,7 @@ export function CardDetailModal({
     return (
       <Dialog open onOpenChange={handleOpenChange}>
         <DialogContent className="flex h-64 max-w-4xl items-center justify-center">
+          <DialogTitle className="sr-only">Carregando card</DialogTitle>
           <span className="text-sm text-slate-400">Carregando card...</span>
         </DialogContent>
       </Dialog>
@@ -197,6 +198,10 @@ export function CardDetailModal({
     <>
     <Dialog open onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-5xl">
+        <DialogTitle className="sr-only">{card.titulo || "Detalhes do card"}</DialogTitle>
+        <DialogDescription className="sr-only">
+          Detalhes, campos e atividades do card {card.titulo}
+        </DialogDescription>
         <div className="grid grid-cols-1 gap-6 p-6 md:grid-cols-[1fr_280px]">
           {/* Painel esquerdo */}
           <div className="flex min-w-0 flex-col gap-4">
@@ -324,7 +329,7 @@ export function CardDetailModal({
 
             <button
               onClick={() => toast("Compartilhar — em breve")}
-              className="flex items-center gap-1.5 self-start text-sm text-slate-500 hover:text-slate-700"
+              className="flex items-center gap-1.5 self-start rounded-md px-1 py-1.5 text-sm text-slate-500 hover:bg-slate-100 hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
             >
               <Share2 size={14} />
               Compartilhar
@@ -334,7 +339,7 @@ export function CardDetailModal({
 
             <button
               onClick={() => setConfigurandoCampos(true)}
-              className="flex items-center gap-1.5 text-left text-sm text-slate-500 hover:text-slate-700"
+              className="flex items-center gap-1.5 self-start rounded-md px-1 py-1.5 text-left text-sm text-slate-500 hover:bg-slate-100 hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
             >
               <Settings2 size={14} />
               Configurações
@@ -342,7 +347,7 @@ export function CardDetailModal({
 
             <button
               onClick={moverParaLixeira}
-              className="mt-auto flex items-center gap-1.5 self-start rounded-md px-1 py-1.5 text-sm text-red-500 hover:bg-red-50 hover:text-red-600"
+              className="mt-auto flex items-center gap-1.5 self-start rounded-md px-1 py-1.5 text-sm text-red-500 hover:bg-red-50 hover:text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-1"
               aria-label="Mover card para a lixeira"
               title="Mover card para a lixeira"
             >

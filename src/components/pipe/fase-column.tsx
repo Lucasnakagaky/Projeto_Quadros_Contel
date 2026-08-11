@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useSortable, SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { useDroppable } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
-import { GripVertical, MoreHorizontal, Plus, Settings2, Trash2 } from "lucide-react";
+import { GripVertical, Inbox, MoreHorizontal, Plus, Settings2, Trash2 } from "lucide-react";
 import { Campo, Card, CardRelacionado, Etiqueta, Fase, Usuario } from "@/lib/types";
 import { CardChip } from "./card-chip";
 import { FaseHeaderPopover } from "./fase-header-popover";
@@ -17,6 +17,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
+
+const FOCUS_RING =
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1";
 
 export function FaseColumn({
   fase,
@@ -70,7 +73,10 @@ export function FaseColumn({
         <button
           {...attributes}
           {...listeners}
-          className="cursor-grab touch-none rounded p-1 text-slate-400 hover:bg-slate-100 active:cursor-grabbing"
+          className={cn(
+            "cursor-grab touch-none rounded p-1 text-slate-400 hover:bg-slate-100 active:cursor-grabbing",
+            FOCUS_RING
+          )}
           aria-label="Arrastar fase"
         >
           <GripVertical size={16} />
@@ -90,7 +96,10 @@ export function FaseColumn({
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button
-                className="flex h-6 w-6 items-center justify-center rounded-full text-[rgb(75,88,99)] hover:bg-slate-100"
+                className={cn(
+                  "flex h-6 w-6 items-center justify-center rounded-full text-[rgb(75,88,99)] hover:bg-slate-100",
+                  FOCUS_RING
+                )}
                 aria-label={`Mais opções da fase ${fase.nome}`}
               >
                 <MoreHorizontal size={16} />
@@ -115,7 +124,10 @@ export function FaseColumn({
           {fase.permiteCriarCards && (
             <button
               onClick={() => onCreateCard(fase.id)}
-              className="flex h-6 w-6 items-center justify-center rounded-full text-[rgb(75,88,99)] hover:bg-slate-100"
+              className={cn(
+                "flex h-6 w-6 items-center justify-center rounded-full text-[rgb(75,88,99)] hover:bg-slate-100",
+                FOCUS_RING
+              )}
               aria-label={`Criar novo card na fase ${fase.nome}`}
             >
               <Plus size={16} />
@@ -151,9 +163,12 @@ export function FaseColumn({
           </SortableContext>
 
           {cards.length === 0 && (
-            <p className="px-1 py-2 text-center text-[13px] text-slate-600">
-              {fase.descricao || "Nenhum card nesta fase."}
-            </p>
+            <div className="flex flex-col items-center gap-1.5 px-2 py-6 text-center">
+              <Inbox size={20} className="text-slate-300" />
+              <p className="text-[13px] text-slate-500">
+                {fase.descricao || "Nenhum card nesta fase."}
+              </p>
+            </div>
           )}
         </div>
 
@@ -161,7 +176,10 @@ export function FaseColumn({
           <div className="px-3 pb-3">
             <button
               onClick={() => onCreateCard(fase.id)}
-              className="flex h-10 w-full cursor-pointer items-center justify-center gap-1.5 rounded-full bg-[rgb(0,94,252)] px-4 text-sm font-medium text-white transition-colors hover:bg-[rgb(0,84,227)]"
+              className={cn(
+                "flex h-10 w-full cursor-pointer items-center justify-center gap-1.5 rounded-full bg-[rgb(0,94,252)] px-4 text-sm font-medium text-white transition-colors hover:bg-[rgb(0,84,227)]",
+                FOCUS_RING
+              )}
             >
               <Plus size={16} />
               Criar novo card

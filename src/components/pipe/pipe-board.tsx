@@ -404,7 +404,7 @@ export function PipeBoard({
 
               <button
                 onClick={() => setNovaFaseAberta(true)}
-                className="flex h-10 w-[280px] shrink-0 items-center gap-1.5 rounded-lg bg-slate-100/70 px-3 text-sm font-medium text-slate-500 hover:bg-slate-200 cursor-pointer"
+                className="flex h-10 w-[280px] shrink-0 items-center gap-1.5 rounded-lg bg-slate-100/70 px-3 text-sm font-medium text-slate-500 hover:bg-slate-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
               >
                 <Plus size={16} />
                 Adicionar Fase

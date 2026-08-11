@@ -2,7 +2,7 @@
 
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { CalendarClock, CornerDownRight, Link2 } from "lucide-react";
+import { AlertCircle, CalendarClock, CornerDownRight, Link2 } from "lucide-react";
 import { Campo, Card, CardRelacionado, Etiqueta, Usuario } from "@/lib/types";
 import { campoPorTipo, stringArray } from "@/lib/campo-utils";
 import { cn, iniciais } from "@/lib/utils";
@@ -102,6 +102,15 @@ export function CardChip({
     onOpenCard?.(id);
   }
 
+  function handleKeyDown(e: React.KeyboardEvent<HTMLDivElement>) {
+    // só abre pelo teclado quando o foco está no próprio card, não em chips/botões internos
+    if (e.target !== e.currentTarget) return;
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      onOpen();
+    }
+  }
+
   return (
     <div
       ref={dragOverlay ? undefined : setNodeRef}
@@ -109,8 +118,9 @@ export function CardChip({
       {...(dragOverlay ? {} : attributes)}
       {...(dragOverlay ? {} : listeners)}
       onClick={onOpen}
+      onKeyDown={dragOverlay ? undefined : handleKeyDown}
       className={cn(
-        "flex cursor-grab touch-none flex-col gap-1.5 rounded bg-white py-3 pl-2 pr-3 transition-shadow duration-[125ms] ease-[cubic-bezier(0.2,0,0.38,0.9)] hover:shadow-[0_4px_6px_0_rgba(102,102,102,0.09),0_9px_14px_0_rgba(102,102,102,0.06)] active:cursor-grabbing",
+        "flex cursor-grab touch-none flex-col gap-1.5 rounded bg-white py-3 pl-2 pr-3 transition-shadow duration-[125ms] ease-[cubic-bezier(0.2,0,0.38,0.9)] hover:shadow-[0_4px_6px_0_rgba(102,102,102,0.09),0_9px_14px_0_rgba(102,102,102,0.06)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 active:cursor-grabbing",
         isDragging && "cursor-grabbing opacity-40"
       )}
     >
@@ -188,8 +198,9 @@ export function CardChip({
                     ? "bg-amber-50 text-amber-600"
                     : "bg-slate-100 text-slate-500"
               )}
+              title={status === "atrasado" ? "Vencimento atrasado" : status === "proximo" ? "Vencimento próximo" : undefined}
             >
-              <CalendarClock size={11} />
+              {status === "atrasado" ? <AlertCircle size={11} /> : <CalendarClock size={11} />}
               {new Date(vencimento).toLocaleDateString("pt-BR", { day: "2-digit", month: "short" })}
             </span>
           )}
