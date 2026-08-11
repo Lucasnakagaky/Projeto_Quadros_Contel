@@ -16,7 +16,7 @@ import {
 } from "@dnd-kit/core";
 import { SortableContext, arrayMove, horizontalListSortingStrategy } from "@dnd-kit/sortable";
 import { Plus } from "lucide-react";
-import { Campo, Card, Etiqueta, Fase, Pipe, Usuario } from "@/lib/types";
+import { Campo, Card, CardRelacionado, Etiqueta, Fase, Pipe, Usuario } from "@/lib/types";
 import { api } from "@/lib/api-client";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -52,8 +52,9 @@ export function PipeBoard({
   camposIniciais,
   etiquetasIniciais,
   usuariosIniciais,
-  contagemFilhosIniciais,
   cardsFilhosIniciais,
+  filhosPorCardIniciais,
+  paisPorCardIniciais,
 }: {
   pipeInicial: Pipe;
   fasesIniciais: Fase[];
@@ -61,8 +62,9 @@ export function PipeBoard({
   camposIniciais: Campo[];
   etiquetasIniciais: Etiqueta[];
   usuariosIniciais: Usuario[];
-  contagemFilhosIniciais: Record<string, number>;
   cardsFilhosIniciais: string[];
+  filhosPorCardIniciais: Record<string, CardRelacionado[]>;
+  paisPorCardIniciais: Record<string, CardRelacionado[]>;
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -91,10 +93,13 @@ export function PipeBoard({
   const [campos, setCampos] = useState(camposIniciais);
   const [etiquetas, setEtiquetas] = useState(etiquetasIniciais);
   const [usuarios] = useState(usuariosIniciais);
-  const [contagemFilhos, setContagemFilhos] = useState<Record<string, number>>(
-    () => ({ ...contagemFilhosIniciais })
-  );
   const [cardsFilhos, setCardsFilhos] = useState<Set<string>>(() => new Set(cardsFilhosIniciais));
+  const [filhosPorCard, setFilhosPorCard] = useState<Record<string, CardRelacionado[]>>(
+    () => ({ ...filhosPorCardIniciais })
+  );
+  const [paisPorCard, setPaisPorCard] = useState<Record<string, CardRelacionado[]>>(
+    () => ({ ...paisPorCardIniciais })
+  );
   const [view, setView] = useState<ViewValue>("kanban");
   const [novaFaseAberta, setNovaFaseAberta] = useState(false);
   const [camposAberto, setCamposAberto] = useState(false);
@@ -368,7 +373,7 @@ export function PipeBoard({
       >
         <ViewTabs />
 
-        <TabsContent value="kanban" className="flex flex-1 flex-col overflow-hidden">
+        <TabsContent value="kanban" className="flex flex-1 flex-col overflow-hidden bg-neutral-50">
           <DndContext
             sensors={sensors}
             collisionDetection={closestCorners}
@@ -376,7 +381,7 @@ export function PipeBoard({
             onDragOver={handleDragOver}
             onDragEnd={handleDragEnd}
           >
-            <ScrollFade className="flex items-start gap-4 px-6 py-4 snap-x snap-mandatory scroll-px-6 scroll-smooth">
+            <ScrollFade className="flex items-start gap-2 px-6 py-4" fadeFrom="from-neutral-50">
               <SortableContext items={faseIds} strategy={horizontalListSortingStrategy}>
                 {fases.map((fase) => (
                   <FaseColumn
@@ -386,12 +391,11 @@ export function PipeBoard({
                     campos={campos}
                     etiquetas={etiquetas}
                     usuarios={usuarios}
-                    contagemFilhos={contagemFilhos}
-                    cardsFilhos={cardsFilhos}
+                    filhosPorCard={filhosPorCard}
+                    paisPorCard={paisPorCard}
                     isDropTarget={Boolean(activeCard) && overFaseId === fase.id}
                     onOpenCard={openCard}
                     onCreateCard={handleCreateCard}
-                    onAddFase={() => setNovaFaseAberta(true)}
                     onUpdateFase={handleUpdateFase}
                     onDeleteFase={handleDeleteFase}
                   />
@@ -400,7 +404,7 @@ export function PipeBoard({
 
               <button
                 onClick={() => setNovaFaseAberta(true)}
-                className="flex h-10 w-[88vw] shrink-0 snap-start items-center gap-1.5 rounded-lg bg-slate-100/70 px-3 text-sm font-medium text-slate-500 hover:bg-slate-200 cursor-pointer sm:w-72"
+                className="flex h-10 w-[280px] shrink-0 items-center gap-1.5 rounded-lg bg-slate-100/70 px-3 text-sm font-medium text-slate-500 hover:bg-slate-200 cursor-pointer"
               >
                 <Plus size={16} />
                 Adicionar Fase
@@ -409,12 +413,12 @@ export function PipeBoard({
 
             <DragOverlay>
               {activeCard ? (
-                <div className="w-[88vw] rotate-2 opacity-90 sm:w-72">
+                <div className="w-[256px] rotate-2 opacity-90">
                   <CardChip card={activeCard} campos={campos} onOpen={() => {}} dragOverlay />
                 </div>
               ) : null}
               {activeFase ? (
-                <div className="w-[88vw] rotate-1 rounded-lg border border-slate-200 bg-slate-100 p-3 opacity-90 sm:w-72">
+                <div className="w-[280px] rotate-1 rounded border border-[rgb(220,223,229)] bg-white p-3 opacity-90">
                   <span className="font-semibold text-slate-700">{activeFase.nome}</span>
                 </div>
               ) : null}
@@ -482,9 +486,19 @@ export function PipeBoard({
           onCardTrashed={handleCardTrashedLocally}
           onEtiquetasChanged={setEtiquetas}
           onCamposChanged={setCampos}
-          onConexaoCriada={(cardPaiId, cardFilhoId) => {
-            setContagemFilhos((prev) => ({ ...prev, [cardPaiId]: (prev[cardPaiId] ?? 0) + 1 }));
+          onConexaoCriada={(cardPaiId, cardFilhoId, cardFilhoTitulo) => {
             setCardsFilhos((prev) => new Set(prev).add(cardFilhoId));
+            setFilhosPorCard((prev) => ({
+              ...prev,
+              [cardPaiId]: [...(prev[cardPaiId] ?? []), { id: cardFilhoId, titulo: cardFilhoTitulo }],
+            }));
+            const pai = cardsById[cardPaiId];
+            if (pai) {
+              setPaisPorCard((prev) => ({
+                ...prev,
+                [cardFilhoId]: [...(prev[cardFilhoId] ?? []), { id: cardPaiId, titulo: pai.titulo }],
+              }));
+            }
           }}
           onNavigateToCard={openCard}
         />

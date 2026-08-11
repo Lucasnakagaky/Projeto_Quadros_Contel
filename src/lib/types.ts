@@ -125,6 +125,12 @@ export interface EventoHistorico {
   entradaEm: string;
 }
 
+/** Referência leve a um card relacionado (pai ou filho), usada para exibir o nome real na face do card no Kanban. */
+export interface CardRelacionado {
+  id: string;
+  titulo: string;
+}
+
 export interface Conexao {
   id: string;
   campoId: string;

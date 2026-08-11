@@ -4,11 +4,18 @@ import { useState } from "react";
 import { useSortable, SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { useDroppable } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
-import { GripVertical, Plus } from "lucide-react";
-import { Campo, Card, Etiqueta, Fase, Usuario } from "@/lib/types";
+import { GripVertical, MoreHorizontal, Plus, Settings2, Trash2 } from "lucide-react";
+import { Campo, Card, CardRelacionado, Etiqueta, Fase, Usuario } from "@/lib/types";
 import { CardChip } from "./card-chip";
 import { FaseHeaderPopover } from "./fase-header-popover";
 import { NovaFaseModal, NovaFaseValues } from "./nova-fase-modal";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 
 export function FaseColumn({
@@ -17,12 +24,11 @@ export function FaseColumn({
   campos,
   etiquetas,
   usuarios,
-  contagemFilhos,
-  cardsFilhos,
+  filhosPorCard,
+  paisPorCard,
   isDropTarget = false,
   onOpenCard,
   onCreateCard,
-  onAddFase,
   onUpdateFase,
   onDeleteFase,
 }: {
@@ -31,12 +37,11 @@ export function FaseColumn({
   campos: Campo[];
   etiquetas: Etiqueta[];
   usuarios: Usuario[];
-  contagemFilhos: Record<string, number>;
-  cardsFilhos: Set<string>;
+  filhosPorCard: Record<string, CardRelacionado[]>;
+  paisPorCard: Record<string, CardRelacionado[]>;
   isDropTarget?: boolean;
   onOpenCard: (id: string) => void;
   onCreateCard: (faseId: string) => void;
-  onAddFase: () => void;
   onUpdateFase: (faseId: string, patch: Partial<NovaFaseValues> & { cor?: string }) => void;
   onDeleteFase: (faseId: string) => void;
 }) {
@@ -57,18 +62,15 @@ export function FaseColumn({
     <div
       ref={setNodeRef}
       style={style}
-      className={cn(
-        "flex w-[88vw] shrink-0 snap-start flex-col overflow-hidden rounded-lg bg-slate-100 sm:w-72",
-        isDragging && "opacity-50"
-      )}
+      className={cn("flex w-[280px] shrink-0 flex-col", isDragging && "opacity-50")}
     >
       <div className="h-1.5 shrink-0" style={{ backgroundColor: fase.cor }} />
 
-      <div className="flex items-center gap-1.5 px-2 pt-2">
+      <div className="group flex h-10 shrink-0 items-center gap-1 border-y border-[rgb(220,223,229)] bg-white px-2">
         <button
           {...attributes}
           {...listeners}
-          className="cursor-grab touch-none rounded p-1 text-slate-400 hover:bg-slate-200 active:cursor-grabbing"
+          className="cursor-grab touch-none rounded p-1 text-slate-400 hover:bg-slate-100 active:cursor-grabbing"
           aria-label="Arrastar fase"
         >
           <GripVertical size={16} />
@@ -80,56 +82,93 @@ export function FaseColumn({
           onConfigurar={() => setConfigurando(true)}
         />
 
-        <span
-          className="rounded-full px-2 py-0.5 text-xs font-medium"
-          style={{ backgroundColor: `${fase.cor}22`, color: fase.cor }}
-        >
+        <span className="ml-auto rounded bg-[rgb(237,239,243)] px-1 py-0.5 text-xs font-normal text-[rgb(16,24,32)]">
           {cards.length}
         </span>
 
-        <button
-          onClick={onAddFase}
-          className="rounded p-1 text-slate-400 hover:bg-slate-200"
-          aria-label="Adicionar fase"
-        >
-          <Plus size={16} />
-        </button>
+        <div className="flex items-center opacity-0 transition-opacity focus-within:opacity-100 group-hover:opacity-100">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                className="flex h-6 w-6 items-center justify-center rounded-full text-[rgb(75,88,99)] hover:bg-slate-100"
+                aria-label={`Mais opções da fase ${fase.nome}`}
+              >
+                <MoreHorizontal size={16} />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onSelect={() => setConfigurando(true)}>
+                <Settings2 size={14} />
+                Configurar fase
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onSelect={() => onDeleteFase(fase.id)}
+                className="text-red-600 data-[highlighted]:bg-red-50"
+              >
+                <Trash2 size={14} />
+                Excluir fase
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {fase.permiteCriarCards && (
+            <button
+              onClick={() => onCreateCard(fase.id)}
+              className="flex h-6 w-6 items-center justify-center rounded-full text-[rgb(75,88,99)] hover:bg-slate-100"
+              aria-label={`Criar novo card na fase ${fase.nome}`}
+            >
+              <Plus size={16} />
+            </button>
+          )}
+        </div>
       </div>
 
       <div
-        ref={setDroppableRef}
         className={cn(
-          "flex min-h-[8px] flex-1 flex-col gap-2 overflow-y-auto rounded-md px-2 py-2 transition-colors",
+          "flex flex-1 flex-col overflow-hidden rounded-b border border-t-0 border-[rgb(220,223,229)] bg-[rgb(242,242,242)] transition-colors",
           isDropTarget && "bg-blue-50 ring-2 ring-inset ring-blue-300"
         )}
       >
-        <SortableContext items={cards.map((c) => c.id)} strategy={verticalListSortingStrategy}>
-          {cards.map((card) => (
-            <CardChip
-              key={card.id}
-              card={card}
-              campos={campos}
-              etiquetas={etiquetas}
-              usuarios={usuarios}
-              contagemFilhos={contagemFilhos[card.id] ?? 0}
-              ehFilho={cardsFilhos.has(card.id)}
-              onOpen={() => onOpenCard(card.id)}
-            />
-          ))}
-        </SortableContext>
-      </div>
+        <div
+          ref={setDroppableRef}
+          className="flex min-h-[8px] flex-1 flex-col gap-2 overflow-y-auto px-3 pb-2 pt-3"
+        >
+          <SortableContext items={cards.map((c) => c.id)} strategy={verticalListSortingStrategy}>
+            {cards.map((card) => (
+              <CardChip
+                key={card.id}
+                card={card}
+                campos={campos}
+                etiquetas={etiquetas}
+                usuarios={usuarios}
+                filhos={filhosPorCard[card.id] ?? []}
+                pai={(paisPorCard[card.id] ?? [])[0]}
+                onOpen={() => onOpenCard(card.id)}
+                onOpenCard={onOpenCard}
+              />
+            ))}
+          </SortableContext>
 
-      {fase.permiteCriarCards && (
-        <div className="px-2 pb-2">
-          <button
-            onClick={() => onCreateCard(fase.id)}
-            className="flex w-full cursor-pointer items-center justify-center gap-1.5 rounded-full bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700"
-          >
-            <Plus size={16} />
-            Criar novo card
-          </button>
+          {cards.length === 0 && (
+            <p className="px-1 py-2 text-center text-[13px] text-slate-600">
+              {fase.descricao || "Nenhum card nesta fase."}
+            </p>
+          )}
         </div>
-      )}
+
+        {fase.permiteCriarCards && (
+          <div className="px-3 pb-3">
+            <button
+              onClick={() => onCreateCard(fase.id)}
+              className="flex h-10 w-full cursor-pointer items-center justify-center gap-1.5 rounded-full bg-[rgb(0,94,252)] px-4 text-sm font-medium text-white transition-colors hover:bg-[rgb(0,84,227)]"
+            >
+              <Plus size={16} />
+              Criar novo card
+            </button>
+          </div>
+        )}
+      </div>
 
       <NovaFaseModal
         open={configurando}

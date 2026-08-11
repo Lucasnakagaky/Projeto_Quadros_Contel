@@ -3,7 +3,7 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { CalendarClock, CornerDownRight, Link2 } from "lucide-react";
-import { Campo, Card, Etiqueta, Usuario } from "@/lib/types";
+import { Campo, Card, CardRelacionado, Etiqueta, Usuario } from "@/lib/types";
 import { campoPorTipo, stringArray } from "@/lib/campo-utils";
 import { cn, iniciais } from "@/lib/utils";
 
@@ -52,18 +52,20 @@ export function CardChip({
   campos,
   etiquetas = [],
   usuarios = [],
-  contagemFilhos = 0,
-  ehFilho = false,
+  filhos = [],
+  pai,
   onOpen,
+  onOpenCard,
   dragOverlay = false,
 }: {
   card: Card;
   campos: Campo[];
   etiquetas?: Etiqueta[];
   usuarios?: Usuario[];
-  contagemFilhos?: number;
-  ehFilho?: boolean;
+  filhos?: CardRelacionado[];
+  pai?: CardRelacionado;
   onOpen: () => void;
+  onOpenCard?: (id: string) => void;
   dragOverlay?: boolean;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
@@ -93,7 +95,12 @@ export function CardChip({
     .filter(({ valor }) => valor !== undefined && valor !== null && valor !== "")
     .slice(0, 2);
 
-  const temRodape = Boolean(vencimento) || contagemFilhos > 0 || responsavelIds.length > 0;
+  const temRodape = Boolean(vencimento) || responsavelIds.length > 0;
+
+  function abrirRelacionado(e: React.MouseEvent, id: string) {
+    e.stopPropagation();
+    onOpenCard?.(id);
+  }
 
   return (
     <div
@@ -103,15 +110,19 @@ export function CardChip({
       {...(dragOverlay ? {} : listeners)}
       onClick={onOpen}
       className={cn(
-        "flex cursor-grab touch-none flex-col gap-1.5 rounded-lg border border-slate-200 bg-white p-3 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-lg active:cursor-grabbing",
+        "flex cursor-grab touch-none flex-col gap-1.5 rounded bg-white py-3 pl-2 pr-3 transition-shadow duration-[125ms] ease-[cubic-bezier(0.2,0,0.38,0.9)] hover:shadow-[0_4px_6px_0_rgba(102,102,102,0.09),0_9px_14px_0_rgba(102,102,102,0.06)] active:cursor-grabbing",
         isDragging && "cursor-grabbing opacity-40"
       )}
     >
-      {ehFilho && (
-        <span className="inline-flex w-fit items-center gap-1 rounded-full bg-violet-50 px-2 py-0.5 text-[10px] font-semibold text-violet-600">
-          <CornerDownRight size={10} />
-          Card filho
-        </span>
+      {pai && (
+        <button
+          onClick={(e) => abrirRelacionado(e, pai.id)}
+          title={`Card pai: ${pai.titulo}`}
+          className="inline-flex w-fit max-w-full items-center gap-1 rounded-full bg-violet-50 px-2 py-0.5 text-[10px] font-semibold text-violet-600 hover:bg-violet-100"
+        >
+          <CornerDownRight size={10} className="shrink-0" />
+          <span className="truncate">Card Pai: {pai.titulo}</span>
+        </button>
       )}
 
       {etiquetaIds.length > 0 && (
@@ -132,7 +143,28 @@ export function CardChip({
         </div>
       )}
 
-      <p className="line-clamp-2 text-sm font-medium text-slate-800">{card.titulo}</p>
+      <p className="line-clamp-2 text-sm font-semibold leading-5 text-slate-900">{card.titulo}</p>
+
+      {filhos.length > 0 && (
+        <div className="flex flex-col items-start gap-1">
+          {filhos.slice(0, 2).map((f) => (
+            <button
+              key={f.id}
+              onClick={(e) => abrirRelacionado(e, f.id)}
+              title={`Card filho: ${f.titulo}`}
+              className="inline-flex w-fit max-w-full items-center gap-1 rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-medium text-blue-600 hover:bg-blue-100"
+            >
+              <Link2 size={10} className="shrink-0" />
+              <span className="truncate">Card Filho: {f.titulo}</span>
+            </button>
+          ))}
+          {filhos.length > 2 && (
+            <span className="text-[10px] font-medium text-slate-400">
+              +{filhos.length - 2} card(s) filho(s)
+            </span>
+          )}
+        </div>
+      )}
 
       {previasCompactas.length > 0 && (
         <div className="flex flex-col gap-0.5">
@@ -159,16 +191,6 @@ export function CardChip({
             >
               <CalendarClock size={11} />
               {new Date(vencimento).toLocaleDateString("pt-BR", { day: "2-digit", month: "short" })}
-            </span>
-          )}
-
-          {contagemFilhos > 0 && (
-            <span
-              title="Cards conectados"
-              className="flex items-center gap-1 rounded-full bg-blue-50 px-1.5 py-0.5 text-[10px] font-medium text-blue-600"
-            >
-              <Link2 size={11} />
-              {contagemFilhos}
             </span>
           )}
 

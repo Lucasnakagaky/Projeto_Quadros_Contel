@@ -23,6 +23,9 @@ import { CommentsSection } from "./comments-section";
 import { AttachmentsSection } from "./attachments-section";
 import { EmBrevePanel } from "../em-breve-panel";
 
+const CLASSE_ABA =
+  "rounded-none border-b-2 border-transparent px-1 py-2 text-sm font-medium text-slate-500 transition-colors hover:bg-transparent hover:text-slate-700 data-[state=active]:border-[rgb(0,94,252)] data-[state=active]:bg-transparent data-[state=active]:text-[rgb(16,24,32)]";
+
 export function CardDetailModal({
   cardId,
   onClose,
@@ -39,7 +42,7 @@ export function CardDetailModal({
   onCardTrashed: (cardId: string) => void;
   onEtiquetasChanged: (etiquetas: Etiqueta[]) => void;
   onCamposChanged: (campos: Campo[]) => void;
-  onConexaoCriada: (cardPaiId: string, cardFilhoId: string) => void;
+  onConexaoCriada: (cardPaiId: string, cardFilhoId: string, cardFilhoTitulo: string) => void;
   onNavigateToCard: (cardId: string) => void;
 }) {
   const [detail, setDetail] = useState<CardDetail | null>(null);
@@ -51,7 +54,27 @@ export function CardDetailModal({
   const carregar = useCallback(async () => {
     try {
       const data = await api.get<CardDetail>(`/api/cards/${cardId}`);
-      setDetail(data);
+      let campos = data.campos;
+
+      // Qualquer card deve poder criar um card filho, mesmo que o pipe ainda não tenha
+      // um campo de "Conexão de pipe" configurado — provisiona um padrão (mesmo pipe,
+      // reaproveitando a estrutura de conexões já existente) na primeira vez que faltar.
+      if (!campos.some((c) => c.tipo === "conexao_pipe")) {
+        try {
+          const novoCampo = await api.post<Campo>(`/api/pipes/${data.card.pipeId}/campos`, {
+            tipo: "conexao_pipe",
+            titulo: "Subtarefas (Cards Filhos)",
+            config: { pipeDestinoId: data.card.pipeId, modoConexao: "criar", cardinalidade: "varios" },
+          });
+          campos = [...campos, novoCampo];
+          onCamposChanged(campos);
+        } catch {
+          // se não conseguir provisionar, o card continua funcionando normalmente,
+          // só sem a seção de card filho até uma nova tentativa
+        }
+      }
+
+      setDetail({ ...data, campos });
       setTitulo(data.card.titulo);
       onCardUpdated(data.card);
       onEtiquetasChanged(data.etiquetas);
@@ -139,7 +162,7 @@ export function CardDetailModal({
 
   function handleConexaoCriada(r: ConexaoResolvida) {
     setDetail((prev) => (prev ? { ...prev, conexoesFilhos: [...prev.conexoesFilhos, r] } : prev));
-    onConexaoCriada(cardId, r.card?.id ?? r.conexao.cardFilhoId);
+    onConexaoCriada(cardId, r.card?.id ?? r.conexao.cardFilhoId, r.card?.titulo ?? "Card");
   }
 
   function handleConexaoRemovida(conexaoId: string) {
@@ -199,19 +222,19 @@ export function CardDetailModal({
               </Button>
             </div>
 
+            <div className="border-t border-[rgb(220,223,229)]" />
+
             <Tabs value={tabAtiva} onValueChange={setTabAtiva}>
-              <TabsList>
-                <TabsTrigger value="form">Form</TabsTrigger>
-                <TabsTrigger value="atividades">Atividades</TabsTrigger>
-                <TabsTrigger value="anexos">Anexos</TabsTrigger>
-                <TabsTrigger value="checklists">Checklists</TabsTrigger>
-                <TabsTrigger value="comentarios">Comentários</TabsTrigger>
-                <TabsTrigger value="email">Email</TabsTrigger>
-                <TabsTrigger value="pdf">PDF</TabsTrigger>
-                <TabsTrigger value="mais">+</TabsTrigger>
+              <TabsList className="gap-4 border-b border-[rgb(220,223,229)]">
+                <TabsTrigger value="form" className={CLASSE_ABA}>Form</TabsTrigger>
+                <TabsTrigger value="atividades" className={CLASSE_ABA}>Atividades</TabsTrigger>
+                <TabsTrigger value="anexos" className={CLASSE_ABA}>Anexos</TabsTrigger>
+                <TabsTrigger value="checklists" className={CLASSE_ABA}>Checklists</TabsTrigger>
+                <TabsTrigger value="comentarios" className={CLASSE_ABA}>Comentários</TabsTrigger>
+                <TabsTrigger value="mais" className={CLASSE_ABA}>+</TabsTrigger>
               </TabsList>
 
-              <TabsContent value="form" className="flex flex-col gap-4 pt-3">
+              <TabsContent value="form" className="flex flex-col gap-4 pt-4">
                 <div className="text-xs text-slate-400">
                   Formulário Inicial — Criado por{" "}
                   <span className="font-medium text-slate-600">{criador?.nome ?? "—"}</span> •{" "}
@@ -251,11 +274,11 @@ export function CardDetailModal({
                 <PaisSection conexoesPais={conexoesPais} onOpenCard={onNavigateToCard} />
               </TabsContent>
 
-              <TabsContent value="atividades" className="pt-3">
+              <TabsContent value="atividades" className="pt-4">
                 <PhaseHistory historico={card.historico} fases={fases} />
               </TabsContent>
 
-              <TabsContent value="anexos" className="pt-3">
+              <TabsContent value="anexos" className="pt-4">
                 <AttachmentsSection
                   cardId={cardId}
                   anexos={anexos}
@@ -263,7 +286,7 @@ export function CardDetailModal({
                 />
               </TabsContent>
 
-              <TabsContent value="checklists" className="pt-3">
+              <TabsContent value="checklists" className="pt-4">
                 <ChecklistSection
                   cardId={cardId}
                   checklists={checklists}
@@ -271,7 +294,7 @@ export function CardDetailModal({
                 />
               </TabsContent>
 
-              <TabsContent value="comentarios" className="pt-3">
+              <TabsContent value="comentarios" className="pt-4">
                 <CommentsSection
                   cardId={cardId}
                   comentarios={comentarios}
@@ -279,47 +302,24 @@ export function CardDetailModal({
                 />
               </TabsContent>
 
-              <TabsContent value="email" className="pt-3">
-                <EmBrevePanel titulo="Email" />
-              </TabsContent>
-              <TabsContent value="pdf" className="pt-3">
-                <EmBrevePanel titulo="PDF" />
-              </TabsContent>
-              <TabsContent value="mais" className="pt-3">
+              <TabsContent value="mais" className="pt-4">
                 <EmBrevePanel titulo="Mais abas" />
               </TabsContent>
             </Tabs>
-
-            <button
-              onClick={() => toast("Editar visualização do card — em breve")}
-              className="self-start text-xs text-slate-400 hover:text-slate-600 hover:underline"
-            >
-              Editar visualização do card
-            </button>
           </div>
 
           {/* Painel direito */}
-          <div className="flex flex-col gap-4">
-            <div className="flex items-center justify-between">
-              <div className="flex flex-col gap-1">
-                <span className="text-xs font-semibold text-slate-500">Fase atual</span>
-                {faseAtual && (
-                  <span
-                    className="w-fit rounded-full px-2.5 py-1 text-xs font-semibold"
-                    style={{ backgroundColor: `${faseAtual.cor}22`, color: faseAtual.cor }}
-                  >
-                    {faseAtual.nome}
-                  </span>
-                )}
-              </div>
-              <button
-                onClick={moverParaLixeira}
-                className="rounded p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600"
-                aria-label="Mover card para a lixeira"
-                title="Mover card para a lixeira"
-              >
-                <Trash2 size={16} />
-              </button>
+          <div className="flex flex-col gap-4 border-t border-[rgb(220,223,229)] pt-4 md:border-l md:border-t-0 md:pl-6 md:pt-0">
+            <div className="flex flex-col gap-1">
+              <span className="text-xs font-semibold text-slate-500">Fase atual</span>
+              {faseAtual && (
+                <span
+                  className="w-fit rounded-full px-2.5 py-1 text-xs font-semibold"
+                  style={{ backgroundColor: `${faseAtual.cor}22`, color: faseAtual.cor }}
+                >
+                  {faseAtual.nome}
+                </span>
+              )}
             </div>
 
             <button
@@ -339,11 +339,15 @@ export function CardDetailModal({
               <Settings2 size={14} />
               Configurações
             </button>
+
             <button
-              onClick={() => toast("Mover cards com IA — em breve")}
-              className="text-left text-sm text-slate-500 hover:text-slate-700"
+              onClick={moverParaLixeira}
+              className="mt-auto flex items-center gap-1.5 self-start rounded-md px-1 py-1.5 text-sm text-red-500 hover:bg-red-50 hover:text-red-600"
+              aria-label="Mover card para a lixeira"
+              title="Mover card para a lixeira"
             >
-              Mover cards com IA
+              <Trash2 size={14} />
+              Mover para a lixeira
             </button>
           </div>
         </div>

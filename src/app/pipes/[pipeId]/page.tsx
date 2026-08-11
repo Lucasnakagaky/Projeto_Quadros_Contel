@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { readDb } from "@/lib/db";
+import { CardRelacionado } from "@/lib/types";
 import { PipeBoard } from "@/components/pipe/pipe-board";
 
 export default async function PipePage({
@@ -21,15 +22,28 @@ export default async function PipePage({
   const etiquetas = db.etiquetas.filter((e) => e.pipeId === pipeId);
 
   const cardIdsDoPipe = new Set(cards.map((c) => c.id));
-  const contagemFilhosPorCard: Record<string, number> = {};
-  db.conexoes.forEach((cx) => {
-    if (!cardIdsDoPipe.has(cx.cardPaiId)) return;
-    contagemFilhosPorCard[cx.cardPaiId] = (contagemFilhosPorCard[cx.cardPaiId] ?? 0) + 1;
-  });
 
   const cardsFilhosIds = Array.from(
     new Set(db.conexoes.filter((cx) => cardIdsDoPipe.has(cx.cardFilhoId)).map((cx) => cx.cardFilhoId))
   );
+
+  // Nomes reais dos cards relacionados (pai/filho), para exibir na face do card no Kanban.
+  const filhosPorCard: Record<string, CardRelacionado[]> = {};
+  const paisPorCard: Record<string, CardRelacionado[]> = {};
+  db.conexoes.forEach((cx) => {
+    if (cardIdsDoPipe.has(cx.cardPaiId)) {
+      const filho = db.cards.find((c) => c.id === cx.cardFilhoId);
+      if (filho) {
+        (filhosPorCard[cx.cardPaiId] ??= []).push({ id: filho.id, titulo: filho.titulo });
+      }
+    }
+    if (cardIdsDoPipe.has(cx.cardFilhoId)) {
+      const pai = db.cards.find((c) => c.id === cx.cardPaiId);
+      if (pai) {
+        (paisPorCard[cx.cardFilhoId] ??= []).push({ id: pai.id, titulo: pai.titulo });
+      }
+    }
+  });
 
   return (
     <Suspense fallback={null}>
@@ -40,8 +54,9 @@ export default async function PipePage({
         camposIniciais={campos}
         etiquetasIniciais={etiquetas}
         usuariosIniciais={db.usuarios}
-        contagemFilhosIniciais={contagemFilhosPorCard}
         cardsFilhosIniciais={cardsFilhosIds}
+        filhosPorCardIniciais={filhosPorCard}
+        paisPorCardIniciais={paisPorCard}
       />
     </Suspense>
   );

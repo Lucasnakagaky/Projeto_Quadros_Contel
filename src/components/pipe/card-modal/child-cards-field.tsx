@@ -179,7 +179,7 @@ export function ChildCardsField({
           className="flex items-center gap-1 self-start text-sm text-blue-600 hover:underline"
         >
           <Plus size={14} />
-          Criar novo card
+          Criar card filho
         </button>
       )}
 
