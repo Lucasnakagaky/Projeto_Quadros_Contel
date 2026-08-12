@@ -2,7 +2,7 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 
 type Variant = "default" | "outline" | "ghost" | "destructive" | "secondary";
-type Size = "default" | "sm" | "icon";
+type Size = "default" | "sm" | "icon" | "pill";
 
 const variantClasses: Record<Variant, string> = {
   default: "bg-blue-600 text-white hover:bg-blue-700",
@@ -16,6 +16,7 @@ const sizeClasses: Record<Size, string> = {
   default: "h-9 px-4 text-sm",
   sm: "h-8 px-3 text-sm",
   icon: "h-8 w-8 p-0",
+  pill: "h-9 rounded-full px-4 text-sm",
 };
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {

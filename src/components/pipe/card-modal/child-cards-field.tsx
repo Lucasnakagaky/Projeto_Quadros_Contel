@@ -179,7 +179,7 @@ export function ChildCardsField({
           className="flex items-center gap-1 self-start text-sm text-blue-600 hover:underline"
         >
           <Plus size={14} />
-          Criar card filho
+          Conectar pipe
         </button>
       )}
 
@@ -211,11 +211,24 @@ export function ChildCardsField({
                   <SelectValue placeholder="Selecione um card..." />
                 </SelectTrigger>
                 <SelectContent>
-                  {candidatos.map((c) => (
-                    <SelectItem key={c.id} value={c.id}>
-                      {c.titulo}
-                    </SelectItem>
-                  ))}
+                  {candidatos.map((c) => {
+                    const fase = fasesDestino.find((f) => f.id === c.faseId);
+                    return (
+                      <SelectItem key={c.id} value={c.id}>
+                        <span className="flex min-w-0 items-center gap-2">
+                          <span className="truncate">{c.titulo}</span>
+                          {fase && (
+                            <span
+                              className="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold"
+                              style={{ backgroundColor: `${fase.cor}1f`, color: fase.cor }}
+                            >
+                              {fase.nome}
+                            </span>
+                          )}
+                        </span>
+                      </SelectItem>
+                    );
+                  })}
                 </SelectContent>
               </Select>
               <div className="flex gap-2">

@@ -31,7 +31,7 @@ export function NovaFaseModal({
 }) {
   const [nome, setNome] = useState(initial?.nome ?? "");
   const [ehFinal, setEhFinal] = useState(initial?.ehFinal ?? false);
-  const [permiteCriarCards, setPermiteCriarCards] = useState(initial?.permiteCriarCards ?? false);
+  const [permiteCriarCards, setPermiteCriarCards] = useState(initial?.permiteCriarCards ?? true);
 
   const [openAnterior, setOpenAnterior] = useState(open);
   if (open !== openAnterior) {
@@ -39,7 +39,7 @@ export function NovaFaseModal({
     if (open) {
       setNome(initial?.nome ?? "");
       setEhFinal(initial?.ehFinal ?? false);
-      setPermiteCriarCards(initial?.permiteCriarCards ?? false);
+      setPermiteCriarCards(initial?.permiteCriarCards ?? true);
     }
   }
 

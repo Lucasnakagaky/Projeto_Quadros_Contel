@@ -9,6 +9,7 @@ import { Campo, Card, CardRelacionado, Etiqueta, Fase, Usuario } from "@/lib/typ
 import { CardChip } from "./card-chip";
 import { FaseHeaderPopover } from "./fase-header-popover";
 import { NovaFaseModal, NovaFaseValues } from "./nova-fase-modal";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -174,16 +175,14 @@ export function FaseColumn({
 
         {fase.permiteCriarCards && (
           <div className="px-3 pb-3">
-            <button
+            <Button
               onClick={() => onCreateCard(fase.id)}
-              className={cn(
-                "flex h-10 w-full cursor-pointer items-center justify-center gap-1.5 rounded-full bg-[rgb(0,94,252)] px-4 text-sm font-medium text-white transition-colors hover:bg-[rgb(0,84,227)]",
-                FOCUS_RING
-              )}
+              size="pill"
+              className={cn("w-full gap-1.5", FOCUS_RING)}
             >
               <Plus size={16} />
               Criar novo card
-            </button>
+            </Button>
           </div>
         )}
       </div>

@@ -10,7 +10,7 @@ import { ColunaId } from "./colunas";
 import { PhaseBadge } from "./phase-badge";
 
 function Vazio() {
-  return <span className="text-sm text-slate-400">Vazio</span>;
+  return <span className="text-sm text-slate-400">—</span>;
 }
 
 export function TableRow({

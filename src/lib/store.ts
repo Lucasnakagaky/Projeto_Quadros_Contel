@@ -59,8 +59,8 @@ export async function createPipe(nome: string): Promise<Pipe> {
 
     const fases: Fase[] = [
       { id: uuid(), pipeId, nome: "Caixa de entrada", cor: "#06B6D4", ordem: 0, ehFinal: false, permiteCriarCards: true, descricao: "Aqui chegam os cards criados para iniciar o processo.", responsavelIds: [] },
-      { id: uuid(), pipeId, nome: "Fazendo", cor: "#F97316", ordem: 1, ehFinal: false, permiteCriarCards: false, descricao: "Hora do show! Aqui ficam os cards que estão em andamento.", responsavelIds: [] },
-      { id: uuid(), pipeId, nome: "Concluído", cor: "#8B5CF6", ordem: 2, ehFinal: true, permiteCriarCards: false, descricao: "Descanse em paz. Aqui ficam os cards finalizados.", responsavelIds: [] },
+      { id: uuid(), pipeId, nome: "Fazendo", cor: "#F97316", ordem: 1, ehFinal: false, permiteCriarCards: true, descricao: "Hora do show! Aqui ficam os cards que estão em andamento.", responsavelIds: [] },
+      { id: uuid(), pipeId, nome: "Concluído", cor: "#8B5CF6", ordem: 2, ehFinal: true, permiteCriarCards: true, descricao: "Descanse em paz. Aqui ficam os cards finalizados.", responsavelIds: [] },
     ];
     db.fases.push(...fases);
 
@@ -111,7 +111,7 @@ export async function createFase(
       cor: "#3B82F6",
       ordem: maxOrdem + 1,
       ehFinal: input.ehFinal ?? false,
-      permiteCriarCards: input.permiteCriarCards ?? false,
+      permiteCriarCards: input.permiteCriarCards ?? true,
       descricao: "",
       responsavelIds: [],
     };

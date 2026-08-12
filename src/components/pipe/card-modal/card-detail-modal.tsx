@@ -2,7 +2,18 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
-import { CalendarClock, Settings2, Share2, Tag, Trash2, User } from "lucide-react";
+import {
+  Activity,
+  CalendarClock,
+  CheckSquare,
+  MessageSquare,
+  Paperclip,
+  Settings2,
+  Share2,
+  Tag,
+  Trash2,
+  User,
+} from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -21,10 +32,18 @@ import { MoverFasePopover } from "./mover-fase-popover";
 import { ChecklistSection } from "./checklist-section";
 import { CommentsSection } from "./comments-section";
 import { AttachmentsSection } from "./attachments-section";
-import { EmBrevePanel } from "../em-breve-panel";
 
 const CLASSE_ABA =
-  "rounded-none border-b-2 border-transparent px-1 py-2 text-sm font-medium text-slate-500 transition-colors hover:bg-transparent hover:text-slate-700 data-[state=active]:border-[rgb(0,94,252)] data-[state=active]:bg-transparent data-[state=active]:text-[rgb(16,24,32)]";
+  "mr-2 mb-2 flex shrink grow-0 items-center gap-1 whitespace-nowrap rounded-full border border-slate-200 bg-white px-2 py-1 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50 hover:text-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 data-[state=active]:border-slate-200 data-[state=active]:bg-slate-100 data-[state=active]:text-slate-900";
+
+function ContadorAba({ valor }: { valor: number }) {
+  if (valor <= 0) return null;
+  return (
+    <span className="rounded-full bg-slate-200 px-1.5 py-px text-[11px] font-semibold text-slate-600">
+      {valor}
+    </span>
+  );
+}
 
 export function CardDetailModal({
   cardId,
@@ -48,7 +67,7 @@ export function CardDetailModal({
   const [detail, setDetail] = useState<CardDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [titulo, setTitulo] = useState("");
-  const [tabAtiva, setTabAtiva] = useState("form");
+  const [tabAtiva, setTabAtiva] = useState("atividades");
   const [configurandoCampos, setConfigurandoCampos] = useState(false);
 
   const carregar = useCallback(async () => {
@@ -91,7 +110,7 @@ export function CardDetailModal({
   if (cardId !== cardIdAnterior) {
     setCardIdAnterior(cardId);
     setLoading(true);
-    setTabAtiva("form");
+    setTabAtiva("atividades");
   }
 
   useEffect(() => {
@@ -116,7 +135,6 @@ export function CardDetailModal({
 
   function focarCampo(tipo: Parameters<typeof campoPorTipo>[1]) {
     const campo = detail ? campoPorTipo(detail.campos, tipo) : undefined;
-    setTabAtiva("form");
     if (!campo) return;
     requestAnimationFrame(() => {
       const el = document.getElementById(`campo-${campo.id}`);
@@ -229,55 +247,72 @@ export function CardDetailModal({
 
             <div className="border-t border-[rgb(220,223,229)]" />
 
-            <Tabs value={tabAtiva} onValueChange={setTabAtiva}>
-              <TabsList className="gap-4 border-b border-[rgb(220,223,229)]">
-                <TabsTrigger value="form" className={CLASSE_ABA}>Form</TabsTrigger>
-                <TabsTrigger value="atividades" className={CLASSE_ABA}>Atividades</TabsTrigger>
-                <TabsTrigger value="anexos" className={CLASSE_ABA}>Anexos</TabsTrigger>
-                <TabsTrigger value="checklists" className={CLASSE_ABA}>Checklists</TabsTrigger>
-                <TabsTrigger value="comentarios" className={CLASSE_ABA}>Comentários</TabsTrigger>
-                <TabsTrigger value="mais" className={CLASSE_ABA}>+</TabsTrigger>
-              </TabsList>
+            {/* Conteúdo primário do card — sempre visível, sem depender de aba (nav-hierarchy:
+                conteúdo principal separado das abas secundárias abaixo) */}
+            <div className="flex flex-col gap-4">
+              <div className="text-xs text-slate-400">
+                Formulário Inicial — Criado por{" "}
+                <span className="font-medium text-slate-600">{criador?.nome ?? "—"}</span> •{" "}
+                {tempoRelativo(card.criadoEm)}
+              </div>
 
-              <TabsContent value="form" className="flex flex-col gap-4 pt-4">
-                <div className="text-xs text-slate-400">
-                  Formulário Inicial — Criado por{" "}
-                  <span className="font-medium text-slate-600">{criador?.nome ?? "—"}</span> •{" "}
-                  {tempoRelativo(card.criadoEm)}
-                </div>
+              <CampoValueList
+                campos={campos}
+                card={card}
+                pipeId={card.pipeId}
+                etiquetas={etiquetas}
+                usuarios={usuarios}
+                onSalvarValor={salvarValorCampo}
+                onEtiquetaCriada={(e) => atualizarEtiquetas([...etiquetas, e])}
+                onEtiquetaAtualizada={(e) =>
+                  atualizarEtiquetas(etiquetas.map((et) => (et.id === e.id ? e : et)))
+                }
+                onEtiquetaExcluida={(id) => atualizarEtiquetas(etiquetas.filter((et) => et.id !== id))}
+              />
 
-                <CampoValueList
-                  campos={campos}
-                  card={card}
-                  pipeId={card.pipeId}
-                  etiquetas={etiquetas}
-                  usuarios={usuarios}
-                  onSalvarValor={salvarValorCampo}
-                  onEtiquetaCriada={(e) => atualizarEtiquetas([...etiquetas, e])}
-                  onEtiquetaAtualizada={(e) =>
-                    atualizarEtiquetas(etiquetas.map((et) => (et.id === e.id ? e : et)))
-                  }
-                  onEtiquetaExcluida={(id) => atualizarEtiquetas(etiquetas.filter((et) => et.id !== id))}
+              {camposConexaoPipe.map((campo) => (
+                <ChildCardsField
+                  key={campo.id}
+                  campoId={campo.id}
+                  nomeConexao={campo.config.nomeConexao || campo.titulo}
+                  cardId={card.id}
+                  pipeDestinoId={campo.config.pipeDestinoId}
+                  modoConexao={campo.config.modoConexao ?? "criar"}
+                  cardinalidade={campo.config.cardinalidade ?? "varios"}
+                  relacionadas={conexoesFilhos.filter((r) => r.conexao.campoId === campo.id)}
+                  onConexaoCriada={handleConexaoCriada}
+                  onConexaoRemovida={handleConexaoRemovida}
+                  onOpenCard={onNavigateToCard}
                 />
+              ))}
 
-                {camposConexaoPipe.map((campo) => (
-                  <ChildCardsField
-                    key={campo.id}
-                    campoId={campo.id}
-                    nomeConexao={campo.config.nomeConexao || campo.titulo}
-                    cardId={card.id}
-                    pipeDestinoId={campo.config.pipeDestinoId}
-                    modoConexao={campo.config.modoConexao ?? "criar"}
-                    cardinalidade={campo.config.cardinalidade ?? "varios"}
-                    relacionadas={conexoesFilhos.filter((r) => r.conexao.campoId === campo.id)}
-                    onConexaoCriada={handleConexaoCriada}
-                    onConexaoRemovida={handleConexaoRemovida}
-                    onOpenCard={onNavigateToCard}
-                  />
-                ))}
+              <PaisSection conexoesPais={conexoesPais} onOpenCard={onNavigateToCard} />
+            </div>
 
-                <PaisSection conexoesPais={conexoesPais} onOpenCard={onNavigateToCard} />
-              </TabsContent>
+            <div className="border-t border-[rgb(220,223,229)]" />
+
+            <Tabs value={tabAtiva} onValueChange={setTabAtiva}>
+              <TabsList className="flex-wrap items-center gap-0 max-w-[420px]">
+                <TabsTrigger value="atividades" className={CLASSE_ABA}>
+                  <Activity size={14} />
+                  Atividades
+                </TabsTrigger>
+                <TabsTrigger value="anexos" className={CLASSE_ABA}>
+                  <Paperclip size={14} />
+                  Anexos
+                  <ContadorAba valor={anexos.length} />
+                </TabsTrigger>
+                <TabsTrigger value="checklists" className={CLASSE_ABA}>
+                  <CheckSquare size={14} />
+                  Checklists
+                  <ContadorAba valor={checklists.length} />
+                </TabsTrigger>
+                <TabsTrigger value="comentarios" className={CLASSE_ABA}>
+                  <MessageSquare size={14} />
+                  Comentários
+                  <ContadorAba valor={comentarios.length} />
+                </TabsTrigger>
+              </TabsList>
 
               <TabsContent value="atividades" className="pt-4">
                 <PhaseHistory historico={card.historico} fases={fases} />
@@ -305,10 +340,6 @@ export function CardDetailModal({
                   comentarios={comentarios}
                   onChanged={(c) => setDetail((prev) => (prev ? { ...prev, comentarios: c } : prev))}
                 />
-              </TabsContent>
-
-              <TabsContent value="mais" className="pt-4">
-                <EmBrevePanel titulo="Mais abas" />
               </TabsContent>
             </Tabs>
           </div>

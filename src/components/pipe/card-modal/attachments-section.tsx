@@ -26,18 +26,33 @@ export function AttachmentsSection({
   const [dragOver, setDragOver] = useState(false);
   const [enviando, setEnviando] = useState(false);
 
-  async function upload(file: File) {
+  async function upload(files: FileList | File[]) {
+    const lista = Array.from(files);
+    if (lista.length === 0) return;
+
     setEnviando(true);
-    try {
-      const formData = new FormData();
-      formData.append("file", file);
-      const anexo = await api.post<Anexo>(`/api/cards/${cardId}/attachments`, formData);
-      onChanged([...anexos, anexo]);
+    let atuais = anexos;
+    let sucesso = 0;
+    let falhas = 0;
+    for (const file of lista) {
+      try {
+        const formData = new FormData();
+        formData.append("file", file);
+        const anexo = await api.post<Anexo>(`/api/cards/${cardId}/attachments`, formData);
+        atuais = [...atuais, anexo];
+        onChanged(atuais);
+        sucesso++;
+      } catch (err) {
+        falhas++;
+        toast.error(err instanceof Error ? err.message : `Erro ao enviar "${file.name}"`);
+      }
+    }
+    setEnviando(false);
+
+    if (sucesso > 1) {
+      toast.success(`${sucesso} anexos adicionados`);
+    } else if (sucesso === 1 && falhas === 0) {
       toast.success("Anexo adicionado");
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Erro ao enviar anexo");
-    } finally {
-      setEnviando(false);
     }
   }
 
@@ -64,8 +79,7 @@ export function AttachmentsSection({
         onDrop={(e) => {
           e.preventDefault();
           setDragOver(false);
-          const file = e.dataTransfer.files?.[0];
-          if (file) upload(file);
+          if (e.dataTransfer.files?.length) upload(e.dataTransfer.files);
         }}
         className={cn(
           "flex cursor-pointer flex-col items-center justify-center gap-1 rounded-md border-2 border-dashed border-slate-300 py-4 text-sm text-slate-400 hover:border-slate-400",
@@ -73,14 +87,14 @@ export function AttachmentsSection({
         )}
       >
         <UploadCloud size={20} />
-        <span>{enviando ? "Enviando..." : "Anexe ou arraste um arquivo"}</span>
+        <span>{enviando ? "Enviando..." : "Anexe ou arraste um ou mais arquivos"}</span>
         <input
           ref={inputRef}
           type="file"
+          multiple
           className="hidden"
           onChange={(e) => {
-            const file = e.target.files?.[0];
-            if (file) upload(file);
+            if (e.target.files?.length) upload(e.target.files);
             e.target.value = "";
           }}
         />

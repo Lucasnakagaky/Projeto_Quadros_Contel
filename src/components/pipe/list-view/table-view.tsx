@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Plus } from "lucide-react";
 import { Campo, Card, Etiqueta, Fase, Usuario } from "@/lib/types";
+import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { COLUNAS, ColunaCtx, ColunaId } from "./colunas";
 import { ColumnHeader } from "./column-header";
@@ -216,13 +217,10 @@ export function TableView({
 
       {faseDestino && (
         <div className="px-6 pb-6">
-          <button
-            onClick={() => onCreateCard(faseDestino.id)}
-            className="flex items-center gap-1.5 rounded-full bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-          >
+          <Button onClick={() => onCreateCard(faseDestino.id)} size="pill" className="gap-1.5">
             <Plus size={16} />
             Criar novo card
-          </button>
+          </Button>
         </div>
       )}
 

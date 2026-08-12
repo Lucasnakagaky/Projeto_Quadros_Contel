@@ -23,8 +23,7 @@ export function FaseHeaderPopover({
       trigger={({ toggle }) => (
         <h3
           onClick={toggle}
-          style={{ color: fase.cor }}
-          className="flex-1 cursor-pointer truncate text-sm font-medium hover:underline"
+          className="flex-1 cursor-pointer truncate text-sm font-medium text-slate-800 hover:underline"
         >
           {fase.nome}
         </h3>
