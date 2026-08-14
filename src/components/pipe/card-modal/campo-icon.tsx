@@ -14,6 +14,7 @@ import {
   ListChecks,
   Mail,
   Paperclip,
+  PenLine,
   Phone,
   Sparkles,
   Tag,
@@ -26,6 +27,7 @@ import { TipoCampo } from "@/lib/types";
 const ICONS: Record<TipoCampo, LucideIcon> = {
   texto_curto: Type,
   texto_longo: AlignLeft,
+  texto_formatado: PenLine,
   conteudo_dinamico: Sparkles,
   anexo: Paperclip,
   checkbox: CheckSquare,

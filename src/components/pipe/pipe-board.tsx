@@ -414,7 +414,13 @@ export function PipeBoard({
             <DragOverlay>
               {activeCard ? (
                 <div className="w-[256px] rotate-2 opacity-90">
-                  <CardChip card={activeCard} campos={campos} onOpen={() => {}} dragOverlay />
+                  <CardChip
+                    card={activeCard}
+                    campos={campos}
+                    corFase={fases.find((f) => f.id === activeCard.faseId)?.cor}
+                    onOpen={() => {}}
+                    dragOverlay
+                  />
                 </div>
               ) : null}
               {activeFase ? (

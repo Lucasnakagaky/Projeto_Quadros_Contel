@@ -157,6 +157,7 @@ export function FaseColumn({
                 usuarios={usuarios}
                 filhos={filhosPorCard[card.id] ?? []}
                 pai={(paisPorCard[card.id] ?? [])[0]}
+                corFase={fase.cor}
                 onOpen={() => onOpenCard(card.id)}
                 onOpenCard={onOpenCard}
               />

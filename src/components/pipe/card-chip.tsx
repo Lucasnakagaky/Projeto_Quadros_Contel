@@ -15,6 +15,8 @@ const TIPOS_SEM_PREVIA_COMPACTA = new Set([
   "conexao_database",
   "anexo",
   "documentos",
+  // Valor é HTML (editor com formatação) — não faz sentido como texto puro na face do card.
+  "texto_formatado",
 ]);
 
 function formatarValorPreview(campo: Campo, valor: unknown): string {
@@ -47,6 +49,10 @@ function statusVencimento(iso?: string): "atrasado" | "proximo" | "normal" | nul
   return "normal";
 }
 
+// Cinza padrão da borda do card (estilo Pipefy) — usado nos 3 lados finos e
+// como fallback da borda esquerda quando o card não tem cor de fase.
+const COR_BORDA_PADRAO = "#CCD1D7";
+
 export function CardChip({
   card,
   campos,
@@ -54,6 +60,7 @@ export function CardChip({
   usuarios = [],
   filhos = [],
   pai,
+  corFase,
   onOpen,
   onOpenCard,
   dragOverlay = false,
@@ -64,6 +71,8 @@ export function CardChip({
   usuarios?: Usuario[];
   filhos?: CardRelacionado[];
   pai?: CardRelacionado;
+  /** Cor da fase/status do card — pinta a borda esquerda de 4px (assinatura visual do card no Pipefy). */
+  corFase?: string;
   onOpen: () => void;
   onOpenCard?: (id: string) => void;
   dragOverlay?: boolean;
@@ -79,6 +88,8 @@ export function CardChip({
     transform: CSS.Transform.toString(transform),
     transition,
   };
+  // Cor da borda esquerda: aplicada em ambos os casos (card normal e clone do drag overlay).
+  const corBorda = { borderLeftColor: corFase || COR_BORDA_PADRAO };
 
   const campoEtiquetas = campoPorTipo(campos, "etiquetas");
   const campoResponsavel = campoPorTipo(campos, "responsavel");
@@ -114,13 +125,13 @@ export function CardChip({
   return (
     <div
       ref={dragOverlay ? undefined : setNodeRef}
-      style={dragOverlay ? undefined : style}
+      style={dragOverlay ? corBorda : { ...style, ...corBorda }}
       {...(dragOverlay ? {} : attributes)}
       {...(dragOverlay ? {} : listeners)}
       onClick={onOpen}
       onKeyDown={dragOverlay ? undefined : handleKeyDown}
       className={cn(
-        "flex cursor-grab touch-none flex-col gap-1.5 rounded bg-white py-3 pl-2 pr-3 transition-shadow duration-[125ms] ease-[cubic-bezier(0.2,0,0.38,0.9)] hover:shadow-[0_4px_6px_0_rgba(102,102,102,0.09),0_9px_14px_0_rgba(102,102,102,0.06)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 active:cursor-grabbing",
+        "flex cursor-grab touch-none flex-col gap-1.5 rounded border-l-4 border-t-[0.667px] border-r-[0.667px] border-b-[0.667px] border-t-[#CCD1D7] border-r-[#CCD1D7] border-b-[#CCD1D7] bg-white py-3 pl-2 pr-3 shadow-[0_4px_8px_0_rgba(38,50,56,0.05)] transition-shadow duration-[125ms] ease-[cubic-bezier(0.2,0,0.38,0.9)] hover:shadow-[0_4px_6px_0_rgba(102,102,102,0.09),0_9px_14px_0_rgba(102,102,102,0.06)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 active:cursor-grabbing",
         isDragging && "cursor-grabbing opacity-40"
       )}
     >

@@ -213,7 +213,7 @@ export function CampoDraftRow({
     );
   }
 
-  if (campo.tipo === "texto_longo") {
+  if (campo.tipo === "texto_longo" || campo.tipo === "texto_formatado") {
     return linha(
       <Textarea
         rows={2}

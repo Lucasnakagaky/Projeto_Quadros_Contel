@@ -210,6 +210,70 @@ export async function createCampo(
   });
 }
 
+export async function ensureDescricaoDemandaCampo(pipeId: string): Promise<Campo> {
+  return mutateDb((db) => {
+    const pipe = db.pipes.find((p) => p.id === pipeId);
+    if (!pipe) notFound("Pipe");
+    // "texto_longo" é um tipo genérico (pode já existir para outros fins no pipe),
+    // então a checagem de idempotência é por título, não só por tipo.
+    const existente = db.campos.find(
+      (c) => c.pipeId === pipeId && c.tipo === "texto_longo" && c.titulo === "Descrição da Demanda"
+    );
+    if (existente) return existente;
+    const maxOrdem = db.campos
+      .filter((c) => c.pipeId === pipeId)
+      .reduce((max, c) => Math.max(max, c.ordem), -1);
+    const campo: Campo = {
+      id: uuid(),
+      pipeId,
+      tipo: "texto_longo",
+      titulo: "Descrição da Demanda",
+      obrigatorio: false,
+      descricao: "",
+      textoAjuda: "",
+      visualizacaoCompacta: false,
+      editavelEmOutrasFases: false,
+      valorUnico: false,
+      validacaoCustomizada: "",
+      arquivado: false,
+      ordem: maxOrdem + 1,
+      config: {},
+    };
+    db.campos.push(campo);
+    return campo;
+  });
+}
+
+export async function ensureConexaoPipeCampo(pipeId: string): Promise<Campo> {
+  return mutateDb((db) => {
+    const pipe = db.pipes.find((p) => p.id === pipeId);
+    if (!pipe) notFound("Pipe");
+    const existente = db.campos.find((c) => c.pipeId === pipeId && c.tipo === "conexao_pipe");
+    if (existente) return existente;
+    const maxOrdem = db.campos
+      .filter((c) => c.pipeId === pipeId)
+      .reduce((max, c) => Math.max(max, c.ordem), -1);
+    const campo: Campo = {
+      id: uuid(),
+      pipeId,
+      tipo: "conexao_pipe",
+      titulo: "Subtarefas (Cards Filhos)",
+      obrigatorio: false,
+      descricao: "",
+      textoAjuda: "",
+      visualizacaoCompacta: false,
+      editavelEmOutrasFases: false,
+      valorUnico: false,
+      validacaoCustomizada: "",
+      arquivado: false,
+      ordem: maxOrdem + 1,
+      config: { pipeDestinoId: pipeId, modoConexao: "criar", cardinalidade: "varios" },
+    };
+    db.campos.push(campo);
+    return campo;
+  });
+}
+
 export type CampoPatch = Partial<
   Pick<
     Campo,

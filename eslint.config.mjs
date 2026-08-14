@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Standalone static site (unrelated to the Next.js kanban app).
+    "acme-website/**",
   ]),
 ]);
 

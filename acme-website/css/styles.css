@@ -1,0 +1,664 @@
+/* ==========================================================================
+   1. RESET BÁSICO
+   Remove inconsistências de estilo padrão entre navegadores, sem depender
+   de uma lib externa (ex.: normalize.css).
+   ========================================================================== */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body,
+h1,
+h2,
+h3,
+p,
+ul,
+figure {
+  margin: 0;
+}
+
+ul {
+  padding: 0;
+  list-style: none;
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+/* Respeita usuários que preferem menos animação (acessibilidade) */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ==========================================================================
+   2. VARIÁVEIS DE DESIGN (design tokens)
+   Centraliza cores, espaçamentos e tipografia para facilitar manutenção.
+   ========================================================================== */
+:root {
+  /* Cores institucionais */
+  --color-primary: #123c69;
+  --color-primary-dark: #0b2545;
+  --color-accent: #e1a730;
+  --color-text: #1f2937;
+  --color-text-light: #5b6472;
+  --color-bg: #ffffff;
+  --color-bg-alt: #f5f7fa;
+  --color-border: #e5e7eb;
+  --color-white: #ffffff;
+
+  /* Tipografia: fonte do sistema, sem depender de fontes externas */
+  --font-base:
+    system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial,
+    sans-serif;
+
+  /* Espaçamentos e layout */
+  --max-width: 1140px;
+  --radius: 12px;
+  --shadow: 0 10px 30px rgba(11, 37, 69, 0.08);
+  --transition: 0.2s ease;
+}
+
+/* ==========================================================================
+   3. BASE
+   ========================================================================== */
+body {
+  font-family: var(--font-base);
+  color: var(--color-text);
+  background: var(--color-bg);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+  color: var(--color-primary-dark);
+  line-height: 1.2;
+  font-weight: 700;
+}
+
+h1 {
+  font-size: clamp(2rem, 4vw + 1rem, 3.25rem);
+}
+
+h2 {
+  font-size: clamp(1.6rem, 2vw + 1rem, 2.25rem);
+}
+
+.container {
+  width: 100%;
+  max-width: var(--max-width);
+  margin-inline: auto;
+  padding-inline: 1.25rem;
+}
+
+.eyebrow {
+  color: var(--color-accent);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  margin-bottom: 0.5rem;
+}
+
+/* Link "pular para o conteúdo": só aparece ao ganhar foco via teclado */
+.skip-link {
+  position: absolute;
+  left: 1rem;
+  top: -3rem;
+  background: var(--color-primary-dark);
+  color: var(--color-white);
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  z-index: 1000;
+  transition: top var(--transition);
+}
+
+.skip-link:focus {
+  top: 1rem;
+}
+
+/* Estado de foco visível e consistente para navegação via teclado */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* ==========================================================================
+   4. BOTÕES
+   ========================================================================== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.5rem;
+  border-radius: 999px;
+  font-weight: 600;
+  transition: transform var(--transition), background var(--transition),
+    box-shadow var(--transition);
+}
+
+.btn--primary {
+  background: var(--color-primary);
+  color: var(--color-white);
+}
+
+.btn--primary:hover {
+  background: var(--color-primary-dark);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+}
+
+.btn--ghost {
+  border: 2px solid var(--color-primary);
+  color: var(--color-primary);
+}
+
+.btn--ghost:hover {
+  background: var(--color-primary);
+  color: var(--color-white);
+}
+
+/* ==========================================================================
+   5. HEADER / NAVEGAÇÃO
+   ========================================================================== */
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.header__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-block: 1rem;
+}
+
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 800;
+  font-size: 1.25rem;
+  color: var(--color-primary-dark);
+}
+
+.logo__mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 8px;
+  background: var(--color-primary);
+  color: var(--color-accent);
+  font-weight: 800;
+}
+
+/* Botão "hamburguer", visível apenas em telas pequenas (ver media query) */
+.nav-toggle {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0.5rem;
+  z-index: 110;
+}
+
+.nav-toggle__bar {
+  width: 22px;
+  height: 2px;
+  background: var(--color-primary-dark);
+  border-radius: 2px;
+  transition: transform var(--transition), opacity var(--transition);
+}
+
+/* Estado aberto: transforma o ícone de "hamburguer" em "X" */
+.nav-toggle[aria-expanded="true"] .nav-toggle__bar:nth-child(1) {
+  transform: translateY(6px) rotate(45deg);
+}
+.nav-toggle[aria-expanded="true"] .nav-toggle__bar:nth-child(2) {
+  opacity: 0;
+}
+.nav-toggle[aria-expanded="true"] .nav-toggle__bar:nth-child(3) {
+  transform: translateY(-6px) rotate(-45deg);
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.nav__list {
+  display: flex;
+  gap: 1.75rem;
+}
+
+.nav__link {
+  font-weight: 500;
+  color: var(--color-text);
+  transition: color var(--transition);
+}
+
+.nav__link:hover {
+  color: var(--color-primary);
+}
+
+.nav__cta {
+  padding: 0.55rem 1.25rem;
+}
+
+/* ==========================================================================
+   6. HERO
+   ========================================================================== */
+.hero {
+  background: linear-gradient(180deg, var(--color-bg-alt), var(--color-bg));
+  padding-block: clamp(3rem, 6vw, 6rem);
+}
+
+.hero__inner {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2.5rem;
+  align-items: center;
+}
+
+.hero__lead {
+  margin-top: 1.25rem;
+  font-size: 1.125rem;
+  color: var(--color-text-light);
+  max-width: 42ch;
+}
+
+.hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.hero__illustration {
+  width: 100%;
+  height: auto;
+}
+
+/* ==========================================================================
+   7. SEÇÕES GENÉRICAS (Sobre, Serviços, Portfólio, Contato)
+   ========================================================================== */
+.section {
+  padding-block: clamp(3rem, 6vw, 5rem);
+}
+
+.section--alt {
+  background: var(--color-bg-alt);
+}
+
+.section__lead {
+  margin-top: 1rem;
+  color: var(--color-text-light);
+  max-width: 60ch;
+  font-size: 1.05rem;
+}
+
+/* ---- Estatísticas (Sobre) ---- */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+  margin-top: 2.5rem;
+}
+
+.stat {
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.stat__numero {
+  display: block;
+  font-size: clamp(1.75rem, 3vw, 2.5rem);
+  font-weight: 800;
+  color: var(--color-primary);
+}
+
+.stat__label {
+  color: var(--color-text-light);
+  font-size: 0.9rem;
+}
+
+/* ---- Grade de cards (Serviços / Portfólio) ---- */
+.card-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  margin-top: 2.5rem;
+}
+
+.card {
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 1.75rem;
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow);
+}
+
+.card__icone {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 10px;
+  background: var(--color-primary);
+  color: var(--color-accent);
+  font-size: 1.4rem;
+  margin-bottom: 1rem;
+}
+
+.card__titulo {
+  font-size: 1.125rem;
+  margin-bottom: 0.5rem;
+  color: var(--color-primary-dark);
+}
+
+.card__texto {
+  color: var(--color-text-light);
+  font-size: 0.95rem;
+}
+
+/* ---- Cards de portfólio: variação com "imagem" (placeholder em CSS) ---- */
+.card--portfolio {
+  padding: 0;
+  overflow: hidden;
+}
+
+.card--portfolio__capa {
+  height: 160px;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+}
+
+.card--portfolio__corpo {
+  padding: 1.5rem;
+}
+
+.card__tag {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  background: rgba(18, 60, 105, 0.08);
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  margin-bottom: 0.75rem;
+}
+
+/* ---- Contato ---- */
+.contato__inner {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 3rem;
+}
+
+.contato__lista {
+  margin-top: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.contato__lista li {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.contato__icone {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: var(--color-white);
+  flex-shrink: 0;
+}
+
+.contato__lista a:hover {
+  color: var(--color-primary);
+  text-decoration: underline;
+}
+
+/* ---- Formulário ---- */
+.form {
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.form__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.form__field label {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.form__field input,
+.form__field textarea {
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 0.7rem 0.9rem;
+  font: inherit;
+  color: var(--color-text);
+  background: var(--color-bg-alt);
+  transition: border-color var(--transition);
+  resize: vertical;
+}
+
+.form__field input:focus,
+.form__field textarea:focus {
+  border-color: var(--color-primary);
+}
+
+/* Estado de erro: aplicado via JS quando a validação falha */
+.form__field.is-invalid input,
+.form__field.is-invalid textarea {
+  border-color: #d64545;
+}
+
+.form__erro {
+  color: #d64545;
+  font-size: 0.8rem;
+  min-height: 1.1em;
+}
+
+.form__status {
+  font-size: 0.9rem;
+  font-weight: 600;
+  min-height: 1.2em;
+}
+
+.form__status[data-tipo="sucesso"] {
+  color: #1a7f4e;
+}
+
+.form__status[data-tipo="erro"] {
+  color: #d64545;
+}
+
+/* ==========================================================================
+   8. FOOTER
+   ========================================================================== */
+.site-footer {
+  background: var(--color-primary-dark);
+  color: rgba(255, 255, 255, 0.85);
+  padding-block: 2.5rem;
+  margin-top: 2rem;
+}
+
+.site-footer__inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  text-align: center;
+}
+
+.logo--footer {
+  color: var(--color-white);
+}
+
+.footer__list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1.5rem;
+}
+
+.footer__list a:hover {
+  color: var(--color-accent);
+}
+
+.footer__copy {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* ==========================================================================
+   9. BOTÃO "VOLTAR AO TOPO"
+   ========================================================================== */
+.back-to-top {
+  position: fixed;
+  right: 1.25rem;
+  bottom: 1.25rem;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: var(--color-white);
+  font-size: 1.25rem;
+  box-shadow: var(--shadow);
+  transition: transform var(--transition), background var(--transition);
+  z-index: 90;
+}
+
+.back-to-top:hover {
+  background: var(--color-primary-dark);
+  transform: translateY(-3px);
+}
+
+.back-to-top[hidden] {
+  display: none;
+}
+
+/* ==========================================================================
+   10. RESPONSIVIDADE (mobile-first: regras acima valem para telas pequenas;
+   a partir daqui, ajustamos para telas médias/grandes)
+   ========================================================================== */
+
+/* Menu mobile: escondido fora da tela por padrão, exibido ao ativar o toggle */
+@media (max-width: 767px) {
+  .nav {
+    position: fixed;
+    inset: 0 0 0 30%;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 2.5rem;
+    padding: 2rem;
+    background: var(--color-white);
+    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.15);
+    transform: translateX(100%);
+    transition: transform var(--transition);
+  }
+
+  .nav.is-open {
+    transform: translateX(0);
+  }
+
+  .nav__list {
+    flex-direction: column;
+    gap: 1.5rem;
+    font-size: 1.15rem;
+  }
+}
+
+/* A partir de telas médias (tablets/desktops): layout em duas colunas,
+   menu sempre visível e toggle escondido. */
+@media (min-width: 768px) {
+  .nav-toggle {
+    display: none;
+  }
+
+  .hero__inner {
+    grid-template-columns: 1.1fr 0.9fr;
+  }
+
+  .stats {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .card-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .contato__inner {
+    grid-template-columns: 0.9fr 1.1fr;
+  }
+}
+
+/* Telas grandes: um pouco mais de respiro entre os cards de portfólio */
+@media (min-width: 1024px) {
+  .card-grid--portfolio {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}

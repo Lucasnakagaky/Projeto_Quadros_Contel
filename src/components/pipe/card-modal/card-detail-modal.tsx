@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import {
-  Activity,
   CalendarClock,
   CheckSquare,
   MessageSquare,
@@ -12,7 +11,6 @@ import {
   Share2,
   Tag,
   Trash2,
-  User,
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -67,7 +65,7 @@ export function CardDetailModal({
   const [detail, setDetail] = useState<CardDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [titulo, setTitulo] = useState("");
-  const [tabAtiva, setTabAtiva] = useState("atividades");
+  const [tabAtiva, setTabAtiva] = useState("anexos");
   const [configurandoCampos, setConfigurandoCampos] = useState(false);
 
   const carregar = useCallback(async () => {
@@ -75,17 +73,32 @@ export function CardDetailModal({
       const data = await api.get<CardDetail>(`/api/cards/${cardId}`);
       let campos = data.campos;
 
+      // Qualquer card deve ter um campo de "Descrição da Demanda" (texto simples, no
+      // padrão Pipefy), provisionado uma única vez por pipe. Provisiona antes do campo de
+      // conexão de pipe abaixo para que a ordem final fique Descrição da Demanda → Subtarefas.
+      if (!campos.some((c) => c.tipo === "texto_longo" && c.titulo === "Descrição da Demanda")) {
+        try {
+          const campo = await api.post<Campo>(
+            `/api/pipes/${data.card.pipeId}/campos/garantir-descricao-demanda`,
+            {}
+          );
+          campos = [...campos, campo];
+          onCamposChanged(campos);
+        } catch {
+          // se não conseguir provisionar, o card continua funcionando normalmente
+        }
+      }
+
       // Qualquer card deve poder criar um card filho, mesmo que o pipe ainda não tenha
       // um campo de "Conexão de pipe" configurado — provisiona um padrão (mesmo pipe,
       // reaproveitando a estrutura de conexões já existente) na primeira vez que faltar.
       if (!campos.some((c) => c.tipo === "conexao_pipe")) {
         try {
-          const novoCampo = await api.post<Campo>(`/api/pipes/${data.card.pipeId}/campos`, {
-            tipo: "conexao_pipe",
-            titulo: "Subtarefas (Cards Filhos)",
-            config: { pipeDestinoId: data.card.pipeId, modoConexao: "criar", cardinalidade: "varios" },
-          });
-          campos = [...campos, novoCampo];
+          const campo = await api.post<Campo>(
+            `/api/pipes/${data.card.pipeId}/campos/garantir-subtarefas`,
+            {}
+          );
+          campos = [...campos, campo];
           onCamposChanged(campos);
         } catch {
           // se não conseguir provisionar, o card continua funcionando normalmente,
@@ -110,7 +123,7 @@ export function CardDetailModal({
   if (cardId !== cardIdAnterior) {
     setCardIdAnterior(cardId);
     setLoading(true);
-    setTabAtiva("atividades");
+    setTabAtiva("anexos");
   }
 
   useEffect(() => {
@@ -231,10 +244,6 @@ export function CardDetailModal({
             />
 
             <div className="flex flex-wrap items-center gap-2">
-              <Button variant="outline" size="sm" onClick={() => focarCampo("responsavel")}>
-                <User size={14} />
-                Adicionar responsável
-              </Button>
               <Button variant="outline" size="sm" onClick={() => focarCampo("data_vencimento")}>
                 <CalendarClock size={14} />
                 Vencimento
@@ -247,8 +256,55 @@ export function CardDetailModal({
 
             <div className="border-t border-[rgb(220,223,229)]" />
 
-            {/* Conteúdo primário do card — sempre visível, sem depender de aba (nav-hierarchy:
-                conteúdo principal separado das abas secundárias abaixo) */}
+            {/* Abas secundárias — ficam acima dos campos do card (hierarquia: navegação
+                de conteúdo relacionado antes dos dados do formulário). */}
+            <Tabs value={tabAtiva} onValueChange={setTabAtiva}>
+              <TabsList className="flex-wrap items-center gap-0 max-w-[420px]">
+                <TabsTrigger value="anexos" className={CLASSE_ABA}>
+                  <Paperclip size={14} />
+                  Anexos
+                  <ContadorAba valor={anexos.length} />
+                </TabsTrigger>
+                <TabsTrigger value="checklists" className={CLASSE_ABA}>
+                  <CheckSquare size={14} />
+                  Checklists
+                  <ContadorAba valor={checklists.length} />
+                </TabsTrigger>
+                <TabsTrigger value="comentarios" className={CLASSE_ABA}>
+                  <MessageSquare size={14} />
+                  Comentários
+                  <ContadorAba valor={comentarios.length} />
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="anexos" className="pt-4">
+                <AttachmentsSection
+                  cardId={cardId}
+                  anexos={anexos}
+                  onChanged={(a) => setDetail((prev) => (prev ? { ...prev, anexos: a } : prev))}
+                />
+              </TabsContent>
+
+              <TabsContent value="checklists" className="pt-4">
+                <ChecklistSection
+                  cardId={cardId}
+                  checklists={checklists}
+                  onChanged={(c) => setDetail((prev) => (prev ? { ...prev, checklists: c } : prev))}
+                />
+              </TabsContent>
+
+              <TabsContent value="comentarios" className="pt-4">
+                <CommentsSection
+                  cardId={cardId}
+                  comentarios={comentarios}
+                  onChanged={(c) => setDetail((prev) => (prev ? { ...prev, comentarios: c } : prev))}
+                />
+              </TabsContent>
+            </Tabs>
+
+            <div className="border-t border-[rgb(220,223,229)]" />
+
+            {/* Campos do card — sempre visíveis, sem depender de aba */}
             <div className="flex flex-col gap-4">
               <div className="text-xs text-slate-400">
                 Formulário Inicial — Criado por{" "}
@@ -287,61 +343,11 @@ export function CardDetailModal({
               ))}
 
               <PaisSection conexoesPais={conexoesPais} onOpenCard={onNavigateToCard} />
-            </div>
 
-            <div className="border-t border-[rgb(220,223,229)]" />
-
-            <Tabs value={tabAtiva} onValueChange={setTabAtiva}>
-              <TabsList className="flex-wrap items-center gap-0 max-w-[420px]">
-                <TabsTrigger value="atividades" className={CLASSE_ABA}>
-                  <Activity size={14} />
-                  Atividades
-                </TabsTrigger>
-                <TabsTrigger value="anexos" className={CLASSE_ABA}>
-                  <Paperclip size={14} />
-                  Anexos
-                  <ContadorAba valor={anexos.length} />
-                </TabsTrigger>
-                <TabsTrigger value="checklists" className={CLASSE_ABA}>
-                  <CheckSquare size={14} />
-                  Checklists
-                  <ContadorAba valor={checklists.length} />
-                </TabsTrigger>
-                <TabsTrigger value="comentarios" className={CLASSE_ABA}>
-                  <MessageSquare size={14} />
-                  Comentários
-                  <ContadorAba valor={comentarios.length} />
-                </TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="atividades" className="pt-4">
+              <div className="border-t border-[rgb(220,223,229)] pt-4">
                 <PhaseHistory historico={card.historico} fases={fases} />
-              </TabsContent>
-
-              <TabsContent value="anexos" className="pt-4">
-                <AttachmentsSection
-                  cardId={cardId}
-                  anexos={anexos}
-                  onChanged={(a) => setDetail((prev) => (prev ? { ...prev, anexos: a } : prev))}
-                />
-              </TabsContent>
-
-              <TabsContent value="checklists" className="pt-4">
-                <ChecklistSection
-                  cardId={cardId}
-                  checklists={checklists}
-                  onChanged={(c) => setDetail((prev) => (prev ? { ...prev, checklists: c } : prev))}
-                />
-              </TabsContent>
-
-              <TabsContent value="comentarios" className="pt-4">
-                <CommentsSection
-                  cardId={cardId}
-                  comentarios={comentarios}
-                  onChanged={(c) => setDetail((prev) => (prev ? { ...prev, comentarios: c } : prev))}
-                />
-              </TabsContent>
-            </Tabs>
+              </div>
+            </div>
           </div>
 
           {/* Painel direito */}
