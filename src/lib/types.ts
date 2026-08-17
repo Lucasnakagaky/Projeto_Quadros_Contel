@@ -65,7 +65,8 @@ export type TipoCampo =
   | "documentos"
   | "id"
   | "conexao_pipe"
-  | "conexao_database";
+  | "conexao_database"
+  | "cards_vinculados";
 
 export interface CampoConfig {
   // selecao_lista / selecao_unica
@@ -80,6 +81,9 @@ export interface CampoConfig {
   // conexao_database
   identificadorDatabase?: string;
   campoIdentificador?: string;
+  // cards_vinculados — reaproveita `cardinalidade` acima (único/vários).
+  // Quando true (padrão), o vínculo aparece nos dois cards; quando false, só no card de origem.
+  bidirecional?: boolean;
 }
 
 export interface Campo {
@@ -140,6 +144,21 @@ export interface Conexao {
   criadoEm: string;
 }
 
+/**
+ * Vínculo entre dois cards do mesmo pipe (campo "Cards Vinculados"), sem relação de
+ * hierarquia (diferente de Conexao, que é pai/filho e pode cruzar pipes). Guardamos uma
+ * única linha por par de cards — quando `campo.config.bidirecional` é true, o vínculo é
+ * resolvido nos dois sentidos na leitura (ver listCardLinksByCard em store.ts), então não
+ * há necessidade de duplicar a linha para cada direção.
+ */
+export interface CardLink {
+  id: string;
+  campoId: string;
+  cardOrigemId: string;
+  cardDestinoId: string;
+  criadoEm: string;
+}
+
 export interface Card {
   id: string;
   pipeId: string;
@@ -162,6 +181,7 @@ export interface DbSchema {
   campos: Campo[];
   cards: Card[];
   conexoes: Conexao[];
+  cardLinks: CardLink[];
   etiquetas: Etiqueta[];
   checklists: Checklist[];
   comentarios: Comentario[];
@@ -219,4 +239,5 @@ export const TIPOS_CAMPO: { tipo: TipoCampo; label: string; grupo: GrupoTipoCamp
   { tipo: "id", label: "ID", grupo: "campo" },
   { tipo: "conexao_pipe", label: "Conexão de pipe", grupo: "conexao" },
   { tipo: "conexao_database", label: "Conexão de database", grupo: "conexao" },
+  { tipo: "cards_vinculados", label: "Cards vinculados", grupo: "conexao" },
 ];

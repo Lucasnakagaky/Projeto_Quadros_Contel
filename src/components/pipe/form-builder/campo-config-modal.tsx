@@ -78,6 +78,7 @@ export function CampoConfigModal({
   const [cardinalidade, setCardinalidade] = useState<"unico" | "varios">(
     campo?.config.cardinalidade ?? "varios"
   );
+  const [bidirecional, setBidirecional] = useState(campo?.config.bidirecional ?? true);
   const [moeda, setMoeda] = useState(campo?.config.moeda ?? "BRL");
   const [identificadorDatabase, setIdentificadorDatabase] = useState(
     campo?.config.identificadorDatabase ?? ""
@@ -106,6 +107,7 @@ export function CampoConfigModal({
       setPipeDestinoId(campo?.config.pipeDestinoId ?? pipeId);
       setModoConexao(campo?.config.modoConexao ?? "criar");
       setCardinalidade(campo?.config.cardinalidade ?? "varios");
+      setBidirecional(campo?.config.bidirecional ?? true);
       setMoeda(campo?.config.moeda ?? "BRL");
       setIdentificadorDatabase(campo?.config.identificadorDatabase ?? "");
       setCampoIdentificador(campo?.config.campoIdentificador ?? "");
@@ -148,6 +150,10 @@ export function CampoConfigModal({
     }
     if (tipo === "moeda") {
       config.moeda = moeda;
+    }
+    if (tipo === "cards_vinculados") {
+      config.cardinalidade = cardinalidade;
+      config.bidirecional = bidirecional;
     }
     onSalvar({
       tipo,
@@ -327,6 +333,43 @@ export function CampoConfigModal({
                   Nome do campo usado para casar o registro no sistema externo.
                 </span>
               </div>
+            </div>
+          )}
+
+          {tipo === "cards_vinculados" && (
+            <div className="flex flex-col gap-3 rounded-md border border-slate-200 p-3">
+              <div className="flex flex-col gap-1.5">
+                <Label>Vínculo aceito</Label>
+                <div className="flex gap-1.5 text-xs">
+                  <button
+                    onClick={() => setCardinalidade("unico")}
+                    className={cn(
+                      "rounded-full px-2.5 py-1 font-medium",
+                      cardinalidade === "unico" ? "bg-blue-600 text-white" : "bg-slate-100 text-slate-500"
+                    )}
+                  >
+                    Um único card
+                  </button>
+                  <button
+                    onClick={() => setCardinalidade("varios")}
+                    className={cn(
+                      "rounded-full px-2.5 py-1 font-medium",
+                      cardinalidade === "varios" ? "bg-blue-600 text-white" : "bg-slate-100 text-slate-500"
+                    )}
+                  >
+                    Vários cards
+                  </button>
+                </div>
+              </div>
+
+              <label className="flex cursor-pointer items-center justify-between text-sm text-slate-700">
+                Vínculo bidirecional
+                <Checkbox checked={bidirecional} onCheckedChange={(v) => setBidirecional(Boolean(v))} />
+              </label>
+              <span className="text-xs text-slate-400">
+                Quando ativado, o card vinculado também exibe este campo com a relação inversa.
+                Quando desativado, o vínculo só aparece no card de origem.
+              </span>
             </div>
           )}
 

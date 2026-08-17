@@ -9,6 +9,7 @@ vi.mock("./db", () => {
     campos: [],
     cards: [],
     conexoes: [],
+    cardLinks: [],
     etiquetas: [],
     checklists: [],
     comentarios: [],

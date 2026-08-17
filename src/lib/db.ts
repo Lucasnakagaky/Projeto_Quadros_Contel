@@ -117,6 +117,7 @@ function emptyDb(): DbSchema {
     campos,
     cards: [],
     conexoes: [],
+    cardLinks: [],
     etiquetas: [],
     checklists: [],
     comentarios: [],
@@ -126,10 +127,17 @@ function emptyDb(): DbSchema {
 
 let writeQueue: Promise<unknown> = Promise.resolve();
 
+// Bancos locais gravados antes do campo "Cards Vinculados" não têm `cardLinks` no JSON —
+// preenche com array vazio em vez de deixar o acesso quebrar em runtime.
+function migrar(db: DbSchema): DbSchema {
+  if (!db.cardLinks) db.cardLinks = [];
+  return db;
+}
+
 export async function readDb(): Promise<DbSchema> {
   try {
     const raw = await fs.readFile(DB_PATH, "utf-8");
-    return JSON.parse(raw) as DbSchema;
+    return migrar(JSON.parse(raw) as DbSchema);
   } catch (err: unknown) {
     if ((err as NodeJS.ErrnoException).code === "ENOENT") {
       const db = emptyDb();
@@ -157,7 +165,7 @@ export async function mutateDb<T>(
     const raw = await fs
       .readFile(DB_PATH, "utf-8")
       .catch(() => JSON.stringify(emptyDb()));
-    const db = JSON.parse(raw) as DbSchema;
+    const db = migrar(JSON.parse(raw) as DbSchema);
     const result = await mutator(db);
     await persist(db);
     return result;

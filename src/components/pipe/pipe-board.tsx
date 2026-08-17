@@ -417,7 +417,6 @@ export function PipeBoard({
                   <CardChip
                     card={activeCard}
                     campos={campos}
-                    corFase={fases.find((f) => f.id === activeCard.faseId)?.cor}
                     onOpen={() => {}}
                     dragOverlay
                   />

@@ -49,10 +49,6 @@ function statusVencimento(iso?: string): "atrasado" | "proximo" | "normal" | nul
   return "normal";
 }
 
-// Cinza padrão da borda do card (estilo Pipefy) — usado nos 3 lados finos e
-// como fallback da borda esquerda quando o card não tem cor de fase.
-const COR_BORDA_PADRAO = "#CCD1D7";
-
 export function CardChip({
   card,
   campos,
@@ -60,7 +56,6 @@ export function CardChip({
   usuarios = [],
   filhos = [],
   pai,
-  corFase,
   onOpen,
   onOpenCard,
   dragOverlay = false,
@@ -71,8 +66,6 @@ export function CardChip({
   usuarios?: Usuario[];
   filhos?: CardRelacionado[];
   pai?: CardRelacionado;
-  /** Cor da fase/status do card — pinta a borda esquerda de 4px (assinatura visual do card no Pipefy). */
-  corFase?: string;
   onOpen: () => void;
   onOpenCard?: (id: string) => void;
   dragOverlay?: boolean;
@@ -88,8 +81,6 @@ export function CardChip({
     transform: CSS.Transform.toString(transform),
     transition,
   };
-  // Cor da borda esquerda: aplicada em ambos os casos (card normal e clone do drag overlay).
-  const corBorda = { borderLeftColor: corFase || COR_BORDA_PADRAO };
 
   const campoEtiquetas = campoPorTipo(campos, "etiquetas");
   const campoResponsavel = campoPorTipo(campos, "responsavel");
@@ -125,13 +116,13 @@ export function CardChip({
   return (
     <div
       ref={dragOverlay ? undefined : setNodeRef}
-      style={dragOverlay ? corBorda : { ...style, ...corBorda }}
+      style={dragOverlay ? undefined : style}
       {...(dragOverlay ? {} : attributes)}
       {...(dragOverlay ? {} : listeners)}
       onClick={onOpen}
       onKeyDown={dragOverlay ? undefined : handleKeyDown}
       className={cn(
-        "flex cursor-grab touch-none flex-col gap-1.5 rounded border-l-4 border-t-[0.667px] border-r-[0.667px] border-b-[0.667px] border-t-[#CCD1D7] border-r-[#CCD1D7] border-b-[#CCD1D7] bg-white py-3 pl-2 pr-3 shadow-[0_4px_8px_0_rgba(38,50,56,0.05)] transition-shadow duration-[125ms] ease-[cubic-bezier(0.2,0,0.38,0.9)] hover:shadow-[0_4px_6px_0_rgba(102,102,102,0.09),0_9px_14px_0_rgba(102,102,102,0.06)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 active:cursor-grabbing",
+        "flex cursor-grab touch-none flex-col gap-1.5 rounded-md border border-[#e3e6eb] bg-white p-3 shadow-[0_1px_2px_0_rgba(38,50,56,0.08)] transition-shadow duration-[125ms] ease-[cubic-bezier(0.2,0,0.38,0.9)] hover:border-[#c5cad1] hover:shadow-[0_4px_8px_0_rgba(38,50,56,0.12)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 active:cursor-grabbing",
         isDragging && "cursor-grabbing opacity-40"
       )}
     >
@@ -164,7 +155,7 @@ export function CardChip({
         </div>
       )}
 
-      <p className="line-clamp-2 text-sm font-semibold leading-5 text-slate-900">{card.titulo}</p>
+      <p className="line-clamp-2 text-sm font-medium leading-5 text-[#151b26]">{card.titulo}</p>
 
       {filhos.length > 0 && (
         <div className="flex flex-col items-start gap-1">

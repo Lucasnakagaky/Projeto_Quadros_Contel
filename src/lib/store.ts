@@ -5,6 +5,7 @@ import {
   Campo,
   CampoConfig,
   Card,
+  CardLink,
   Checklist,
   Comentario,
   Conexao,
@@ -158,6 +159,9 @@ export async function deleteFase(id: string): Promise<void> {
     db.anexos = db.anexos.filter((a) => !cardIds.includes(a.cardId));
     db.conexoes = db.conexoes.filter(
       (cx) => !cardIds.includes(cx.cardPaiId) && !cardIds.includes(cx.cardFilhoId)
+    );
+    db.cardLinks = db.cardLinks.filter(
+      (l) => !cardIds.includes(l.cardOrigemId) && !cardIds.includes(l.cardDestinoId)
     );
   });
 }
@@ -324,6 +328,7 @@ export async function deleteCampo(id: string): Promise<void> {
     db.cards.forEach((card) => {
       delete card.valoresCampos[id];
     });
+    db.cardLinks = db.cardLinks.filter((l) => l.campoId !== id);
   });
 }
 
@@ -481,6 +486,7 @@ export async function permanentDeleteCard(id: string): Promise<void> {
     db.comentarios = db.comentarios.filter((c) => c.cardId !== id);
     db.anexos = db.anexos.filter((a) => a.cardId !== id);
     db.conexoes = db.conexoes.filter((cx) => cx.cardPaiId !== id && cx.cardFilhoId !== id);
+    db.cardLinks = db.cardLinks.filter((l) => l.cardOrigemId !== id && l.cardDestinoId !== id);
   });
 }
 
@@ -596,6 +602,74 @@ export async function removeConexao(id: string): Promise<void> {
 export async function temFilhos(cardId: string): Promise<boolean> {
   const db = await readDb();
   return db.conexoes.some((c) => c.cardPaiId === cardId);
+}
+
+// ---------- Cards vinculados (campo "cards_vinculados") ----------
+// Retorna os vínculos nas duas direções — quem chama filtra por campo e decide, com base em
+// `campo.config.bidirecional`, se os vínculos onde este card é o "destino" também aparecem.
+export async function listCardLinksByCard(cardId: string) {
+  const db = await readDb();
+  const links = db.cardLinks.filter((l) => l.cardOrigemId === cardId || l.cardDestinoId === cardId);
+  return links.map((l) => {
+    const direcao: "origem" | "destino" = l.cardOrigemId === cardId ? "origem" : "destino";
+    const outroId = direcao === "origem" ? l.cardDestinoId : l.cardOrigemId;
+    const outro = db.cards.find((c) => c.id === outroId);
+    const fase = outro ? db.fases.find((f) => f.id === outro.faseId) : undefined;
+    return { link: l, card: outro, fase, direcao };
+  });
+}
+
+export async function createCardLinks(
+  campoId: string,
+  cardOrigemId: string,
+  targetIds: string[]
+): Promise<CardLink[]> {
+  return mutateDb((db) => {
+    const origem = db.cards.find((c) => c.id === cardOrigemId);
+    if (!origem) notFound("Card");
+    const campo = db.campos.find((c) => c.id === campoId);
+    if (!campo) notFound("Campo de vinculação");
+
+    const idsValidos = [...new Set(targetIds.filter((id) => id !== cardOrigemId))];
+    if (idsValidos.length === 0) badRequest("Selecione ao menos um card para vincular");
+
+    for (const targetId of idsValidos) {
+      if (!db.cards.some((c) => c.id === targetId && c.pipeId === origem.pipeId)) {
+        badRequest("Só é possível vincular cards do mesmo pipe");
+      }
+    }
+
+    // "único" vale para o card como um todo (independente da direção), senão um campo
+    // bidirecional poderia acabar com mais de um vínculo vindo do lado "destino".
+    const existentesNoCard = db.cardLinks.filter(
+      (l) => l.campoId === campoId && (l.cardOrigemId === cardOrigemId || l.cardDestinoId === cardOrigemId)
+    );
+    if (campo.config.cardinalidade === "unico" && existentesNoCard.length + idsValidos.length > 1) {
+      badRequest(`"${campo.titulo}" permite vincular apenas um card`);
+    }
+
+    const novos: CardLink[] = [];
+    for (const targetId of idsValidos) {
+      const jaVinculado = db.cardLinks.some(
+        (l) =>
+          l.campoId === campoId &&
+          ((l.cardOrigemId === cardOrigemId && l.cardDestinoId === targetId) ||
+            (l.cardOrigemId === targetId && l.cardDestinoId === cardOrigemId))
+      );
+      if (jaVinculado) continue;
+      const link: CardLink = { id: uuid(), campoId, cardOrigemId, cardDestinoId: targetId, criadoEm: now() };
+      db.cardLinks.push(link);
+      novos.push(link);
+    }
+    if (novos.length === 0) badRequest("Os cards selecionados já estão vinculados");
+    return novos;
+  });
+}
+
+export async function removeCardLink(id: string): Promise<void> {
+  return mutateDb((db) => {
+    db.cardLinks = db.cardLinks.filter((l) => l.id !== id);
+  });
 }
 
 // ---------- Etiquetas ----------

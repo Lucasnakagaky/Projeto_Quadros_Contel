@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import {
   CardPatch,
   getCard,
+  listCardLinksByCard,
   listConexoesFilhos,
   listConexoesPais,
   permanentDeleteCard,
@@ -29,6 +30,7 @@ export async function GET(_req: Request, { params }: Ctx) {
     const anexos = db.anexos.filter((a) => a.cardId === cardId);
     const conexoesFilhos = await listConexoesFilhos(cardId);
     const conexoesPais = await listConexoesPais(cardId);
+    const cardLinks = await listCardLinksByCard(cardId);
 
     return NextResponse.json({
       card,
@@ -42,6 +44,7 @@ export async function GET(_req: Request, { params }: Ctx) {
       anexos,
       conexoesFilhos,
       conexoesPais,
+      cardLinks,
     });
   } catch (err) {
     return handleError(err);

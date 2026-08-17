@@ -24,7 +24,9 @@ export function CampoValueList({
   onEtiquetaAtualizada: (etiqueta: Etiqueta) => void;
   onEtiquetaExcluida: (etiquetaId: string) => void;
 }) {
-  const visiveis = campos.filter((c) => c.tipo !== "conexao_pipe" && !c.arquivado);
+  const visiveis = campos.filter(
+    (c) => c.tipo !== "conexao_pipe" && c.tipo !== "cards_vinculados" && !c.arquivado
+  );
 
   return (
     <div className="flex flex-col divide-y divide-slate-100">

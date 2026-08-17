@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import { toast } from "sonner";
-import { Paperclip, Trash2, UploadCloud } from "lucide-react";
+import { Paperclip, Plus, Trash2, UploadCloud } from "lucide-react";
 import { api } from "@/lib/api-client";
 import { Anexo } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -65,68 +65,85 @@ export function AttachmentsSection({
     }
   }
 
+  const temAnexos = anexos.length > 0;
+
   return (
     <div className="flex flex-col gap-2">
       <span className="text-xs font-semibold text-slate-500">Anexos</span>
 
-      <div
-        onClick={() => inputRef.current?.click()}
-        onDragOver={(e) => {
-          e.preventDefault();
-          setDragOver(true);
+      {/* Input escondido único, compartilhado pela dropzone (sem anexos) e pelo link
+          "+ Adicionar anexo" (com anexos) — mesma lógica de upload de antes. */}
+      <input
+        ref={inputRef}
+        type="file"
+        multiple
+        className="hidden"
+        onChange={(e) => {
+          if (e.target.files?.length) upload(e.target.files);
+          e.target.value = "";
         }}
-        onDragLeave={() => setDragOver(false)}
-        onDrop={(e) => {
-          e.preventDefault();
-          setDragOver(false);
-          if (e.dataTransfer.files?.length) upload(e.dataTransfer.files);
-        }}
-        className={cn(
-          "flex cursor-pointer flex-col items-center justify-center gap-1 rounded-md border-2 border-dashed border-slate-300 py-4 text-sm text-slate-400 hover:border-slate-400",
-          dragOver && "border-blue-400 bg-blue-50"
-        )}
-      >
-        <UploadCloud size={20} />
-        <span>{enviando ? "Enviando..." : "Anexe ou arraste um ou mais arquivos"}</span>
-        <input
-          ref={inputRef}
-          type="file"
-          multiple
-          className="hidden"
-          onChange={(e) => {
-            if (e.target.files?.length) upload(e.target.files);
-            e.target.value = "";
-          }}
-        />
-      </div>
+      />
 
-      {anexos.length > 0 && (
-        <ul className="flex flex-col gap-1">
-          {anexos.map((a) => (
-            <li
-              key={a.id}
-              className="flex items-center gap-2 rounded-md border border-slate-200 px-2 py-1.5 text-sm"
-            >
-              <Paperclip size={14} className="shrink-0 text-slate-400" />
-              <a
-                href={a.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex-1 truncate text-blue-600 hover:underline"
+      {temAnexos ? (
+        <>
+          <ul className="flex flex-col gap-1">
+            {anexos.map((a) => (
+              <li
+                key={a.id}
+                className="flex items-center gap-2 rounded-md border border-slate-200 px-2 py-1.5 text-sm"
               >
-                {a.nome}
-              </a>
-              <span className="text-xs text-slate-400">{formatBytes(a.tamanho)}</span>
-              <button
-                onClick={() => remover(a.id)}
-                className="text-slate-400 hover:text-red-600"
-                aria-label="Remover anexo"
-              >
-                <Trash2 size={14} />
-              </button>
-            </li>
-          ))}
-        </ul>
+                <Paperclip size={14} className="shrink-0 text-slate-400" />
+                <a
+                  href={a.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 truncate text-blue-600 hover:underline"
+                >
+                  {a.nome}
+                </a>
+                <span className="text-xs text-slate-400">{formatBytes(a.tamanho)}</span>
+                <button
+                  onClick={() => remover(a.id)}
+                  className="text-slate-400 hover:text-red-600"
+                  aria-label="Remover anexo"
+                >
+                  <Trash2 size={14} />
+                </button>
+              </li>
+            ))}
+          </ul>
+
+          <button
+            type="button"
+            onClick={() => inputRef.current?.click()}
+            disabled={enviando}
+            className="flex w-fit items-center gap-1 self-start text-xs text-blue-600 hover:underline disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <Plus size={12} />
+            {enviando ? "Enviando..." : "Adicionar anexo"}
+          </button>
+        </>
+      ) : (
+        <div
+          onClick={() => inputRef.current?.click()}
+          onDragOver={(e) => {
+            e.preventDefault();
+            setDragOver(true);
+          }}
+          onDragLeave={() => setDragOver(false)}
+          onDrop={(e) => {
+            e.preventDefault();
+            setDragOver(false);
+            if (e.dataTransfer.files?.length) upload(e.dataTransfer.files);
+          }}
+          className={cn(
+            "flex cursor-pointer items-center gap-2 rounded-md border-2 border-dashed border-slate-300 px-3 py-2 text-sm text-slate-400 hover:border-slate-400",
+            dragOver && "border-blue-400 bg-blue-50"
+          )}
+        >
+          <UploadCloud size={16} className="shrink-0" />
+          <span>{enviando ? "Enviando..." : "Anexe ou arraste um arquivo"}</span>
+        </div>
       )}
     </div>
   );

@@ -11,6 +11,7 @@ import {
   Fingerprint,
   GitBranch,
   Hash,
+  Link,
   ListChecks,
   Mail,
   Paperclip,
@@ -47,6 +48,7 @@ const ICONS: Record<TipoCampo, LucideIcon> = {
   id: Fingerprint,
   conexao_pipe: GitBranch,
   conexao_database: Database,
+  cards_vinculados: Link,
 };
 
 export function CampoIcon({ tipo, size = 14 }: { tipo: TipoCampo; size?: number }) {

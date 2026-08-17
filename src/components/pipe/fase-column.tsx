@@ -68,7 +68,7 @@ export function FaseColumn({
       style={style}
       className={cn("flex w-[280px] shrink-0 flex-col", isDragging && "opacity-50")}
     >
-      <div className="h-1.5 shrink-0" style={{ backgroundColor: fase.cor }} />
+      <div className="h-1 shrink-0" style={{ backgroundColor: fase.cor }} />
 
       <div className="group flex h-10 shrink-0 items-center gap-1 border-y border-[rgb(220,223,229)] bg-white px-2">
         <button
@@ -139,7 +139,7 @@ export function FaseColumn({
 
       <div
         className={cn(
-          "flex flex-1 flex-col overflow-hidden rounded-b border border-t-0 border-[rgb(220,223,229)] bg-[rgb(242,242,242)] transition-colors",
+          "flex flex-1 flex-col overflow-hidden rounded-b border border-t-0 border-[#e3e6eb] bg-[#f7f8fa] transition-colors",
           isDropTarget && "bg-blue-50 ring-2 ring-inset ring-blue-300"
         )}
       >
@@ -157,7 +157,6 @@ export function FaseColumn({
                 usuarios={usuarios}
                 filhos={filhosPorCard[card.id] ?? []}
                 pai={(paisPorCard[card.id] ?? [])[0]}
-                corFase={fase.cor}
                 onOpen={() => onOpenCard(card.id)}
                 onOpenCard={onOpenCard}
               />
@@ -179,7 +178,10 @@ export function FaseColumn({
             <Button
               onClick={() => onCreateCard(fase.id)}
               size="pill"
-              className={cn("w-full gap-1.5", FOCUS_RING)}
+              className={cn(
+                "w-full gap-1.5 rounded-md bg-[#1d4ed8] hover:bg-[#1a44bd]",
+                FOCUS_RING
+              )}
             >
               <Plus size={16} />
               Criar novo card

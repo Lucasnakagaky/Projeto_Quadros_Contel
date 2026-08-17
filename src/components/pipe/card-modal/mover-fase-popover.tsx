@@ -2,7 +2,6 @@
 
 import { ArrowRight } from "lucide-react";
 import { Popover } from "@/components/ui/popover";
-import { Button } from "@/components/ui/button";
 import { Fase } from "@/lib/types";
 
 export function MoverFasePopover({
@@ -15,14 +14,30 @@ export function MoverFasePopover({
   onMover: (faseId: string) => void;
 }) {
   const destinos = fases.filter((f) => f.id !== faseAtualId);
+  const faseAtual = fases.find((f) => f.id === faseAtualId);
 
   return (
     <Popover
       align="end"
       trigger={({ toggle }) => (
-        <Button onClick={toggle} className="w-full rounded-full">
-          Mover para fase
-        </Button>
+        <button
+          type="button"
+          onClick={toggle}
+          className="flex h-11 w-full items-center justify-between gap-2 rounded-lg border border-slate-200 bg-white px-3 text-left transition-colors hover:border-blue-300 hover:bg-blue-50/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
+        >
+          <span className="flex min-w-0 items-center gap-2">
+            {faseAtual && (
+              <span
+                className="h-2 w-2 shrink-0 rounded-full"
+                style={{ backgroundColor: faseAtual.cor }}
+              />
+            )}
+            <span className="truncate text-sm font-semibold text-slate-800">
+              {faseAtual?.nome ?? "Mover para fase"}
+            </span>
+          </span>
+          <ArrowRight size={16} className="shrink-0 text-slate-400" />
+        </button>
       )}
     >
       {({ close }) => (
