@@ -266,7 +266,7 @@ export function CardDetailModal({
             Divididas por borda (não gap), cada uma com seu próprio padding interno. */}
         <div className="grid grid-cols-1 md:grid-cols-[1fr_240px_240px]">
           {/* Coluna 1 — Card */}
-          <div className="flex min-w-0 flex-col gap-3 p-6">
+          <div className="flex min-w-0 flex-col gap-3 p-5">
             <Input
               value={titulo}
               onChange={(e) => setTitulo(e.target.value)}
@@ -336,8 +336,8 @@ export function CardDetailModal({
 
               <div className="mt-2 border-t border-[rgb(220,223,229)]" />
 
-              <TabsContent value="form" className="pt-3">
-                <div className="flex flex-col gap-3">
+              <TabsContent value="form" className="pt-2">
+                <div className="flex flex-col gap-2">
                   <div className="text-xs text-slate-400">
                     Formulário Inicial — Criado por{" "}
                     <span className="font-medium text-slate-600">{criador?.nome ?? "—"}</span> •{" "}
@@ -402,11 +402,15 @@ export function CardDetailModal({
                 </div>
               </TabsContent>
 
-              <TabsContent value="atividades" className="pt-3">
-                <PhaseHistory historico={card.historico} fases={fases} />
+              <TabsContent value="atividades" className="pt-2">
+                <PhaseHistory
+                  historico={card.historico}
+                  fases={fases}
+                  onEditarVisualizacao={() => setConfigurandoCampos(true)}
+                />
               </TabsContent>
 
-              <TabsContent value="anexos" className="pt-3">
+              <TabsContent value="anexos" className="pt-2">
                 <AttachmentsSection
                   cardId={cardId}
                   anexos={anexos}
@@ -414,7 +418,7 @@ export function CardDetailModal({
                 />
               </TabsContent>
 
-              <TabsContent value="checklists" className="pt-3">
+              <TabsContent value="checklists" className="pt-2">
                 <ChecklistSection
                   cardId={cardId}
                   checklists={checklists}
@@ -422,7 +426,7 @@ export function CardDetailModal({
                 />
               </TabsContent>
 
-              <TabsContent value="comentarios" className="pt-3">
+              <TabsContent value="comentarios" className="pt-2">
                 <CommentsSection
                   cardId={cardId}
                   comentarios={comentarios}
@@ -430,11 +434,11 @@ export function CardDetailModal({
                 />
               </TabsContent>
 
-              <TabsContent value="email" className="pt-3">
+              <TabsContent value="email" className="pt-2">
                 <AbaEmBreve label="Enviar card por email" />
               </TabsContent>
 
-              <TabsContent value="pdf" className="pt-3">
+              <TabsContent value="pdf" className="pt-2">
                 <AbaEmBreve label="Exportar card em PDF" />
               </TabsContent>
             </Tabs>

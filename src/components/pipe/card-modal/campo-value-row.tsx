@@ -206,7 +206,7 @@ export function CampoValueRow({
       </>
     );
     return (
-      <div id={`campo-${campo.id}`} className="flex items-start gap-2 py-1.5 scroll-mt-4 transition-colors">
+      <div id={`campo-${campo.id}`} className="flex items-start gap-2 py-1 scroll-mt-4 transition-colors">
         <div className="mt-1">
           <CampoIcon tipo={campo.tipo} />
         </div>

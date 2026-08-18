@@ -1,3 +1,4 @@
+import { Plus } from "lucide-react";
 import { EventoHistorico, Fase } from "@/lib/types";
 import { dataCurta, duracaoEntre } from "@/lib/utils";
 
@@ -28,9 +29,11 @@ export function derivarHistoricoItens(historico: EventoHistorico[], fases: Fase[
 export function PhaseHistory({
   historico,
   fases,
+  onEditarVisualizacao,
 }: {
   historico: EventoHistorico[];
   fases: Fase[];
+  onEditarVisualizacao: () => void;
 }) {
   const itens = derivarHistoricoItens(historico, fases);
 
@@ -45,27 +48,33 @@ export function PhaseHistory({
           {itens.map((item, i) => (
             <li
               key={`${item.faseId}-${item.entrouEm.toISOString()}-${i}`}
-              className="flex items-start justify-between gap-3 rounded-lg border border-slate-200 bg-white p-3"
+              className="flex flex-col gap-1 rounded-lg border border-slate-200 bg-slate-50 p-3"
             >
-              <div className="flex flex-col items-start gap-1">
-                <span
-                  className="w-fit rounded-full px-2.5 py-1 text-xs font-bold whitespace-nowrap"
-                  style={{ backgroundColor: `${item.faseCor}1f`, color: item.faseCor }}
-                >
-                  {item.faseNome}
-                </span>
-                <span className="text-xs text-slate-400">
-                  {duracaoEntre(item.entrouEm, item.saiuEm ?? new Date())}
-                </span>
-              </div>
-
-              <span className="shrink-0 text-xs font-bold text-slate-600">
+              <span
+                className="w-fit rounded-full px-2.5 py-1 text-xs font-bold whitespace-nowrap"
+                style={{ backgroundColor: `${item.faseCor}1f`, color: item.faseCor }}
+              >
+                {item.faseNome}
+              </span>
+              <span className="text-xs text-slate-400">
+                {duracaoEntre(item.entrouEm, item.saiuEm ?? new Date())}
+              </span>
+              <span className="text-xs text-slate-400">
                 {dataCurta(item.entrouEm)}
               </span>
             </li>
           ))}
         </ul>
       )}
+
+      <button
+        type="button"
+        onClick={onEditarVisualizacao}
+        className="flex w-fit items-center gap-1 self-start text-xs text-blue-600 hover:underline"
+      >
+        <Plus size={12} />
+        Editar visualização do card
+      </button>
     </div>
   );
 }

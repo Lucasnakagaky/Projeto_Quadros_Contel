@@ -137,7 +137,7 @@ export function AttachmentsSection({
             if (e.dataTransfer.files?.length) upload(e.dataTransfer.files);
           }}
           className={cn(
-            "flex cursor-pointer items-center gap-2 rounded-md border-2 border-dashed border-slate-300 px-3 py-2 text-sm text-slate-400 hover:border-slate-400",
+            "flex cursor-pointer items-center gap-2 rounded-md border-2 border-dashed border-slate-300 px-3 py-1.5 text-sm text-slate-400 hover:border-slate-400",
             dragOver && "border-blue-400 bg-blue-50"
           )}
         >
