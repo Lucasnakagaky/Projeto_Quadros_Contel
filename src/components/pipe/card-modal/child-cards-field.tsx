@@ -37,7 +37,7 @@ export function ChildCardsField({
   relacionadas: ConexaoResolvida[];
   onConexaoCriada: (r: ConexaoResolvida) => void;
   onConexaoRemovida: (conexaoId: string) => void;
-  onOpenCard: (cardId: string) => void;
+  onOpenCard: (cardId: string, opts?: { focarDescricao?: boolean }) => void;
 }) {
   const [edicaoAtiva, setEdicaoAtiva] = useState(false);
   const [formAberto, setFormAberto] = useState(false);
@@ -99,6 +99,9 @@ export function ChildCardsField({
       onConexaoCriada({ conexao: result.conexao, card: result.card, fase, pipe: pipeDestino ?? undefined });
       toast.success("Card criado com sucesso");
       setFormAberto(false);
+      // o formulário inicial (CampoDraftRow) só suporta texto puro na "Descrição da Demanda" —
+      // abre o card recém-criado, onde o editor completo (com upload de imagem) já funciona.
+      onOpenCard(result.card.id, { focarDescricao: true });
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Erro ao criar card");
     }
@@ -179,7 +182,7 @@ export function ChildCardsField({
           className="flex items-center gap-1 self-start text-sm text-blue-600 hover:underline"
         >
           <Plus size={14} />
-          Conectar pipe
+          Criar card Filho
         </button>
       )}
 

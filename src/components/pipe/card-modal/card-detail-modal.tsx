@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import {
   Activity,
+  Archive,
   CalendarClock,
   CheckSquare,
   ClipboardList,
@@ -15,7 +16,6 @@ import {
   Plus,
   Settings2,
   Sparkles,
-  Tag,
   Trash2,
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -23,14 +23,14 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { api } from "@/lib/api-client";
-import { Campo, Card, Etiqueta } from "@/lib/types";
-import { campoPorTipo } from "@/lib/campo-utils";
+import { Campo, Card, Etiqueta, Fase } from "@/lib/types";
+import { campoPorTipo, stringArray } from "@/lib/campo-utils";
 import { tempoRelativo } from "@/lib/utils";
 import { CardDetail, CardLinkResolvida, ConexaoResolvida } from "./types";
 import { CampoValueList } from "./campo-value-list";
 import { FormBuilder } from "../form-builder/form-builder";
 import { ChildCardsField } from "./child-cards-field";
-import { CardLinksField } from "./card-links-field";
+import { EtiquetasPopover } from "./etiquetas-popover";
 import { PaisSection } from "./pais-section";
 import { PhaseHistory } from "./phase-history";
 import { MoverFasePopover } from "./mover-fase-popover";
@@ -63,22 +63,29 @@ function AbaEmBreve({ label }: { label: string }) {
 
 export function CardDetailModal({
   cardId,
+  focarDescricaoAoAbrir,
   onClose,
   onCardUpdated,
   onCardTrashed,
   onEtiquetasChanged,
   onCamposChanged,
   onConexaoCriada,
+  onFaseCriada,
   onNavigateToCard,
 }: {
   cardId: string;
+  // true quando o modal deve abrir já rolado/destacado no campo "Descrição da Demanda" — usado
+  // ao criar um card filho, cujo formulário inicial não suporta imagem (é um Textarea simples),
+  // pra levar o usuário direto pro editor completo (com upload de imagem) assim que o card existe.
+  focarDescricaoAoAbrir?: boolean;
   onClose: () => void;
   onCardUpdated: (card: Card) => void;
   onCardTrashed: (cardId: string) => void;
   onEtiquetasChanged: (etiquetas: Etiqueta[]) => void;
   onCamposChanged: (campos: Campo[]) => void;
   onConexaoCriada: (cardPaiId: string, cardFilhoId: string, cardFilhoTitulo: string) => void;
-  onNavigateToCard: (cardId: string) => void;
+  onFaseCriada: (fase: Fase) => void;
+  onNavigateToCard: (cardId: string, opts?: { focarDescricao?: boolean }) => void;
 }) {
   const [detail, setDetail] = useState<CardDetail | null>(null);
   const [loading, setLoading] = useState(true);
@@ -91,19 +98,36 @@ export function CardDetailModal({
       const data = await api.get<CardDetail>(`/api/cards/${cardId}`);
       let campos = data.campos;
 
-      // Qualquer card deve ter um campo de "Descrição da Demanda" (texto simples, no
-      // padrão Pipefy), provisionado uma única vez por pipe. Provisiona antes do campo de
+      // Qualquer card deve ter um campo de "Descrição da Demanda" (texto formatado, com
+      // suporte a imagem), provisionado uma única vez por pipe. Provisiona antes do campo de
       // conexão de pipe abaixo para que a ordem final fique Descrição da Demanda → Subtarefas.
-      if (!campos.some((c) => c.tipo === "texto_longo" && c.titulo === "Descrição da Demanda")) {
+      // Chama o "garantir" tanto quando o campo ainda não existe quanto quando ele existe no
+      // tipo antigo ("texto_longo") — nesse segundo caso o endpoint migra o campo (e o valor
+      // salvo em cada card do pipe) para "texto_formatado" no lugar, em vez de só ignorar.
+      const descricaoAntiga = campos.find(
+        (c) => c.tipo === "texto_longo" && c.titulo === "Descrição da Demanda"
+      );
+      const temDescricaoFormatada = campos.some(
+        (c) => c.tipo === "texto_formatado" && c.titulo === "Descrição da Demanda"
+      );
+      if (descricaoAntiga || !temDescricaoFormatada) {
         try {
           const campo = await api.post<Campo>(
             `/api/pipes/${data.card.pipeId}/campos/garantir-descricao-demanda`,
             {}
           );
-          campos = [...campos, campo];
+          campos = descricaoAntiga
+            ? campos.map((c) => (c.id === campo.id ? campo : c))
+            : [...campos, campo];
           onCamposChanged(campos);
+          if (descricaoAntiga) {
+            // a migração também reescreve o valor salvo em cada card (texto → HTML) — busca o
+            // card de novo para não mostrar o texto antigo sem quebras de linha até reabrir.
+            const fresco = await api.get<CardDetail>(`/api/cards/${cardId}`);
+            data.card = fresco.card;
+          }
         } catch {
-          // se não conseguir provisionar, o card continua funcionando normalmente
+          // se não conseguir provisionar/migrar, o card continua funcionando normalmente
         }
       }
 
@@ -124,10 +148,29 @@ export function CardDetailModal({
         }
       }
 
+      // Qualquer card deve poder se conectar livremente a outro card do mesmo pipe (sem
+      // relação de pai/filho, via "Conectar card") — provisiona o campo "Cards vinculados"
+      // na primeira vez que faltar, mesmo padrão dos dois provisionamentos acima.
+      if (!campos.some((c) => c.tipo === "cards_vinculados")) {
+        try {
+          const campo = await api.post<Campo>(
+            `/api/pipes/${data.card.pipeId}/campos/garantir-cards-vinculados`,
+            {}
+          );
+          campos = [...campos, campo];
+          onCamposChanged(campos);
+        } catch {
+          // se não conseguir provisionar, a seção de conexões continua mostrando só os pais
+        }
+      }
+
       setDetail({ ...data, campos });
       setTitulo(data.card.titulo);
       onCardUpdated(data.card);
       onEtiquetasChanged(data.etiquetas);
+      if (focarDescricaoAoAbrir) {
+        destacarCampo(campoPorTipo(campos, "texto_formatado"));
+      }
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Erro ao carregar card");
       onClose();
@@ -164,8 +207,7 @@ export function CardDetailModal({
     patchCard({ valoresCampos: { [campoId]: valor } });
   }
 
-  function focarCampo(tipo: Parameters<typeof campoPorTipo>[1]) {
-    const campo = detail ? campoPorTipo(detail.campos, tipo) : undefined;
+  function destacarCampo(campo: Campo | undefined) {
     if (!campo) return;
     requestAnimationFrame(() => {
       const el = document.getElementById(`campo-${campo.id}`);
@@ -173,6 +215,10 @@ export function CardDetailModal({
       el?.classList.add("bg-blue-50");
       setTimeout(() => el?.classList.remove("bg-blue-50"), 1200);
     });
+  }
+
+  function focarCampo(tipo: Parameters<typeof campoPorTipo>[1]) {
+    destacarCampo(detail ? campoPorTipo(detail.campos, tipo) : undefined);
   }
 
   async function moverFase(faseId: string) {
@@ -196,6 +242,30 @@ export function CardDetailModal({
       onCardTrashed(cardId);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Erro ao mover card para a lixeira");
+    }
+  }
+
+  async function arquivarCard() {
+    if (!detail) return;
+    try {
+      let faseArquivado = detail.fases.find((f) => f.nome === "Arquivado");
+      if (!faseArquivado) {
+        faseArquivado = await api.post<Fase>(
+          `/api/pipes/${detail.card.pipeId}/fases/garantir-arquivada`,
+          {}
+        );
+        setDetail((prev) => (prev ? { ...prev, fases: [...prev.fases, faseArquivado!] } : prev));
+        onFaseCriada(faseArquivado);
+      }
+      const card2 = await api.post<Card>(`/api/cards/${cardId}/mover`, {
+        faseId: faseArquivado.id,
+        index: 0,
+      });
+      setDetail((prev) => (prev ? { ...prev, card: card2 } : prev));
+      onCardUpdated(card2);
+      toast.success("Card arquivado com sucesso");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Erro ao arquivar card");
     }
   }
 
@@ -251,7 +321,10 @@ export function CardDetailModal({
   const faseAtual = fases.find((f) => f.id === card.faseId);
   const criador = usuarios.find((u) => u.id === card.criadoPorId);
   const camposConexaoPipe = campos.filter((c) => c.tipo === "conexao_pipe");
-  const camposCardsVinculados = campos.filter((c) => c.tipo === "cards_vinculados");
+  const campoCardsVinculados = campos.find((c) => c.tipo === "cards_vinculados");
+  const campoEtiquetas = campos.find((c) => c.tipo === "etiquetas");
+  const idsEtiquetas = campoEtiquetas ? stringArray(card.valoresCampos[campoEtiquetas.id]) : [];
+  const etiquetasSelecionadas = etiquetas.filter((e) => idsEtiquetas.includes(e.id));
   void pipe;
 
   return (
@@ -275,15 +348,41 @@ export function CardDetailModal({
             />
 
             <div className="flex flex-wrap items-center gap-2">
-              <Button variant="outline" size="sm" onClick={() => focarCampo("data_vencimento")}>
-                <CalendarClock size={14} />
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-7 px-2 text-xs"
+                onClick={() => focarCampo("data_vencimento")}
+              >
+                <CalendarClock size={12} />
                 Vencimento
               </Button>
-              <Button variant="outline" size="sm" onClick={() => focarCampo("etiquetas")}>
-                <Tag size={14} />
-                Adicionar etiquetas
-              </Button>
+              <EtiquetasPopover
+                pipeId={card.pipeId}
+                etiquetas={etiquetas}
+                selecionadas={idsEtiquetas}
+                onSalvarSelecao={(ids) => campoEtiquetas && salvarValorCampo(campoEtiquetas.id, ids)}
+                onEtiquetaCriada={(e) => atualizarEtiquetas([...etiquetas, e])}
+                onEtiquetaAtualizada={(e) =>
+                  atualizarEtiquetas(etiquetas.map((et) => (et.id === e.id ? e : et)))
+                }
+                onEtiquetaExcluida={(id) => atualizarEtiquetas(etiquetas.filter((et) => et.id !== id))}
+              />
             </div>
+
+            {etiquetasSelecionadas.length > 0 && (
+              <div className="flex flex-wrap gap-1.5">
+                {etiquetasSelecionadas.map((e) => (
+                  <span
+                    key={e.id}
+                    className="rounded-full px-2.5 py-0.5 text-xs font-medium"
+                    style={{ backgroundColor: `${e.cor}1f`, color: e.cor }}
+                  >
+                    {e.nome}
+                  </span>
+                ))}
+              </div>
+            )}
 
             <div className="border-t border-[rgb(220,223,229)]" />
 
@@ -347,15 +446,8 @@ export function CardDetailModal({
                   <CampoValueList
                     campos={campos}
                     card={card}
-                    pipeId={card.pipeId}
-                    etiquetas={etiquetas}
                     usuarios={usuarios}
                     onSalvarValor={salvarValorCampo}
-                    onEtiquetaCriada={(e) => atualizarEtiquetas([...etiquetas, e])}
-                    onEtiquetaAtualizada={(e) =>
-                      atualizarEtiquetas(etiquetas.map((et) => (et.id === e.id ? e : et)))
-                    }
-                    onEtiquetaExcluida={(id) => atualizarEtiquetas(etiquetas.filter((et) => et.id !== id))}
                   />
 
                   {camposConexaoPipe.map((campo) => (
@@ -374,31 +466,17 @@ export function CardDetailModal({
                     />
                   ))}
 
-                  {camposCardsVinculados.map((campo) => {
-                    // Bidirecional (padrão): mostra vínculos criados a partir deste card e os
-                    // recebidos de outro card — como o campo é o mesmo em todo o pipe, basta
-                    // reaproveitar a mesma linha guardada em cardLinks (ver comentário em
-                    // listCardLinksByCard, em store.ts) em vez de duplicar o registro por direção.
-                    const bidirecional = campo.config.bidirecional ?? true;
-                    return (
-                      <CardLinksField
-                        key={campo.id}
-                        campoId={campo.id}
-                        nomeCampo={campo.titulo}
-                        cardId={card.id}
-                        pipeId={card.pipeId}
-                        cardinalidade={campo.config.cardinalidade ?? "varios"}
-                        relacionadas={cardLinks.filter(
-                          (r) => r.link.campoId === campo.id && (r.direcao === "origem" || bidirecional)
-                        )}
-                        onLinksCriados={handleLinksCriados}
-                        onLinkRemovido={handleLinkRemovido}
-                        onOpenCard={onNavigateToCard}
-                      />
-                    );
-                  })}
-
-                  <PaisSection conexoesPais={conexoesPais} onOpenCard={onNavigateToCard} />
+                  <PaisSection
+                    conexoesPais={conexoesPais}
+                    cardLinks={cardLinks}
+                    cardId={card.id}
+                    pipeId={card.pipeId}
+                    campoId={campoCardsVinculados?.id}
+                    cardinalidade={campoCardsVinculados?.config.cardinalidade ?? "varios"}
+                    onOpenCard={onNavigateToCard}
+                    onLinksCriados={handleLinksCriados}
+                    onLinkRemovido={handleLinkRemovido}
+                  />
                 </div>
               </TabsContent>
 
@@ -449,7 +527,7 @@ export function CardDetailModal({
               tem muito conteúdo — sem isso, o scroll compartilhado deixava um vão enorme de
               espaço em branco abaixo do texto curto desta coluna. */}
           <div className="flex flex-col border-t border-[rgb(220,223,229)] md:self-start md:border-l md:border-t-0">
-            <div className="flex shrink-0 items-center justify-between gap-2 border-b border-[rgb(220,223,229)] p-4">
+            <div className="flex shrink-0 items-center justify-between gap-2 border-b border-[rgb(220,223,229)] p-5">
               <div className="flex flex-col gap-1">
                 <span className="text-xs font-semibold text-slate-500">Fase atual</span>
                 {faseAtual && (
@@ -471,7 +549,7 @@ export function CardDetailModal({
                 <Settings2 size={16} />
               </button>
             </div>
-            <div className="flex flex-1 flex-col gap-2 p-4">
+            <div className="flex flex-1 flex-col gap-2 p-5">
               {faseAtual?.descricao ? (
                 <p className="whitespace-pre-wrap text-sm text-slate-600">{faseAtual.descricao}</p>
               ) : (
@@ -487,7 +565,7 @@ export function CardDetailModal({
               dropdown do Popover é posicionado com position:absolute (não usa portal) — um
               ancestral com overflow-y-auto cortaria o dropdown, já que "overflow-y: auto"
               força o browser a clipar também o eixo X. */}
-          <div className="flex flex-col border-t border-[rgb(220,223,229)] p-4 pt-6 md:self-start md:border-l md:border-t-0">
+          <div className="flex flex-col border-t border-[rgb(220,223,229)] p-5 pt-6 md:self-start md:border-l md:border-t-0">
             <div className="flex shrink-0 flex-col gap-3">
               <span className="text-sm font-semibold text-slate-800">Mover card para fase</span>
               <MoverFasePopover fases={fases} faseAtualId={card.faseId} onMover={moverFase} />
@@ -526,14 +604,26 @@ export function CardDetailModal({
               </div>
 
               <button
-                onClick={moverParaLixeira}
-                className="mt-auto flex items-center gap-1.5 self-start rounded-md px-1 py-1.5 text-sm text-red-500 hover:bg-red-50 hover:text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-1"
-                aria-label="Mover card para a lixeira"
-                title="Mover card para a lixeira"
+                onClick={arquivarCard}
+                className="flex items-center gap-1.5 self-start rounded-md px-1 py-1.5 text-left text-sm text-slate-500 hover:bg-slate-100 hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
+                aria-label="Arquivar card"
+                title="Arquivar card"
               >
-                <Trash2 size={14} />
-                Mover para a lixeira
+                <Archive size={14} />
+                Arquivado
               </button>
+
+              {faseAtual?.ehFinal && (
+                <button
+                  onClick={moverParaLixeira}
+                  className="mt-auto flex items-center gap-1.5 self-start rounded-md px-1 py-1.5 text-sm text-red-500 hover:bg-red-50 hover:text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-1"
+                  aria-label="Mover card para a lixeira"
+                  title="Mover card para a lixeira"
+                >
+                  <Trash2 size={14} />
+                  Mover para a lixeira
+                </button>
+              )}
             </div>
           </div>
         </div>

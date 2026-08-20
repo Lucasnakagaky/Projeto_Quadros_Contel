@@ -1,50 +1,62 @@
 "use client";
 
-import { Campo, Card, Etiqueta, Usuario } from "@/lib/types";
+import { CalendarPlus } from "lucide-react";
+import { Campo, Card, Usuario } from "@/lib/types";
+import { formatarData } from "@/lib/utils";
 import { CampoValueRow } from "./campo-value-row";
 
 export function CampoValueList({
   campos,
   card,
-  pipeId,
-  etiquetas,
   usuarios,
   onSalvarValor,
-  onEtiquetaCriada,
-  onEtiquetaAtualizada,
-  onEtiquetaExcluida,
 }: {
   campos: Campo[];
   card: Card;
-  pipeId: string;
-  etiquetas: Etiqueta[];
   usuarios: Usuario[];
   onSalvarValor: (campoId: string, valor: unknown) => void;
-  onEtiquetaCriada: (etiqueta: Etiqueta) => void;
-  onEtiquetaAtualizada: (etiqueta: Etiqueta) => void;
-  onEtiquetaExcluida: (etiquetaId: string) => void;
 }) {
   const visiveis = campos.filter(
-    (c) => c.tipo !== "conexao_pipe" && c.tipo !== "cards_vinculados" && !c.arquivado
+    (c) =>
+      c.tipo !== "conexao_pipe" &&
+      c.tipo !== "cards_vinculados" &&
+      c.tipo !== "etiquetas" &&
+      !c.arquivado
   );
 
   return (
     <div className="flex flex-col divide-y divide-slate-100">
-      {visiveis.map((campo) => (
-        <CampoValueRow
-          key={campo.id}
-          campo={campo}
-          cardId={card.id}
-          pipeId={pipeId}
-          valor={card.valoresCampos[campo.id]}
-          etiquetas={etiquetas}
-          usuarios={usuarios}
-          onSave={(valor) => onSalvarValor(campo.id, valor)}
-          onEtiquetaCriada={onEtiquetaCriada}
-          onEtiquetaAtualizada={onEtiquetaAtualizada}
-          onEtiquetaExcluida={onEtiquetaExcluida}
-        />
-      ))}
+      {visiveis.map((campo) =>
+        campo.tipo === "data_vencimento" ? (
+          <div key={campo.id} className="grid grid-cols-2 gap-2">
+            <div className="flex items-start gap-2 py-1">
+              <div className="mt-1">
+                <CalendarPlus size={14} className="shrink-0 text-slate-400" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <span className="block text-xs font-medium text-slate-500">Criação do card</span>
+                <span className="text-sm text-slate-700">{formatarData(card.criadoEm)}</span>
+              </div>
+            </div>
+            <CampoValueRow
+              campo={campo}
+              cardId={card.id}
+              usuarios={usuarios}
+              valor={card.valoresCampos[campo.id]}
+              onSave={(valor) => onSalvarValor(campo.id, valor)}
+            />
+          </div>
+        ) : (
+          <CampoValueRow
+            key={campo.id}
+            campo={campo}
+            cardId={card.id}
+            usuarios={usuarios}
+            valor={card.valoresCampos[campo.id]}
+            onSave={(valor) => onSalvarValor(campo.id, valor)}
+          />
+        )
+      )}
     </div>
   );
 }

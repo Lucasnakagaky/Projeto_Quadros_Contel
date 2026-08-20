@@ -92,7 +92,18 @@ export function AttachmentsSection({
                 key={a.id}
                 className="flex items-center gap-2 rounded-md border border-slate-200 px-2 py-1.5 text-sm"
               >
-                <Paperclip size={14} className="shrink-0 text-slate-400" />
+                {a.tipo.startsWith("image/") ? (
+                  <img
+                    src={a.url}
+                    alt={a.nome}
+                    width={36}
+                    height={36}
+                    loading="lazy"
+                    className="h-9 w-9 shrink-0 rounded object-cover"
+                  />
+                ) : (
+                  <Paperclip size={14} className="shrink-0 text-slate-400" />
+                )}
                 <a
                   href={a.url}
                   target="_blank"

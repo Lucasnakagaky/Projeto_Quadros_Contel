@@ -76,6 +76,9 @@ export function PipeBoard({
   // que, ao trocar o cardId enquanto o modal já está aberto, podia remontar a árvore e
   // causar o efeito de "abre e fecha". A URL continua sincronizada (compartilhamento/voltar).
   const [cardId, setCardId] = useState(cardIdParam);
+  // true só na navegação logo após criar um card filho (ver openCard) — pede pro modal abrir
+  // já rolado/destacado no campo "Descrição da Demanda", que é onde o upload de imagem funciona.
+  const [focarDescricaoAoAbrir, setFocarDescricaoAoAbrir] = useState(false);
   const [cardIdParamAnterior, setCardIdParamAnterior] = useState(cardIdParam);
   if (cardIdParam !== cardIdParamAnterior) {
     setCardIdParamAnterior(cardIdParam);
@@ -118,8 +121,9 @@ export function PipeBoard({
     return Object.keys(columns).find((key) => columns[key].includes(id));
   }
 
-  function openCard(id: string) {
+  function openCard(id: string, opts?: { focarDescricao?: boolean }) {
     setCardId(id);
+    setFocarDescricaoAoAbrir(Boolean(opts?.focarDescricao));
     router.push(`${pathname}?cardId=${id}`, { scroll: false });
   }
 
@@ -257,6 +261,13 @@ export function PipeBoard({
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Erro ao criar fase");
     }
+  }
+
+  /** Fase criada dinamicamente a partir do card (ex.: botão "Arquivado"). Idempotente — o card já
+   * pode ter reaproveitado uma fase existente, então só adiciona se ainda não estiver no board. */
+  function handleFaseCriada(fase: Fase) {
+    setFases((prev) => (prev.some((f) => f.id === fase.id) ? prev : [...prev, fase]));
+    setColumns((prev) => (prev[fase.id] ? prev : { ...prev, [fase.id]: [] }));
   }
 
   async function handleUpdateFase(
@@ -486,11 +497,13 @@ export function PipeBoard({
       {cardId && (
         <CardDetailModal
           cardId={cardId}
+          focarDescricaoAoAbrir={focarDescricaoAoAbrir}
           onClose={closeCard}
           onCardUpdated={handleCardUpdatedLocally}
           onCardTrashed={handleCardTrashedLocally}
           onEtiquetasChanged={setEtiquetas}
           onCamposChanged={setCampos}
+          onFaseCriada={handleFaseCriada}
           onConexaoCriada={(cardPaiId, cardFilhoId, cardFilhoTitulo) => {
             setCardsFilhos((prev) => new Set(prev).add(cardFilhoId));
             setFilhosPorCard((prev) => ({

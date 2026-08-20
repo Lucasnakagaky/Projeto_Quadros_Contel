@@ -166,6 +166,34 @@ export async function deleteFase(id: string): Promise<void> {
   });
 }
 
+/** Garante que o pipe tenha uma fase "Arquivado" (cria se ainda não existir), usada pelo botão
+ * "Arquivado" do card. Idempotente por nome — se o pipe já tiver uma fase "Arquivado" (mesmo
+ * criada manualmente antes dessa feature), ela é reaproveitada como está. */
+export async function ensureFaseArquivada(pipeId: string): Promise<Fase> {
+  return mutateDb((db) => {
+    const pipe = db.pipes.find((p) => p.id === pipeId);
+    if (!pipe) notFound("Pipe");
+    const existente = db.fases.find((f) => f.pipeId === pipeId && f.nome === "Arquivado");
+    if (existente) return existente;
+    const maxOrdem = db.fases
+      .filter((f) => f.pipeId === pipeId)
+      .reduce((max, f) => Math.max(max, f.ordem), -1);
+    const fase: Fase = {
+      id: uuid(),
+      pipeId,
+      nome: "Arquivado",
+      cor: "#3B82F6",
+      ordem: maxOrdem + 1,
+      ehFinal: true,
+      permiteCriarCards: true,
+      descricao: "",
+      responsavelIds: [],
+    };
+    db.fases.push(fase);
+    return fase;
+  });
+}
+
 // ---------- Campos ----------
 export async function listCamposByPipe(pipeId: string): Promise<Campo[]> {
   const db = await readDb();
@@ -214,23 +242,52 @@ export async function createCampo(
   });
 }
 
+// Escapa texto puro para uso seguro dentro de HTML e troca quebras de linha por <br> — usado
+// para migrar valores existentes de "Descrição da Demanda" de texto_longo para texto_formatado
+// sem perder as quebras de linha nem correr risco de um "<" virar tag.
+function textoParaHtml(texto: string): string {
+  return texto
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/\n/g, "<br>");
+}
+
 export async function ensureDescricaoDemandaCampo(pipeId: string): Promise<Campo> {
   return mutateDb((db) => {
     const pipe = db.pipes.find((p) => p.id === pipeId);
     if (!pipe) notFound("Pipe");
-    // "texto_longo" é um tipo genérico (pode já existir para outros fins no pipe),
-    // então a checagem de idempotência é por título, não só por tipo.
+    // "texto_longo"/"texto_formatado" são tipos genéricos (podem já existir para outros fins
+    // no pipe), então a checagem de idempotência é por título, não só por tipo. Aceita os dois
+    // tipos porque pipes criados antes desta migração ainda têm o campo como "texto_longo" — a
+    // migração abaixo promove esses no lugar, para ganhar o editor com imagem sem duplicar campo.
     const existente = db.campos.find(
-      (c) => c.pipeId === pipeId && c.tipo === "texto_longo" && c.titulo === "Descrição da Demanda"
+      (c) =>
+        c.pipeId === pipeId &&
+        c.titulo === "Descrição da Demanda" &&
+        (c.tipo === "texto_longo" || c.tipo === "texto_formatado")
     );
-    if (existente) return existente;
+    if (existente) {
+      if (existente.tipo === "texto_longo") {
+        existente.tipo = "texto_formatado";
+        db.cards
+          .filter((card) => card.pipeId === pipeId)
+          .forEach((card) => {
+            const valor = card.valoresCampos[existente.id];
+            if (typeof valor === "string" && valor) {
+              card.valoresCampos[existente.id] = textoParaHtml(valor);
+            }
+          });
+      }
+      return existente;
+    }
     const maxOrdem = db.campos
       .filter((c) => c.pipeId === pipeId)
       .reduce((max, c) => Math.max(max, c.ordem), -1);
     const campo: Campo = {
       id: uuid(),
       pipeId,
-      tipo: "texto_longo",
+      tipo: "texto_formatado",
       titulo: "Descrição da Demanda",
       obrigatorio: false,
       descricao: "",
@@ -272,6 +329,38 @@ export async function ensureConexaoPipeCampo(pipeId: string): Promise<Campo> {
       arquivado: false,
       ordem: maxOrdem + 1,
       config: { pipeDestinoId: pipeId, modoConexao: "criar", cardinalidade: "varios" },
+    };
+    db.campos.push(campo);
+    return campo;
+  });
+}
+
+/** Garante que o pipe tenha um campo "Cards vinculados" (cria se ainda não existir), usado pelo
+ * botão "Conectar card" — vínculo livre entre cards do mesmo pipe, sem relação de pai/filho. */
+export async function ensureCardsVinculadosCampo(pipeId: string): Promise<Campo> {
+  return mutateDb((db) => {
+    const pipe = db.pipes.find((p) => p.id === pipeId);
+    if (!pipe) notFound("Pipe");
+    const existente = db.campos.find((c) => c.pipeId === pipeId && c.tipo === "cards_vinculados");
+    if (existente) return existente;
+    const maxOrdem = db.campos
+      .filter((c) => c.pipeId === pipeId)
+      .reduce((max, c) => Math.max(max, c.ordem), -1);
+    const campo: Campo = {
+      id: uuid(),
+      pipeId,
+      tipo: "cards_vinculados",
+      titulo: "Cards vinculados",
+      obrigatorio: false,
+      descricao: "",
+      textoAjuda: "",
+      visualizacaoCompacta: false,
+      editavelEmOutrasFases: false,
+      valorUnico: false,
+      validacaoCustomizada: "",
+      arquivado: false,
+      ordem: maxOrdem + 1,
+      config: { cardinalidade: "varios", bidirecional: true },
     };
     db.campos.push(campo);
     return campo;

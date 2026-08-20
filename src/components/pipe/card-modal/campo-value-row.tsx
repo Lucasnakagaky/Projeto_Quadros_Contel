@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { Paperclip, Pencil, Trash2, X } from "lucide-react";
+import { Paperclip, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -15,12 +15,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { CampoIcon } from "./campo-icon";
+import { ImageLightbox, ImagemAmpliada } from "./image-lightbox";
 import { RichTextEditor } from "./rich-text-editor";
 import { api } from "@/lib/api-client";
-import { Campo, CORES_ETIQUETA, Etiqueta, Usuario } from "@/lib/types";
+import { Campo, Usuario } from "@/lib/types";
 import { stringArray } from "@/lib/campo-utils";
 import { sanitizeHtml } from "@/lib/sanitize-html";
-import { cn, iniciais } from "@/lib/utils";
+import { iniciais } from "@/lib/utils";
 
 type Anexo = { nome: string; url: string };
 type RelacaoExterna = { id: string; rotulo: string };
@@ -45,37 +46,34 @@ function formatarMoeda(valor: unknown, codigoMoeda: string): string {
 export function CampoValueRow({
   campo,
   cardId,
-  pipeId,
   valor,
-  etiquetas,
   usuarios,
   onSave,
-  onEtiquetaCriada,
-  onEtiquetaAtualizada,
-  onEtiquetaExcluida,
 }: {
   campo: Campo;
   cardId: string;
-  pipeId: string;
   valor: unknown;
-  etiquetas: Etiqueta[];
   usuarios: Usuario[];
   onSave: (valor: unknown) => void;
-  onEtiquetaCriada: (etiqueta: Etiqueta) => void;
-  onEtiquetaAtualizada: (etiqueta: Etiqueta) => void;
-  onEtiquetaExcluida: (etiquetaId: string) => void;
 }) {
   const [editing, setEditing] = useState(false);
   const [rascunho, setRascunho] = useState<string>(typeof valor === "string" ? valor : "");
-  const [criandoEtiqueta, setCriandoEtiqueta] = useState(false);
-  const [nomeEtiqueta, setNomeEtiqueta] = useState("");
-  const [corEtiqueta, setCorEtiqueta] = useState(CORES_ETIQUETA[0]);
-  const [editandoEtiquetaId, setEditandoEtiquetaId] = useState<string | null>(null);
-  const [nomeEdicaoEtiqueta, setNomeEdicaoEtiqueta] = useState("");
-  const [corEdicaoEtiqueta, setCorEdicaoEtiqueta] = useState(CORES_ETIQUETA[0]);
   const [enviando, setEnviando] = useState(false);
   const [relacionandoDb, setRelacionandoDb] = useState(false);
   const [novaRelacaoDb, setNovaRelacaoDb] = useState("");
+  const [imagemAmpliada, setImagemAmpliada] = useState<ImagemAmpliada>(null);
+  const conteudoDescricaoRef = useRef<HTMLDivElement>(null);
+
+  // Torna as imagens da descrição focáveis/anunciáveis por teclado (o conteúdo vem de
+  // dangerouslySetInnerHTML, então não dá pra passar tabIndex/aria-label via JSX direto nelas).
+  // No-op pra qualquer campo.tipo que não seja "texto_formatado" (a ref nunca é anexada).
+  useEffect(() => {
+    conteudoDescricaoRef.current?.querySelectorAll("img").forEach((img) => {
+      img.tabIndex = 0;
+      img.setAttribute("role", "button");
+      img.setAttribute("aria-label", img.alt ? `Ampliar imagem: ${img.alt}` : "Ampliar imagem");
+    });
+  }, [valor]);
 
   function iniciarEdicao() {
     setRascunho(typeof valor === "string" ? valor : "");
@@ -118,61 +116,6 @@ export function CampoValueRow({
   }
 
   const vazio = valor === undefined || valor === null || valor === "";
-
-  async function criarEtiqueta() {
-    if (!nomeEtiqueta.trim()) return;
-    try {
-      const etiqueta = await api.post<Etiqueta>(`/api/pipes/${pipeId}/etiquetas`, {
-        nome: nomeEtiqueta.trim(),
-        cor: corEtiqueta,
-      });
-      onEtiquetaCriada(etiqueta);
-      const atuais = stringArray(valor);
-      onSave([...atuais, etiqueta.id]);
-      setNomeEtiqueta("");
-      setCriandoEtiqueta(false);
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Erro ao criar etiqueta");
-    }
-  }
-
-  function iniciarEdicaoEtiqueta(etiqueta: Etiqueta) {
-    setCriandoEtiqueta(false);
-    setEditandoEtiquetaId(etiqueta.id);
-    setNomeEdicaoEtiqueta(etiqueta.nome);
-    setCorEdicaoEtiqueta(etiqueta.cor);
-  }
-
-  async function salvarEdicaoEtiqueta() {
-    if (!editandoEtiquetaId || !nomeEdicaoEtiqueta.trim()) return;
-    try {
-      const atualizada = await api.patch<Etiqueta>(
-        `/api/pipes/${pipeId}/etiquetas/${editandoEtiquetaId}`,
-        { nome: nomeEdicaoEtiqueta.trim(), cor: corEdicaoEtiqueta }
-      );
-      onEtiquetaAtualizada(atualizada);
-      setEditandoEtiquetaId(null);
-      toast.success("Etiqueta atualizada");
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Erro ao atualizar etiqueta");
-    }
-  }
-
-  async function excluirEtiqueta(etiquetaId: string) {
-    if (!confirm("Excluir esta etiqueta? Ela será removida de todos os cards.")) return;
-    try {
-      await api.delete(`/api/pipes/${pipeId}/etiquetas/${etiquetaId}`);
-      onEtiquetaExcluida(etiquetaId);
-      const atuais = stringArray(valor);
-      if (atuais.includes(etiquetaId)) {
-        onSave(atuais.filter((id) => id !== etiquetaId));
-      }
-      if (editandoEtiquetaId === etiquetaId) setEditandoEtiquetaId(null);
-      toast.success("Etiqueta excluída");
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Erro ao excluir etiqueta");
-    }
-  }
 
   async function upload(file: File) {
     setEnviando(true);
@@ -265,119 +208,6 @@ export function CampoValueRow({
             <span className="text-sm text-slate-700">{u.nome}</span>
           </label>
         ))}
-      </div>
-    );
-  }
-
-  // Etiquetas: multi-seleção + criar/editar/excluir
-  if (campo.tipo === "etiquetas") {
-    const ids = stringArray(valor);
-    return linha(
-      <div className="flex flex-col gap-1">
-        {etiquetas.map((e) =>
-          editandoEtiquetaId === e.id ? (
-            <div key={e.id} className="flex flex-col gap-2 rounded-md border border-slate-200 p-2">
-              <Input
-                autoFocus
-                value={nomeEdicaoEtiqueta}
-                onChange={(ev) => setNomeEdicaoEtiqueta(ev.target.value)}
-                onKeyDown={(ev) => ev.key === "Enter" && salvarEdicaoEtiqueta()}
-              />
-              <div className="flex flex-wrap gap-1.5">
-                {CORES_ETIQUETA.map((c) => (
-                  <button
-                    key={c}
-                    type="button"
-                    onClick={() => setCorEdicaoEtiqueta(c)}
-                    className={cn(
-                      "h-6 w-6 rounded-full",
-                      corEdicaoEtiqueta === c && "ring-2 ring-slate-900 ring-offset-1"
-                    )}
-                    style={{ backgroundColor: c }}
-                  />
-                ))}
-              </div>
-              <div className="flex gap-2">
-                <Button size="sm" onClick={salvarEdicaoEtiqueta}>
-                  Salvar
-                </Button>
-                <Button size="sm" variant="ghost" onClick={() => setEditandoEtiquetaId(null)}>
-                  Cancelar
-                </Button>
-              </div>
-            </div>
-          ) : (
-            <div key={e.id} className="group flex items-center gap-2 rounded px-1 py-0.5 hover:bg-slate-50">
-              <label className="flex flex-1 cursor-pointer items-center gap-2 min-w-0">
-                <Checkbox
-                  checked={ids.includes(e.id)}
-                  onCheckedChange={() =>
-                    onSave(ids.includes(e.id) ? ids.filter((id) => id !== e.id) : [...ids, e.id])
-                  }
-                />
-                <span className="h-3 w-3 shrink-0 rounded-full" style={{ backgroundColor: e.cor }} />
-                <span className="truncate text-sm text-slate-700">{e.nome}</span>
-              </label>
-              <button
-                type="button"
-                onClick={() => iniciarEdicaoEtiqueta(e)}
-                className="shrink-0 text-slate-400 opacity-0 hover:text-slate-700 group-hover:opacity-100"
-                aria-label="Editar etiqueta"
-              >
-                <Pencil size={12} />
-              </button>
-              <button
-                type="button"
-                onClick={() => excluirEtiqueta(e.id)}
-                className="shrink-0 text-slate-400 opacity-0 hover:text-red-600 group-hover:opacity-100"
-                aria-label="Excluir etiqueta"
-              >
-                <Trash2 size={12} />
-              </button>
-            </div>
-          )
-        )}
-
-        {criandoEtiqueta ? (
-          <div className="flex flex-col gap-2 rounded-md border border-slate-200 p-2">
-            <Input
-              autoFocus
-              placeholder="Nome da etiqueta"
-              value={nomeEtiqueta}
-              onChange={(e) => setNomeEtiqueta(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && criarEtiqueta()}
-            />
-            <div className="flex flex-wrap gap-1.5">
-              {CORES_ETIQUETA.map((c) => (
-                <button
-                  key={c}
-                  type="button"
-                  onClick={() => setCorEtiqueta(c)}
-                  className={cn(
-                    "h-6 w-6 rounded-full",
-                    corEtiqueta === c && "ring-2 ring-slate-900 ring-offset-1"
-                  )}
-                  style={{ backgroundColor: c }}
-                />
-              ))}
-            </div>
-            <div className="flex gap-2">
-              <Button size="sm" onClick={criarEtiqueta}>
-                Salvar
-              </Button>
-              <Button size="sm" variant="ghost" onClick={() => setCriandoEtiqueta(false)}>
-                Cancelar
-              </Button>
-            </div>
-          </div>
-        ) : (
-          <button
-            onClick={() => setCriandoEtiqueta(true)}
-            className="self-start text-xs text-blue-600 hover:underline"
-          >
-            + Criar nova etiqueta
-          </button>
-        )}
       </div>
     );
   }
@@ -590,31 +420,54 @@ export function CampoValueRow({
     );
   }
 
-  // Texto formatado: editor com negrito/itálico/listas (armazena HTML sanitizado)
+  // Texto formatado: editor com negrito/itálico/listas/imagem (armazena HTML sanitizado)
   if (campo.tipo === "texto_formatado") {
     const html = typeof valor === "string" ? valor : "";
     if (!editing) {
+      // Clique/Enter/Espaço numa <img> abre o lightbox em vez de entrar em modo de edição —
+      // intercepta antes do onClick do <button> (stopPropagation) só quando o alvo é a imagem;
+      // clicar em qualquer outro ponto do texto continua abrindo a edição normalmente.
+      function aoInteragirComImagem(e: React.SyntheticEvent) {
+        const alvo = e.target as HTMLElement;
+        if (alvo.tagName !== "IMG") return;
+        e.preventDefault();
+        e.stopPropagation();
+        const img = alvo as HTMLImageElement;
+        setImagemAmpliada({ src: img.src, alt: img.alt });
+      }
       return linha(
-        <button
-          onClick={iniciarEdicao}
-          className="w-full rounded px-1 -mx-1 text-left text-sm text-slate-700 hover:bg-slate-50"
-        >
-          {htmlEstaVazio(html) ? (
-            <span className="text-slate-400">Clique aqui para adicionar</span>
-          ) : (
-            <div
-              className="[&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5"
-              // Sanitiza também na renderização (defesa em profundidade): o valor pode ter
-              // sido salvo por outro caminho que não passa pelo RichTextEditor (ex.: rascunho
-              // de criação de card, que usa um Textarea simples).
-              dangerouslySetInnerHTML={{ __html: sanitizeHtml(html) }}
-            />
-          )}
-        </button>
+        <>
+          <button
+            onClick={iniciarEdicao}
+            className="w-full rounded px-1 -mx-1 text-left text-sm text-slate-700 hover:bg-slate-50"
+          >
+            {htmlEstaVazio(html) ? (
+              <span className="text-slate-400">Clique aqui para adicionar</span>
+            ) : (
+              <div
+                ref={conteudoDescricaoRef}
+                className="[&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_img]:max-w-full [&_img]:rounded [&_img]:cursor-zoom-in"
+                // Sanitiza também na renderização (defesa em profundidade): o valor pode ter
+                // sido salvo por outro caminho que não passa pelo RichTextEditor (ex.: rascunho
+                // de criação de card, que usa um Textarea simples).
+                dangerouslySetInnerHTML={{ __html: sanitizeHtml(html) }}
+                onClick={aoInteragirComImagem}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") aoInteragirComImagem(e);
+                }}
+              />
+            )}
+          </button>
+          <ImageLightbox
+            imagem={imagemAmpliada}
+            onOpenChange={(open) => !open && setImagemAmpliada(null)}
+          />
+        </>
       );
     }
     return linha(
       <RichTextEditor
+        cardId={cardId}
         valorInicial={sanitizeHtml(html)}
         onSalvar={(novoHtml) => {
           const vazio = htmlEstaVazio(novoHtml);
@@ -630,7 +483,7 @@ export function CampoValueRow({
     );
   }
 
-  // Texto longo (texto plano, sem formatação — ex.: "Descrição da Demanda")
+  // Texto longo (texto plano, sem formatação)
   if (campo.tipo === "texto_longo") {
     const textareaId = `campo-textarea-${campo.id}`;
     if (!editing) {

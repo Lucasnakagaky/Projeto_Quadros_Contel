@@ -23,9 +23,19 @@ vi.mock("./db", () => {
   };
 });
 
-const { createCampo, createCard, createPipe, listFasesByPipe, updateCampo, updateCard } = await import(
-  "./store"
-);
+const {
+  createCampo,
+  createCard,
+  createPipe,
+  ensureCardsVinculadosCampo,
+  ensureDescricaoDemandaCampo,
+  ensureFaseArquivada,
+  getCard,
+  listCamposByPipe,
+  listFasesByPipe,
+  updateCampo,
+  updateCard,
+} = await import("./store");
 
 describe("updateCampo", () => {
   it("persiste arquivado, valorUnico, validacaoCustomizada e config.moeda", async () => {
@@ -102,5 +112,105 @@ describe("updateCard — validação de valor único", () => {
     await expect(
       updateCard(card.id, { valoresCampos: { [campo.id]: "ABC-1" } })
     ).resolves.not.toThrow();
+  });
+});
+
+describe("ensureFaseArquivada", () => {
+  it("cria a fase 'Arquivado' como fase final quando ela ainda não existe", async () => {
+    const pipe = await createPipe("Pipe de teste — ensureFaseArquivada cria");
+
+    const fase = await ensureFaseArquivada(pipe.id);
+
+    expect(fase.nome).toBe("Arquivado");
+    expect(fase.ehFinal).toBe(true);
+    expect(fase.pipeId).toBe(pipe.id);
+  });
+
+  it("reaproveita a fase 'Arquivado' existente em vez de duplicar", async () => {
+    const pipe = await createPipe("Pipe de teste — ensureFaseArquivada idempotente");
+
+    const primeira = await ensureFaseArquivada(pipe.id);
+    const segunda = await ensureFaseArquivada(pipe.id);
+
+    expect(segunda.id).toBe(primeira.id);
+    const fases = await listFasesByPipe(pipe.id);
+    expect(fases.filter((f) => f.nome === "Arquivado")).toHaveLength(1);
+  });
+});
+
+describe("ensureCardsVinculadosCampo", () => {
+  it("cria o campo 'Cards vinculados' (bidirecional, vários) quando ele ainda não existe", async () => {
+    const pipe = await createPipe("Pipe de teste — ensureCardsVinculadosCampo cria");
+
+    const campo = await ensureCardsVinculadosCampo(pipe.id);
+
+    expect(campo.titulo).toBe("Cards vinculados");
+    expect(campo.tipo).toBe("cards_vinculados");
+    expect(campo.config.bidirecional).toBe(true);
+    expect(campo.config.cardinalidade).toBe("varios");
+  });
+
+  it("reaproveita o campo existente em vez de duplicar", async () => {
+    const pipe = await createPipe("Pipe de teste — ensureCardsVinculadosCampo idempotente");
+
+    const primeiro = await ensureCardsVinculadosCampo(pipe.id);
+    const segundo = await ensureCardsVinculadosCampo(pipe.id);
+
+    expect(segundo.id).toBe(primeiro.id);
+    const campos = await listCamposByPipe(pipe.id);
+    expect(campos.filter((c) => c.tipo === "cards_vinculados")).toHaveLength(1);
+  });
+});
+
+describe("ensureDescricaoDemandaCampo", () => {
+  it("cria o campo já como texto_formatado quando ele ainda não existe", async () => {
+    const pipe = await createPipe("Pipe de teste — ensureDescricaoDemandaCampo cria");
+
+    const campo = await ensureDescricaoDemandaCampo(pipe.id);
+
+    expect(campo.titulo).toBe("Descrição da Demanda");
+    expect(campo.tipo).toBe("texto_formatado");
+  });
+
+  it("migra um campo texto_longo existente para texto_formatado preservando o valor com quebras de linha", async () => {
+    const pipe = await createPipe("Pipe de teste — ensureDescricaoDemandaCampo migra");
+    const fases = await listFasesByPipe(pipe.id);
+    const campoAntigo = await createCampo(pipe.id, {
+      tipo: "texto_longo",
+      titulo: "Descrição da Demanda",
+    });
+    const card = await createCard({ pipeId: pipe.id, faseId: fases[0].id, titulo: "Card com descrição" });
+    await updateCard(card.id, {
+      valoresCampos: { [campoAntigo.id]: "Linha 1\nLinha 2 com <tag> & cia" },
+    });
+
+    const migrado = await ensureDescricaoDemandaCampo(pipe.id);
+
+    expect(migrado.id).toBe(campoAntigo.id);
+    expect(migrado.tipo).toBe("texto_formatado");
+    const cardAtualizado = await getCard(card.id);
+    expect(cardAtualizado.valoresCampos[campoAntigo.id]).toBe(
+      "Linha 1<br>Linha 2 com &lt;tag&gt; &amp; cia"
+    );
+  });
+
+  it("não duplica o campo nem re-escapa o valor numa segunda chamada", async () => {
+    const pipe = await createPipe("Pipe de teste — ensureDescricaoDemandaCampo idempotente");
+    const fases = await listFasesByPipe(pipe.id);
+    const campoAntigo = await createCampo(pipe.id, {
+      tipo: "texto_longo",
+      titulo: "Descrição da Demanda",
+    });
+    const card = await createCard({ pipeId: pipe.id, faseId: fases[0].id, titulo: "Card" });
+    await updateCard(card.id, { valoresCampos: { [campoAntigo.id]: "Texto simples" } });
+
+    await ensureDescricaoDemandaCampo(pipe.id);
+    const segunda = await ensureDescricaoDemandaCampo(pipe.id);
+
+    expect(segunda.id).toBe(campoAntigo.id);
+    const campos = await listCamposByPipe(pipe.id);
+    expect(campos.filter((c) => c.titulo === "Descrição da Demanda")).toHaveLength(1);
+    const cardAtualizado = await getCard(card.id);
+    expect(cardAtualizado.valoresCampos[campoAntigo.id]).toBe("Texto simples");
   });
 });
