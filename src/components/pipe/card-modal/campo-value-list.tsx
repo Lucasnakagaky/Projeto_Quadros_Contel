@@ -21,6 +21,10 @@ export function CampoValueList({
       c.tipo !== "conexao_pipe" &&
       c.tipo !== "cards_vinculados" &&
       c.tipo !== "etiquetas" &&
+      // "Descrição da Demanda" mudou pra coluna "Fase atual" (card-detail-modal.tsx) — exclui
+      // aqui pra não duplicar o id do campo no DOM. Checagem dupla (tipo + título) porque
+      // "texto_formatado" é um tipo genérico que o usuário pode reaproveitar em outro campo.
+      !(c.tipo === "texto_formatado" && c.titulo === "Descrição da Demanda") &&
       !c.arquivado
   );
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import {
   Activity,
@@ -19,7 +19,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { api } from "@/lib/api-client";
@@ -28,6 +28,7 @@ import { campoPorTipo, stringArray } from "@/lib/campo-utils";
 import { tempoRelativo } from "@/lib/utils";
 import { CardDetail, CardLinkResolvida, ConexaoResolvida } from "./types";
 import { CampoValueList } from "./campo-value-list";
+import { CampoValueRow } from "./campo-value-row";
 import { FormBuilder } from "../form-builder/form-builder";
 import { ChildCardsField } from "./child-cards-field";
 import { EtiquetasPopover } from "./etiquetas-popover";
@@ -63,6 +64,7 @@ function AbaEmBreve({ label }: { label: string }) {
 
 export function CardDetailModal({
   cardId,
+  cards,
   focarDescricaoAoAbrir,
   onClose,
   onCardUpdated,
@@ -74,6 +76,10 @@ export function CardDetailModal({
   onNavigateToCard,
 }: {
   cardId: string;
+  /** Todos os cards do pipe (não só o atual) — usado pra contar quantos cards usam cada
+   * etiqueta ao confirmar exclusão dentro do EtiquetasPopover (mesmo dado que
+   * EtiquetasManagerModal já recebe de pipe-board.tsx). */
+  cards: Card[];
   // true quando o modal deve abrir já rolado/destacado no campo "Descrição da Demanda" — usado
   // ao criar um card filho, cujo formulário inicial não suporta imagem (é um Textarea simples),
   // pra levar o usuário direto pro editor completo (com upload de imagem) assim que o card existe.
@@ -92,6 +98,24 @@ export function CardDetailModal({
   const [titulo, setTitulo] = useState("");
   const [tabAtiva, setTabAtiva] = useState("form");
   const [configurandoCampos, setConfigurandoCampos] = useState(false);
+  const tituloRef = useRef<HTMLTextAreaElement>(null);
+  // Sinaliza (sem re-render) que o EtiquetasPopover está com uma edição inline de etiqueta em
+  // andamento — usado no onEscapeKeyDown do Dialog logo abaixo. O input inline de edição não é
+  // um Dialog Radix (é só um <input> comum), então o listener de Esc do Radix (fase de captura
+  // no document) roda ANTES de qualquer preventDefault/stopPropagation que o próprio input
+  // tentasse fazer, fechando o card inteiro. O prop onEscapeKeyDown é o ponto de extensão que o
+  // próprio Radix expõe pra isso — mesma ideia de layer stack que ele já usa entre Dialogs
+  // aninhados, replicada manualmente pra esse único filho que não é um Dialog.
+  const etiquetaEmEdicaoRef = useRef(false);
+
+  // Cresce a altura do textarea do título junto com o conteúdo — cobre tanto a digitação
+  // quanto o preenchimento inicial assíncrono de `titulo` (ver `carregar()` abaixo).
+  useLayoutEffect(() => {
+    const el = tituloRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${el.scrollHeight}px`;
+  }, [titulo]);
 
   const carregar = useCallback(async () => {
     try {
@@ -323,28 +347,43 @@ export function CardDetailModal({
   const camposConexaoPipe = campos.filter((c) => c.tipo === "conexao_pipe");
   const campoCardsVinculados = campos.find((c) => c.tipo === "cards_vinculados");
   const campoEtiquetas = campos.find((c) => c.tipo === "etiquetas");
+  const campoDescricao = campos.find(
+    (c) => c.tipo === "texto_formatado" && c.titulo === "Descrição da Demanda"
+  );
   const idsEtiquetas = campoEtiquetas ? stringArray(card.valoresCampos[campoEtiquetas.id]) : [];
-  const etiquetasSelecionadas = etiquetas.filter((e) => idsEtiquetas.includes(e.id));
   void pipe;
 
   return (
     <>
     <Dialog open onOpenChange={handleOpenChange}>
-      <DialogContent className="max-w-6xl">
+      <DialogContent
+        className="max-w-6xl"
+        onEscapeKeyDown={(e) => {
+          if (etiquetaEmEdicaoRef.current) e.preventDefault();
+        }}
+      >
         <DialogTitle className="sr-only">{card.titulo || "Detalhes do card"}</DialogTitle>
         <DialogDescription className="sr-only">
           Detalhes, campos e atividades do card {card.titulo}
         </DialogDescription>
         {/* 3 colunas independentes (padrão Pipefy): card | fase atual | ações da fase.
             Divididas por borda (não gap), cada uma com seu próprio padding interno. */}
-        <div className="grid grid-cols-1 md:grid-cols-[1fr_240px_240px]">
+        <div className="grid grid-cols-1 md:grid-cols-[minmax(0,4fr)_minmax(0,5fr)_240px]">
           {/* Coluna 1 — Card */}
-          <div className="flex min-w-0 flex-col gap-3 p-5">
-            <Input
+          <div className="flex min-w-0 flex-col gap-3 px-5 py-6">
+            <Textarea
+              ref={tituloRef}
+              rows={1}
               value={titulo}
               onChange={(e) => setTitulo(e.target.value)}
               onBlur={() => titulo.trim() && titulo !== card.titulo && patchCard({ titulo })}
-              className="h-auto flex-1 border-none px-0 text-xl font-bold shadow-none focus:ring-0"
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  e.currentTarget.blur();
+                }
+              }}
+              className="h-auto shrink-0 resize-none overflow-hidden border-none px-0 py-0 text-xl font-bold shadow-none focus:ring-0"
             />
 
             <div className="flex flex-wrap items-center gap-2">
@@ -357,32 +396,21 @@ export function CardDetailModal({
                 <CalendarClock size={12} />
                 Vencimento
               </Button>
-              <EtiquetasPopover
-                pipeId={card.pipeId}
-                etiquetas={etiquetas}
-                selecionadas={idsEtiquetas}
-                onSalvarSelecao={(ids) => campoEtiquetas && salvarValorCampo(campoEtiquetas.id, ids)}
-                onEtiquetaCriada={(e) => atualizarEtiquetas([...etiquetas, e])}
-                onEtiquetaAtualizada={(e) =>
-                  atualizarEtiquetas(etiquetas.map((et) => (et.id === e.id ? e : et)))
-                }
-                onEtiquetaExcluida={(id) => atualizarEtiquetas(etiquetas.filter((et) => et.id !== id))}
-              />
             </div>
 
-            {etiquetasSelecionadas.length > 0 && (
-              <div className="flex flex-wrap gap-1.5">
-                {etiquetasSelecionadas.map((e) => (
-                  <span
-                    key={e.id}
-                    className="rounded-full px-2.5 py-0.5 text-xs font-medium"
-                    style={{ backgroundColor: `${e.cor}1f`, color: e.cor }}
-                  >
-                    {e.nome}
-                  </span>
-                ))}
-              </div>
-            )}
+            {/* Linha própria (não divide com o botão Vencimento): as pills podem quebrar em
+                várias linhas, e um trigger de altura variável ao lado de um botão de altura fixa
+                (items-center) quebraria o alinhamento vertical. */}
+            <EtiquetasPopover
+              pipeId={card.pipeId}
+              etiquetas={etiquetas}
+              cards={cards}
+              campos={campos}
+              selecionadas={idsEtiquetas}
+              onSalvarSelecao={(ids) => campoEtiquetas && salvarValorCampo(campoEtiquetas.id, ids)}
+              onEtiquetasChanged={atualizarEtiquetas}
+              emEdicaoRef={etiquetaEmEdicaoRef}
+            />
 
             <div className="border-t border-[rgb(220,223,229)]" />
 
@@ -526,8 +554,8 @@ export function CardDetailModal({
               que o Grid estique esta coluna para acompanhar a altura da coluna 1 quando ela
               tem muito conteúdo — sem isso, o scroll compartilhado deixava um vão enorme de
               espaço em branco abaixo do texto curto desta coluna. */}
-          <div className="flex flex-col border-t border-[rgb(220,223,229)] md:self-start md:border-l md:border-t-0">
-            <div className="flex shrink-0 items-center justify-between gap-2 border-b border-[rgb(220,223,229)] p-5">
+          <div className="flex min-w-0 flex-col border-t border-[rgb(220,223,229)] md:self-start md:border-l md:border-t-0">
+            <div className="flex shrink-0 items-center justify-between gap-2 border-b border-[rgb(220,223,229)] p-5 pt-6">
               <div className="flex flex-col gap-1">
                 <span className="text-xs font-semibold text-slate-500">Fase atual</span>
                 {faseAtual && (
@@ -549,11 +577,23 @@ export function CardDetailModal({
                 <Settings2 size={16} />
               </button>
             </div>
-            <div className="flex flex-1 flex-col gap-2 p-5">
+            <div className="flex flex-1 flex-col gap-2 p-5 pb-6">
               {faseAtual?.descricao ? (
                 <p className="whitespace-pre-wrap text-sm text-slate-600">{faseAtual.descricao}</p>
               ) : (
                 <p className="text-sm text-slate-400">Nenhuma informação adicional desta fase.</p>
+              )}
+
+              {campoDescricao && (
+                <div className="border-t border-[rgb(220,223,229)] pt-3">
+                  <CampoValueRow
+                    campo={campoDescricao}
+                    cardId={card.id}
+                    usuarios={usuarios}
+                    valor={card.valoresCampos[campoDescricao.id]}
+                    onSave={(valor) => salvarValorCampo(campoDescricao.id, valor)}
+                  />
+                </div>
               )}
             </div>
           </div>
@@ -565,7 +605,7 @@ export function CardDetailModal({
               dropdown do Popover é posicionado com position:absolute (não usa portal) — um
               ancestral com overflow-y-auto cortaria o dropdown, já que "overflow-y: auto"
               força o browser a clipar também o eixo X. */}
-          <div className="flex flex-col border-t border-[rgb(220,223,229)] p-5 pt-6 md:self-start md:border-l md:border-t-0">
+          <div className="flex flex-col border-t border-[rgb(220,223,229)] px-5 py-6 md:self-start md:border-l md:border-t-0">
             <div className="flex shrink-0 flex-col gap-3">
               <span className="text-sm font-semibold text-slate-800">Mover card para fase</span>
               <MoverFasePopover fases={fases} faseAtualId={card.faseId} onMover={moverFase} />
@@ -592,7 +632,7 @@ export function CardDetailModal({
               </div>
             </div>
 
-            <div className="flex min-h-0 flex-1 flex-col gap-4 md:overflow-y-auto">
+            <div className="flex min-h-0 flex-1 flex-col gap-4 pb-4 md:overflow-y-auto">
               <div className="mt-4 border-t border-[rgb(220,223,229)] pt-4">
                 <button
                   onClick={() => setConfigurandoCampos(true)}

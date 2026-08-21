@@ -24,7 +24,7 @@ test.describe("Criar card filho — Descrição da Demanda", () => {
       expect(cardFilhoId).not.toEqual(seed.cardId);
 
       // o título no cabeçalho do modal já é o do card filho (confirma que trocou de card mesmo)
-      const tituloInput = page.getByRole("dialog").locator("input").first();
+      const tituloInput = page.getByRole("dialog").locator("input, textarea").first();
       await expect(tituloInput).toHaveValue("[E2E] card filho");
 
       // campo "Descrição da Demanda" (texto_formatado, com upload de imagem) está visível, sem

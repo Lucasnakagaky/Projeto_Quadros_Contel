@@ -20,9 +20,20 @@ export function Popover({
   useEffect(() => {
     if (!open) return;
     function handler(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
-        setOpen(false);
+      const alvo = e.target as Node;
+      if (ref.current?.contains(alvo)) return;
+      if (alvo instanceof Element && ref.current) {
+        const dialogAncestor = alvo.closest('[role="dialog"]');
+        // Um Dialog Radix aberto a partir de dentro do popover (ex.: EtiquetaFormModal) é
+        // renderizado via Portal direto em document.body — no DOM real ele NÃO é descendente do
+        // ref do popover, mesmo sendo descendente na árvore React. Sem essa checagem, qualquer
+        // clique dentro desse modal (inclusive no botão "Salvar") seria lido como "clique fora" e
+        // fecharia o popover — e junto o modal — antes do modal processar o próprio clique.
+        // Só ignora quando o dialog encontrado NÃO contém este popover — um dialog ancestral
+        // (ex.: o modal do card, que contém o próprio popover) ainda deve fechar normalmente.
+        if (dialogAncestor && !dialogAncestor.contains(ref.current)) return;
       }
+      setOpen(false);
     }
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);

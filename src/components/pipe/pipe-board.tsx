@@ -27,6 +27,7 @@ import { CardChip } from "./card-chip";
 import { NovaFaseModal, NovaFaseValues } from "./nova-fase-modal";
 import { EmBrevePanel } from "./em-breve-panel";
 import { FormBuilder } from "./form-builder/form-builder";
+import { EtiquetasManagerModal } from "./etiquetas/etiquetas-manager-modal";
 import { CardDetailModal } from "./card-modal/card-detail-modal";
 import { TableView } from "./list-view/table-view";
 import { FlowCanvas } from "./flow-view/flow-canvas";
@@ -106,6 +107,7 @@ export function PipeBoard({
   const [view, setView] = useState<ViewValue>("kanban");
   const [novaFaseAberta, setNovaFaseAberta] = useState(false);
   const [camposAberto, setCamposAberto] = useState(false);
+  const [etiquetasAberto, setEtiquetasAberto] = useState(false);
   const [activeCard, setActiveCard] = useState<Card | null>(null);
   const [activeFase, setActiveFase] = useState<Fase | null>(null);
   const [overFaseId, setOverFaseId] = useState<string | null>(null);
@@ -375,7 +377,11 @@ export function PipeBoard({
 
   return (
     <div className="flex h-full flex-1 flex-col overflow-hidden">
-      <PipeHeader pipe={pipe} onAbrirCampos={() => setCamposAberto(true)} />
+      <PipeHeader
+        pipe={pipe}
+        onAbrirCampos={() => setCamposAberto(true)}
+        onAbrirEtiquetas={() => setEtiquetasAberto(true)}
+      />
 
       <Tabs
         value={view}
@@ -386,6 +392,13 @@ export function PipeBoard({
 
         <TabsContent value="kanban" className="flex flex-1 flex-col overflow-hidden bg-neutral-50">
           <DndContext
+            // id fixo: sem isso, o dnd-kit gera o aria-describedby dos itens arrastáveis
+            // (ex.: "DndDescribedBy-57") a partir de um contador incremental em módulo
+            // (@dnd-kit/utilities' useUniqueId) que não é resetado/sincronizado entre o SSR e a
+            // hidratação no cliente — cada um começa a contar de um ponto diferente, causando
+            // hydration mismatch. Passar um id explícito faz o dnd-kit usá-lo direto no lugar do
+            // contador, então servidor e cliente sempre geram o mesmo valor.
+            id="kanban-board"
             sensors={sensors}
             collisionDetection={closestCorners}
             onDragStart={handleDragStart}
@@ -428,6 +441,7 @@ export function PipeBoard({
                   <CardChip
                     card={activeCard}
                     campos={campos}
+                    etiquetas={etiquetas}
                     onOpen={() => {}}
                     dragOverlay
                   />
@@ -494,9 +508,20 @@ export function PipeBoard({
         </DialogContent>
       </Dialog>
 
+      <EtiquetasManagerModal
+        open={etiquetasAberto}
+        onOpenChange={setEtiquetasAberto}
+        pipeId={pipe.id}
+        etiquetas={etiquetas}
+        onEtiquetasChanged={setEtiquetas}
+        cards={Object.values(cardsById)}
+        campos={campos}
+      />
+
       {cardId && (
         <CardDetailModal
           cardId={cardId}
+          cards={Object.values(cardsById)}
           focarDescricaoAoAbrir={focarDescricaoAoAbrir}
           onClose={closeCard}
           onCardUpdated={handleCardUpdatedLocally}
