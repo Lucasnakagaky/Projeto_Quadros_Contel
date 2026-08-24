@@ -8,14 +8,12 @@ import {
   CalendarClock,
   CheckSquare,
   ClipboardList,
-  CornerDownRight,
   FileText,
   Mail,
   MessageSquare,
   Paperclip,
   Plus,
   Settings2,
-  Sparkles,
   Trash2,
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -612,27 +610,6 @@ export function CardDetailModal({
             <div className="flex shrink-0 flex-col gap-3">
               <span className="text-sm font-semibold text-slate-800">Mover card para fase</span>
               <MoverFasePopover fases={fases} faseAtualId={card.faseId} onMover={moverFase} />
-
-              <div className="flex flex-col gap-1.5 pl-0.5">
-                <button
-                  type="button"
-                  disabled
-                  title="Configurar mover cards — em breve"
-                  className="flex cursor-not-allowed items-center gap-1.5 self-start text-xs text-slate-400"
-                >
-                  <CornerDownRight size={12} />
-                  Configurar mover cards
-                </button>
-                <button
-                  type="button"
-                  disabled
-                  title="Mover cards por IA — em breve"
-                  className="flex cursor-not-allowed items-center gap-1.5 self-start text-xs text-slate-400"
-                >
-                  <Sparkles size={12} />
-                  Mover cards por IA
-                </button>
-              </div>
             </div>
 
             <div className="flex min-h-0 flex-1 flex-col gap-4 pb-4 md:overflow-y-auto">
