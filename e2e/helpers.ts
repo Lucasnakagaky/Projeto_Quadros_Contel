@@ -55,3 +55,23 @@ export async function colarTexto(page: Page, texto: string) {
   }, texto);
   await page.keyboard.press("Control+V");
 }
+
+// Escreve um único ClipboardItem com DUAS representações simultâneas (text/html com texto ao
+// redor + um item image/* solto) — simula uma fonte real que oferece ambos pra uma mesma
+// operação de copiar (ex.: "texto + imagem + texto" de um e-mail/página). Regressão-alvo: um
+// item de imagem solto no clipboard não pode mais descartar o texto que veio junto, nem causar
+// upload duplicado da mesma imagem.
+export async function colarHtmlComImagemBruta(page: Page, html: string, pngBase64: string) {
+  await page.evaluate(
+    async ({ htmlColado, png }) => {
+      const bytes = Uint8Array.from(atob(png), (c) => c.charCodeAt(0));
+      const item = new ClipboardItem({
+        "text/html": new Blob([htmlColado], { type: "text/html" }),
+        "image/png": new Blob([bytes], { type: "image/png" }),
+      });
+      await navigator.clipboard.write([item]);
+    },
+    { htmlColado: html, png: pngBase64 }
+  );
+  await page.keyboard.press("Control+V");
+}

@@ -108,11 +108,16 @@ export function RichTextEditor({
   valorInicial,
   onSalvar,
   onCancelar,
+  onAnexoCriado,
 }: {
   cardId: string;
   valorInicial: string;
   onSalvar: (html: string) => void;
   onCancelar: () => void;
+  /** Chamado a cada upload bem-sucedido (toolbar, paste de imagem crua ou imagem embutida no
+   * HTML colado) — permite ao pai (card-detail-modal) refletir o novo anexo na aba "Anexos" ao
+   * vivo, sem precisar fechar/reabrir o card. */
+  onAnexoCriado?: (anexo: Anexo) => void;
 }) {
   const editorRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -144,6 +149,7 @@ export function RichTextEditor({
       const anexo = await api.post<Anexo>(`/api/cards/${cardId}/attachments`, formData);
       document.execCommand("insertImage", false, anexo.url);
       editorRef.current?.querySelector(`img[src="${anexo.url}"]`)?.setAttribute("alt", file.name);
+      onAnexoCriado?.(anexo);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Erro ao enviar imagem");
     } finally {
@@ -152,55 +158,118 @@ export function RichTextEditor({
   }
 
   async function handlePaste(e: React.ClipboardEvent<HTMLDivElement>) {
+    e.preventDefault();
+
+    // Lê TUDO do clipboardData de forma síncrona, antes de qualquer await — o DataTransfer do
+    // evento de paste não sobrevive de forma confiável a um retorno ao event loop (alguns
+    // navegadores esvaziam o objeto assim que a função async atinge o primeiro await), então os
+    // itens de imagem e o texto/HTML precisam ser extraídos aqui em cima, antes de qualquer
+    // upload assíncrono.
     const imagens = Array.from(e.clipboardData.items).filter((item) => item.type.startsWith("image/"));
-    if (imagens.length > 0) {
-      e.preventDefault();
-      for (const item of imagens) {
-        const file = item.getAsFile();
-        if (file) await inserirImagem(file);
-      }
-      return;
+    const arquivosDeImagem = imagens.map((item) => item.getAsFile()).filter((f): f is File => f !== null);
+    const rawHtml = e.clipboardData.getData("text/html");
+    const rawTexto = e.clipboardData.getData("text/plain");
+
+    // Item(ns) de imagem solta no clipboard (ex.: screenshot copiado, ou "copiar imagem" de um
+    // app): envia cada um pelo mesmo caminho do botão da toolbar.
+    for (const file of arquivosDeImagem) {
+      await inserirImagem(file);
     }
 
-    // Sem item de imagem solto no clipboard: em vez de deixar o paste nativo do navegador
-    // inserir o HTML "sujo" direto no DOM, sanitiza com a mesma whitelist do Salvar/exibição
-    // ANTES de inserir — senão spans com estilo/cor/fonte (ou um documento inteiro colado do
-    // Word) aparecem formatados durante a edição e só "somem" de surpresa depois do Salvar.
-    e.preventDefault();
-    const rawHtml = e.clipboardData.getData("text/html");
-    const htmlParaInserir = rawHtml || textoParaHtmlEscapado(e.clipboardData.getData("text/plain"));
+    // Texto/HTML que veio junto no mesmo paste (ex.: "texto + imagem + texto" copiado de um
+    // e-mail, página web ou documento) — antes um item de imagem solta fazia a função retornar
+    // cedo e descartava esse texto inteiro; agora ele é sempre inserido. Em vez de deixar o
+    // paste nativo do navegador inserir o HTML "sujo" direto no DOM, sanitiza com a mesma
+    // whitelist do Salvar/exibição ANTES de inserir — senão spans com estilo/cor/fonte (ou um
+    // documento inteiro colado do Word) aparecem formatados durante a edição e só "somem" de
+    // surpresa depois do Salvar.
+    const htmlParaInserir = rawHtml || textoParaHtmlEscapado(rawTexto);
     if (htmlParaInserir) {
-      // permitirImagemTemporaria: imagem embutida no HTML colado (data:/blob:) ainda não foi
-      // enviada — precisa sobreviver a esta sanitização pra enviarImagensColadasEmbutidas achar
-      // e trocar pelo upload real logo abaixo; o sanitizeHtml do Salvar (sem essa opção) volta a
-      // bloquear data:/blob:, então uma imagem que falhar no upload não escapa pra produção.
-      inserirHtmlNoCursor(sanitizeHtml(htmlParaInserir, { permitirImagemTemporaria: true }));
+      // permitirImagemTemporaria: imagem embutida no HTML colado (data:/blob:/http(s)) ainda não
+      // foi enviada — precisa sobreviver a esta sanitização pra enviarImagensColadasEmbutidas
+      // achar e trocar pelo upload real logo abaixo; o sanitizeHtml do Salvar (sem essa opção)
+      // volta a bloquear, então uma imagem que falhar no upload não escapa pra produção. Se já
+      // havia imagem(ns) solta(s) acima, NÃO permite imagem temporária aqui: alguns navegadores
+      // trazem tanto um item image/* cru quanto um <img> referenciando a mesma imagem dentro do
+      // HTML pra uma única operação de copiar — sem essa guarda, a mesma imagem seria enviada
+      // duas vezes (uma por inserirImagem, outra por enviarImagensColadasEmbutidas).
+      const opts = arquivosDeImagem.length > 0 ? undefined : { permitirImagemTemporaria: true };
+      inserirHtmlNoCursor(sanitizeHtml(htmlParaInserir, opts));
     }
 
     void enviarImagensColadasEmbutidas();
   }
 
+  function precisaReupload(src: string): boolean {
+    return (
+      src.startsWith("data:") ||
+      src.startsWith("blob:") ||
+      src.startsWith("http://") ||
+      src.startsWith("https://")
+    );
+  }
+
+  // Se o src colado for uma URL absoluta apontando pro próprio /uploads/ deste app (ex.:
+  // usuário colou um trecho de OUTRA descrição que já tinha essa imagem), não é uma imagem
+  // nova — só normaliza pra forma relativa (a forma que sanitizeHtml exige pra sobreviver ao
+  // Salvar), sem reenviar. Sem isso, um src absoluto do próprio host cairia no fetch+upload
+  // abaixo e duplicaria o anexo.
+  function resolverUploadProprio(src: string): string | null {
+    try {
+      const url = new URL(src, window.location.href);
+      if (url.origin === window.location.origin && url.pathname.startsWith("/uploads/")) {
+        return url.pathname;
+      }
+    } catch {
+      // src não é uma URL válida — ignora, segue o fluxo normal
+    }
+    return null;
+  }
+
+  // data:/blob: só existem no próprio navegador (o servidor não tem como buscá-las) — seguem
+  // sendo baixadas aqui no cliente e reenviadas como arquivo, como já era. Uma URL http(s) por
+  // outro lado é buscada pelo SERVIDOR (ver enviarImagemRemota): a maioria dos hosts reais
+  // (SharePoint, páginas web, e-mail) não manda cabeçalho CORS permissivo pra imagens, então um
+  // fetch(src) daqui do navegador falharia silenciosamente pra praticamente todo mundo.
+  async function enviarImagemEmbutidaLocal(img: HTMLImageElement) {
+    const src = img.getAttribute("src") ?? "";
+    const blob = await (await fetch(src)).blob();
+    const ext = blob.type.split("/")[1] ?? "png";
+    const formData = new FormData();
+    formData.append("file", new File([blob], `colada.${ext}`, { type: blob.type || "image/png" }));
+    return api.post<Anexo>(`/api/cards/${cardId}/attachments`, formData);
+  }
+
+  async function enviarImagemRemota(img: HTMLImageElement) {
+    const src = img.getAttribute("src") ?? "";
+    return api.post<Anexo>(`/api/cards/${cardId}/attachments`, { url: src });
+  }
+
   async function enviarImagensColadasEmbutidas() {
-    const imgs = Array.from(editorRef.current?.querySelectorAll("img") ?? []).filter((img) => {
+    const candidatas: HTMLImageElement[] = [];
+    for (const img of Array.from(editorRef.current?.querySelectorAll("img") ?? [])) {
       const src = img.getAttribute("src") ?? "";
-      return src.startsWith("data:") || src.startsWith("blob:");
-    });
-    if (imgs.length === 0) return;
+      const uploadProprio = resolverUploadProprio(src);
+      if (uploadProprio) {
+        img.setAttribute("src", uploadProprio);
+        continue;
+      }
+      if (precisaReupload(src)) candidatas.push(img);
+    }
+    if (candidatas.length === 0) return;
     setEnviando(true);
     try {
-      for (const img of imgs) {
+      for (const img of candidatas) {
         const src = img.getAttribute("src") ?? "";
         try {
-          const blob = await (await fetch(src)).blob();
-          const ext = blob.type.split("/")[1] ?? "png";
-          const formData = new FormData();
-          formData.append("file", new File([blob], `colada.${ext}`, { type: blob.type || "image/png" }));
-          const anexo = await api.post<Anexo>(`/api/cards/${cardId}/attachments`, formData);
+          const remota = src.startsWith("http://") || src.startsWith("https://");
+          const anexo = remota ? await enviarImagemRemota(img) : await enviarImagemEmbutidaLocal(img);
           img.setAttribute("src", anexo.url);
+          onAnexoCriado?.(anexo);
         } catch (err) {
-          // Upload falhou: remove em vez de deixar um src que o sanitizeHtml vai apagar
-          // silenciosamente no Salvar (sem essa remoção, o alt/texto ao redor da imagem ficaria
-          // com um "buraco" sem explicação).
+          // Upload falhou (rede, host não permitido, imagem exige autenticação etc.): remove em
+          // vez de deixar um src que o sanitizeHtml vai apagar silenciosamente no Salvar (sem
+          // essa remoção, o texto ao redor da imagem ficaria com um "buraco" sem explicação).
           img.remove();
           toast.error(err instanceof Error ? err.message : "Erro ao enviar imagem colada");
         }

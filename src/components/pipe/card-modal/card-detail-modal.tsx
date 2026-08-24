@@ -592,6 +592,9 @@ export function CardDetailModal({
                     usuarios={usuarios}
                     valor={card.valoresCampos[campoDescricao.id]}
                     onSave={(valor) => salvarValorCampo(campoDescricao.id, valor)}
+                    onAnexoCriado={(anexo) =>
+                      setDetail((prev) => (prev ? { ...prev, anexos: [...prev.anexos, anexo] } : prev))
+                    }
                   />
                 </div>
               )}

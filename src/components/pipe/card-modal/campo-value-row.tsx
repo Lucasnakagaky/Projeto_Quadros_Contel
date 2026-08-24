@@ -18,7 +18,7 @@ import { CampoIcon } from "./campo-icon";
 import { ImageLightbox, ImagemAmpliada } from "./image-lightbox";
 import { RichTextEditor } from "./rich-text-editor";
 import { api } from "@/lib/api-client";
-import { Campo, Usuario } from "@/lib/types";
+import { Anexo as AnexoReal, Campo, Usuario } from "@/lib/types";
 import { stringArray } from "@/lib/campo-utils";
 import { sanitizeHtml } from "@/lib/sanitize-html";
 import { iniciais } from "@/lib/utils";
@@ -49,12 +49,16 @@ export function CampoValueRow({
   valor,
   usuarios,
   onSave,
+  onAnexoCriado,
 }: {
   campo: Campo;
   cardId: string;
   valor: unknown;
   usuarios: Usuario[];
   onSave: (valor: unknown) => void;
+  /** Repassado ao RichTextEditor do campo "texto_formatado" — notifica o pai de um anexo criado
+   * a partir de uma imagem colada/enviada na descrição, pra atualizar a aba "Anexos" ao vivo. */
+  onAnexoCriado?: (anexo: AnexoReal) => void;
 }) {
   const [editing, setEditing] = useState(false);
   const [rascunho, setRascunho] = useState<string>(typeof valor === "string" ? valor : "");
@@ -479,6 +483,7 @@ export function CampoValueRow({
           setEditing(false);
         }}
         onCancelar={cancelar}
+        onAnexoCriado={onAnexoCriado}
       />
     );
   }

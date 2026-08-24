@@ -4,7 +4,10 @@
  * (negrito, itálico, listas, parágrafos/quebras, imagem) e permite, por tag,
  * só os atributos estritamente necessários — evita persistir/renderizar
  * markup capaz de executar script (ex.: um <script>, um atributo onClick ou
- * um href/src com "javascript:"/"data:").
+ * um href/src com "javascript:"). No conteúdo persistido/renderizado, um
+ * img[src] só sobrevive se apontar para um upload local do próprio app
+ * ("/uploads/") — data:/blob:/http(s) só são aceitos temporariamente, durante
+ * a janela de edição de um paste, via permitirImagemTemporaria.
  */
 const TAGS_PERMITIDAS = new Set([
   "B",
@@ -34,17 +37,26 @@ const ATRIBUTOS_PERMITIDOS: Record<string, Set<string>> = {
 };
 
 export interface SanitizeHtmlOpts {
-  /** Aceita "data:"/"blob:" em img[src] além de "/uploads/" — usado só no momento do
-   * paste, antes do upload assíncrono trocar o src pela URL real do arquivo. */
+  /** Aceita "data:"/"blob:"/"http(s):" em img[src] além de "/uploads/" — usado só no momento
+   * do paste, antes do upload assíncrono trocar o src pela URL real do arquivo. Uma imagem
+   * embutida em HTML colado (Word, página web, SharePoint, e-mail) nem sempre vem como
+   * data:/blob: — muitas fontes preservam uma URL remota http(s) apontando pro host original.
+   * Aceitar isso só nesta janela temporária permite que enviarImagensColadasEmbutidas() baixe e
+   * reenvie a imagem como anexo real logo em seguida; o sanitizeHtml do Salvar (sem esta opção)
+   * volta a bloquear http(s), então uma URL remota nunca sobrevive ao conteúdo persistido nem é
+   * renderizada fora dessa janela fugaz. */
   permitirImagemTemporaria?: boolean;
 }
 
-// O "src" da imagem só é aceito se apontar para um upload local do próprio app (ou, com
-// permitirImagemTemporaria, para um blob local temporário) — bloqueia "javascript:" e hosts
-// externos, que é a garantia anti-XSS que este arquivo protege.
+// O "src" da imagem só é aceito se apontar para um upload local do próprio app, ou (com
+// permitirImagemTemporaria) para uma imagem temporária ainda não enviada — bloqueia sempre
+// "javascript:", que é a garantia anti-XSS que este arquivo protege.
 function srcValido(valor: string, opts?: SanitizeHtmlOpts): boolean {
   if (valor.startsWith("/uploads/")) return true;
-  if (opts?.permitirImagemTemporaria && (valor.startsWith("data:") || valor.startsWith("blob:"))) return true;
+  if (opts?.permitirImagemTemporaria) {
+    if (valor.startsWith("data:") || valor.startsWith("blob:")) return true;
+    if (valor.startsWith("http://") || valor.startsWith("https://")) return true;
+  }
   return false;
 }
 

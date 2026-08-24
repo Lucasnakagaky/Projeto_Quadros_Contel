@@ -76,13 +76,26 @@ describe("sanitizeHtml", () => {
       expect(comBlob).toContain('src="blob:http://localhost/abc-123"');
     });
 
-    it("com a opção, ainda bloqueia javascript: e hosts externos", () => {
+    it("com a opção, ainda bloqueia javascript:", () => {
       expect(sanitizeHtml('<img src="javascript:alert(1)">', { permitirImagemTemporaria: true })).not.toContain(
         "<img"
       );
-      expect(
-        sanitizeHtml('<img src="https://evil.example/x.png">', { permitirImagemTemporaria: true })
-      ).not.toContain("<img");
+    });
+
+    it("com a opção, permite http(s) temporariamente (imagem remota embutida no HTML colado)", () => {
+      const comHttps = sanitizeHtml('<img src="https://cdn.example.com/x.png">', {
+        permitirImagemTemporaria: true,
+      });
+      expect(comHttps).toContain('src="https://cdn.example.com/x.png"');
+
+      const comHttp = sanitizeHtml('<img src="http://cdn.example.com/x.png">', {
+        permitirImagemTemporaria: true,
+      });
+      expect(comHttp).toContain('src="http://cdn.example.com/x.png"');
+    });
+
+    it("sem a opção, continua bloqueando http(s) (garantia preservada no Salvar/renderização)", () => {
+      expect(sanitizeHtml('<img src="https://evil.example/x.png">')).not.toContain("<img");
     });
   });
 });

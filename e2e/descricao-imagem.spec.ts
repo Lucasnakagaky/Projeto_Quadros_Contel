@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { abrirCard, cleanupCard, colarHtml, colarTexto, seedCard } from "./helpers";
+import { abrirCard, cleanupCard, colarHtml, colarHtmlComImagemBruta, colarTexto, seedCard } from "./helpers";
 
 // PNGs mínimos válidos (1x1), usados como payload de "imagem colada" — bytes diferentes entre
 // as duas para o cenário de "duas imagens" não depender só do nome de arquivo gerado no upload.
@@ -54,11 +54,18 @@ test.describe("Descrição da Demanda — colar imagem embutida (data:) no HTML"
 
       const imgFinal = page.locator(`#campo-${seed.campoId} img`);
       await expect(imgFinal).toHaveAttribute("src", /^\/uploads\//);
+      const srcFinal = await imgFinal.getAttribute("src");
       const htmlFinal = await page.locator(`#campo-${seed.campoId}`).innerHTML();
       expect(htmlFinal).toContain("<b>negrito</b>");
       expect(htmlFinal).toMatch(/<i>itálico<\/i>/);
       expect(htmlFinal).toContain("<br>");
       expect(htmlFinal).not.toContain("data:image");
+
+      // a MESMA imagem da descrição também aparece na aba Anexos do card — sem upload duplicado
+      await page.getByRole("tab", { name: /Anexos/ }).click();
+      const painelAnexos = page.getByRole("tabpanel");
+      await expect(painelAnexos.locator("li")).toHaveCount(1);
+      await expect(painelAnexos.locator(`a[href="${srcFinal}"]`)).toBeVisible();
     } finally {
       await cleanupCard(request, seed);
     }
@@ -97,6 +104,15 @@ test.describe("Descrição da Demanda — colar imagem embutida (data:) no HTML"
       await expect(imgsFinais).toHaveCount(2);
       await expect(imgsFinais.nth(0)).toHaveAttribute("src", /^\/uploads\//);
       await expect(imgsFinais.nth(1)).toHaveAttribute("src", /^\/uploads\//);
+      const srcFinal1 = await imgsFinais.nth(0).getAttribute("src");
+      const srcFinal2 = await imgsFinais.nth(1).getAttribute("src");
+
+      // as DUAS imagens da descrição também aparecem na aba Anexos — sem upload duplicado
+      await page.getByRole("tab", { name: /Anexos/ }).click();
+      const painelAnexos = page.getByRole("tabpanel");
+      await expect(painelAnexos.locator("li")).toHaveCount(2);
+      await expect(painelAnexos.locator(`a[href="${srcFinal1}"]`)).toBeVisible();
+      await expect(painelAnexos.locator(`a[href="${srcFinal2}"]`)).toBeVisible();
     } finally {
       await cleanupCard(request, seed);
     }
@@ -148,6 +164,153 @@ test.describe("Descrição da Demanda — colar imagem embutida (data:) no HTML"
       const htmlFinal = await campoFinal.innerHTML();
       expect(htmlFinal).toContain("<b>negrito</b>");
       expect(htmlFinal).not.toContain("<img");
+    } finally {
+      await cleanupCard(request, seed);
+    }
+  });
+
+  test("clipboard misto (item de imagem crua + text/html com texto ao redor): texto não é mais descartado, e não há upload duplicado", async ({
+    page,
+    context,
+    request,
+  }) => {
+    await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+    const seed = await seedCard(request, "[E2E] cenário 6 - clipboard misto imagem crua + html");
+    try {
+      await abrirCard(page, seed);
+      const campo = page.locator(`#campo-${seed.campoId}`);
+      await campo.getByRole("button", { name: "Clique aqui para adicionar" }).click();
+      const editor = campo.getByRole("textbox", { name: "Editor de atividades" });
+      await editor.click();
+
+      // Simula uma fonte que oferece, na MESMA operação de copiar, tanto um item image/* cru
+      // quanto text/html com texto ao redor referenciando essa mesma imagem — antes, o item de
+      // imagem cru fazia handlePaste retornar cedo e descartar todo o texto.
+      await colarHtmlComImagemBruta(
+        page,
+        `<p>Texto antes</p><img src="data:image/png;base64,${PNG_TRANSPARENTE}"><p>Texto depois</p>`,
+        PNG_TRANSPARENTE
+      );
+
+      await expect(editor).toContainText("Texto antes", { timeout: 10_000 });
+      await expect(editor).toContainText("Texto depois");
+      await expect(editor.locator("img")).toHaveAttribute("src", /^\/uploads\//, { timeout: 10_000 });
+      // exatamente 1 <img> no editor — a mesma imagem não deve aparecer duas vezes (uma pelo
+      // item cru, outra pelo <img> embutido no HTML referenciando a mesma imagem)
+      await expect(editor.locator("img")).toHaveCount(1);
+
+      await campo.getByRole("button", { name: "Salvar" }).click();
+      await page.goto(`/pipes/${seed.pipeId}`);
+      await abrirCard(page, seed);
+
+      const campoFinal = page.locator(`#campo-${seed.campoId}`);
+      await expect(campoFinal).toContainText("Texto antes");
+      await expect(campoFinal).toContainText("Texto depois");
+      await expect(campoFinal.locator("img")).toHaveCount(1);
+
+      // exatamente 1 anexo criado — sem duplicar por causa da imagem crua + <img> no mesmo HTML
+      const detalhe = await (await request.get(`/api/cards/${seed.cardId}`)).json();
+      expect(detalhe.anexos).toHaveLength(1);
+
+      await page.getByRole("tab", { name: /Anexos/ }).click();
+      await expect(page.getByRole("tabpanel").locator("li")).toHaveCount(1);
+    } finally {
+      await cleanupCard(request, seed);
+    }
+  });
+
+  test("imagem embutida como URL remota http(s) para um host interno/loopback: bloqueada com aviso, texto ao redor sobrevive", async ({
+    page,
+    context,
+    request,
+  }) => {
+    await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+    const seed = await seedCard(request, "[E2E] cenário 7 - imagem remota bloqueada (SSRF)");
+    try {
+      await abrirCard(page, seed);
+      const campo = page.locator(`#campo-${seed.campoId}`);
+      await campo.getByRole("button", { name: "Clique aqui para adicionar" }).click();
+      const editor = campo.getByRole("textbox", { name: "Editor de atividades" });
+      await editor.click();
+
+      // URL http(s) embutida no HTML colado, apontando pro próprio host local — o download é
+      // feito pelo SERVIDOR (não pelo navegador, que sofreria de CORS pra hosts reais), e o
+      // servidor deve recusar por ser um endereço interno/loopback (proteção contra SSRF), sem
+      // precisar mockar rede nenhuma pra este teste: a rejeição é real.
+      await colarHtml(
+        page,
+        `<p>Texto que deve sobreviver</p><img src="http://127.0.0.1:3000/favicon.ico">`
+      );
+
+      await expect(page.getByText(/não permitido/)).toBeVisible({ timeout: 10_000 });
+      await expect(editor.locator("img")).toHaveCount(0);
+      await expect(editor).toContainText("Texto que deve sobreviver");
+
+      await campo.getByRole("button", { name: "Salvar" }).click();
+      await page.goto(`/pipes/${seed.pipeId}`);
+      await abrirCard(page, seed);
+
+      const campoFinal = page.locator(`#campo-${seed.campoId}`);
+      await expect(campoFinal).toContainText("Texto que deve sobreviver");
+      const htmlFinal = await campoFinal.innerHTML();
+      expect(htmlFinal).not.toContain("<img");
+
+      const detalhe = await (await request.get(`/api/cards/${seed.cardId}`)).json();
+      expect(detalhe.anexos).toHaveLength(0);
+    } finally {
+      await cleanupCard(request, seed);
+    }
+  });
+
+  test("imagem embutida como URL absoluta pro próprio /uploads/ do app (ex.: colar trecho de outra descrição): normaliza sem duplicar anexo", async ({
+    page,
+    context,
+    request,
+  }) => {
+    await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+    const seed = await seedCard(request, "[E2E] cenário 8 - referência à própria imagem já enviada");
+    try {
+      await abrirCard(page, seed);
+      const campo = page.locator(`#campo-${seed.campoId}`);
+      await campo.getByRole("button", { name: "Clique aqui para adicionar" }).click();
+      const editor = campo.getByRole("textbox", { name: "Editor de atividades" });
+      await editor.click();
+
+      // Envia uma primeira imagem pelo botão da toolbar (fluxo convencional) pra ter uma URL
+      // real de /uploads/ já existente neste card.
+      const [fileChooser] = await Promise.all([
+        page.waitForEvent("filechooser"),
+        campo.getByRole("button", { name: "Inserir imagem" }).click(),
+      ]);
+      await fileChooser.setFiles({
+        name: "original.png",
+        mimeType: "image/png",
+        buffer: Buffer.from(PNG_TRANSPARENTE, "base64"),
+      });
+      await expect(editor.locator("img")).toHaveAttribute("src", /^\/uploads\//, { timeout: 10_000 });
+      const srcOriginal = await editor.locator("img").getAttribute("src");
+
+      // Cola um HTML referenciando essa MESMA imagem por URL absoluta (como o navegador
+      // costuma serializar ao copiar um trecho que contém uma imagem já hospedada) — não deve
+      // reenviar/duplicar, só normalizar pra forma relativa.
+      await colarHtml(page, `<p>Trecho copiado de outro lugar</p><img src="http://localhost:3000${srcOriginal}">`);
+
+      await expect(editor.locator("img")).toHaveCount(2, { timeout: 10_000 });
+      await expect(editor.locator("img").nth(1)).toHaveAttribute("src", srcOriginal ?? "");
+
+      await campo.getByRole("button", { name: "Salvar" }).click();
+      await page.goto(`/pipes/${seed.pipeId}`);
+      await abrirCard(page, seed);
+
+      const campoFinal = page.locator(`#campo-${seed.campoId}`);
+      await expect(campoFinal.locator("img")).toHaveCount(2);
+
+      // apenas 1 anexo no total — a segunda referência não criou um anexo novo
+      const detalhe = await (await request.get(`/api/cards/${seed.cardId}`)).json();
+      expect(detalhe.anexos).toHaveLength(1);
+
+      await page.getByRole("tab", { name: /Anexos/ }).click();
+      await expect(page.getByRole("tabpanel").locator("li")).toHaveCount(1);
     } finally {
       await cleanupCard(request, seed);
     }
