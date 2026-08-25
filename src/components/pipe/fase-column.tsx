@@ -31,10 +31,12 @@ export function FaseColumn({
   filhosPorCard,
   paisPorCard,
   isDropTarget = false,
+  filtroAtivo = false,
   onOpenCard,
   onCreateCard,
   onUpdateFase,
   onDeleteFase,
+  onFiltrarEtiqueta,
 }: {
   fase: Fase;
   cards: Card[];
@@ -44,10 +46,13 @@ export function FaseColumn({
   filhosPorCard: Record<string, CardRelacionado[]>;
   paisPorCard: Record<string, CardRelacionado[]>;
   isDropTarget?: boolean;
+  /** Há um filtro de pesquisa ativo no quadro — muda só a mensagem de coluna vazia. */
+  filtroAtivo?: boolean;
   onOpenCard: (id: string) => void;
   onCreateCard: (faseId: string) => void;
   onUpdateFase: (faseId: string, patch: Partial<NovaFaseValues> & { cor?: string }) => void;
   onDeleteFase: (faseId: string) => void;
+  onFiltrarEtiqueta?: (nome: string) => void;
 }) {
   const [configurando, setConfigurando] = useState(false);
 
@@ -159,6 +164,7 @@ export function FaseColumn({
                 pai={(paisPorCard[card.id] ?? [])[0]}
                 onOpen={() => onOpenCard(card.id)}
                 onOpenCard={onOpenCard}
+                onFiltrarEtiqueta={onFiltrarEtiqueta}
               />
             ))}
           </SortableContext>
@@ -167,7 +173,9 @@ export function FaseColumn({
             <div className="flex flex-col items-center gap-1.5 px-2 py-6 text-center">
               <Inbox size={20} className="text-slate-300" />
               <p className="text-[13px] text-slate-500">
-                {fase.descricao || "Nenhum card nesta fase."}
+                {filtroAtivo
+                  ? "Nenhum card nesta fase com esse filtro."
+                  : fase.descricao || "Nenhum card nesta fase."}
               </p>
             </div>
           )}

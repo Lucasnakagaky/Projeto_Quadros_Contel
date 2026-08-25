@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Plus } from "lucide-react";
 import { readDb } from "@/lib/db";
-import { PipeCard } from "@/components/pipe/pipe-card";
+import { PipesList } from "@/components/pipe/pipes-list";
 import { Button } from "@/components/ui/button";
 
 export default async function PipesPage() {
@@ -34,13 +34,13 @@ export default async function PipesPage() {
           </Link>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {pipes.map((pipe) => {
-            const faseCount = db.fases.filter((f) => f.pipeId === pipe.id).length;
-            const cardCount = db.cards.filter((c) => c.pipeId === pipe.id && !c.excluido).length;
-            return <PipeCard key={pipe.id} pipe={pipe} faseCount={faseCount} cardCount={cardCount} />;
-          })}
-        </div>
+        <PipesList
+          initialPipes={pipes.map((pipe) => ({
+            pipe,
+            faseCount: db.fases.filter((f) => f.pipeId === pipe.id).length,
+            cardCount: db.cards.filter((c) => c.pipeId === pipe.id && !c.excluido).length,
+          }))}
+        />
       )}
     </div>
   );

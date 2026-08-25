@@ -11,14 +11,22 @@ export const VIEWS = [
 
 export type ViewValue = (typeof VIEWS)[number]["value"];
 
-export function ViewTabs() {
+/**
+ * `right` fica ao lado das abas (ex.: o campo de filtro do Kanban). Precisa ser irmão do
+ * TabsList, nunca filho: o TabsList do Radix captura setas e digitação para navegar entre
+ * as abas, o que atrapalharia um input de texto colocado dentro dele.
+ */
+export function ViewTabs({ right }: { right?: React.ReactNode }) {
   return (
-    <TabsList className="border-b border-slate-200 px-6 py-2">
-      {VIEWS.map((v) => (
-        <TabsTrigger key={v.value} value={v.value}>
-          {v.label}
-        </TabsTrigger>
-      ))}
-    </TabsList>
+    <div className="flex flex-wrap items-center gap-3 border-b border-slate-200 px-6 py-2">
+      <TabsList>
+        {VIEWS.map((v) => (
+          <TabsTrigger key={v.value} value={v.value}>
+            {v.label}
+          </TabsTrigger>
+        ))}
+      </TabsList>
+      {right && <div className="ml-auto">{right}</div>}
+    </div>
   );
 }

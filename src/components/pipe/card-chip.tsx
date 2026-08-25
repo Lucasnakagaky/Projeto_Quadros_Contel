@@ -58,6 +58,7 @@ export function CardChip({
   pai,
   onOpen,
   onOpenCard,
+  onFiltrarEtiqueta,
   dragOverlay = false,
 }: {
   card: Card;
@@ -68,6 +69,8 @@ export function CardChip({
   pai?: CardRelacionado;
   onOpen: () => void;
   onOpenCard?: (id: string) => void;
+  /** Clique na etiqueta aplica o filtro do quadro por aquele nome (não abre o card). */
+  onFiltrarEtiqueta?: (nome: string) => void;
   dragOverlay?: boolean;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
@@ -143,13 +146,23 @@ export function CardChip({
             const etiqueta = etiquetas.find((e) => e.id === id);
             if (!etiqueta) return null;
             return (
-              <span
+              <button
                 key={id}
-                className="rounded-full px-2 py-0.5 text-[10px] font-semibold leading-4"
+                type="button"
+                // stopPropagation impede que o clique chegue ao onClick da raiz e abra o card.
+                // O pointerdown continua propagando de propósito, para o dnd-kit seguir
+                // permitindo arrastar o card pegando pela etiqueta.
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onFiltrarEtiqueta?.(etiqueta.nome);
+                }}
+                title={`Filtrar por etiqueta ${etiqueta.nome}`}
+                aria-label={`Filtrar por etiqueta ${etiqueta.nome}`}
+                className="cursor-pointer rounded-full px-2 py-0.5 text-[10px] font-semibold leading-4 transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
                 style={{ backgroundColor: `${etiqueta.cor}1f`, color: etiqueta.cor }}
               >
                 {etiqueta.nome}
-              </span>
+              </button>
             );
           })}
         </div>

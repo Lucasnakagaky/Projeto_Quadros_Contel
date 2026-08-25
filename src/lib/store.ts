@@ -76,6 +76,50 @@ export async function createPipe(nome: string): Promise<Pipe> {
   });
 }
 
+export type PipePatch = Partial<Pick<Pipe, "nome">>;
+
+export async function updatePipe(id: string, patch: PipePatch): Promise<Pipe> {
+  return mutateDb((db) => {
+    const pipe = db.pipes.find((p) => p.id === id);
+    if (!pipe) notFound("Pipe");
+    if (patch.nome !== undefined) pipe.nome = patch.nome.trim();
+    return pipe;
+  });
+}
+
+export async function deletePipe(id: string): Promise<void> {
+  return mutateDb((db) => {
+    const pipe = db.pipes.find((p) => p.id === id);
+    if (!pipe) notFound("Pipe");
+
+    const cardIds = db.cards.filter((c) => c.pipeId === id).map((c) => c.id);
+
+    db.pipes = db.pipes.filter((p) => p.id !== id);
+    db.fases = db.fases.filter((f) => f.pipeId !== id);
+    db.campos = db.campos.filter((c) => c.pipeId !== id);
+    db.etiquetas = db.etiquetas.filter((e) => e.pipeId !== id);
+    db.cards = db.cards.filter((c) => c.pipeId !== id);
+    db.checklists = db.checklists.filter((c) => !cardIds.includes(c.cardId));
+    db.comentarios = db.comentarios.filter((c) => !cardIds.includes(c.cardId));
+    db.anexos = db.anexos.filter((a) => !cardIds.includes(a.cardId));
+    db.conexoes = db.conexoes.filter(
+      (cx) => !cardIds.includes(cx.cardPaiId) && !cardIds.includes(cx.cardFilhoId)
+    );
+    db.cardLinks = db.cardLinks.filter(
+      (l) => !cardIds.includes(l.cardOrigemId) && !cardIds.includes(l.cardDestinoId)
+    );
+
+    // Campo "conexao_pipe" de outro pipe pode referenciar este pipe via config.pipeDestinoId
+    // (hoje só acontece auto-referenciado, ver ensureConexaoPipeCampo, mas limpamos
+    // defensivamente pra nunca deixar essa referência solta).
+    db.campos.forEach((c) => {
+      if (c.tipo === "conexao_pipe" && c.config.pipeDestinoId === id) {
+        delete c.config.pipeDestinoId;
+      }
+    });
+  });
+}
+
 export async function getPipeFull(pipeId: string) {
   const db = await readDb();
   const pipe = db.pipes.find((p) => p.id === pipeId);

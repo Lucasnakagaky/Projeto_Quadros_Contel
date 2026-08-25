@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useDeferredValue, useMemo, useState } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import {
@@ -15,13 +15,17 @@ import {
   type DragStartEvent,
 } from "@dnd-kit/core";
 import { SortableContext, arrayMove, horizontalListSortingStrategy } from "@dnd-kit/sortable";
-import { Plus } from "lucide-react";
+import { Plus, SearchX } from "lucide-react";
 import { Campo, Card, CardRelacionado, Etiqueta, Fase, Pipe, Usuario } from "@/lib/types";
 import { api } from "@/lib/api-client";
+import { filtrarColunas } from "@/lib/card-filter";
+import { campoPorTipo } from "@/lib/campo-utils";
+import { normalizarTexto } from "@/lib/utils";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { PipeHeader } from "./pipe-header";
 import { ViewTabs, VIEWS, ViewValue } from "./view-tabs";
+import { KanbanFiltro } from "./kanban-filtro";
 import { FaseColumn } from "./fase-column";
 import { CardChip } from "./card-chip";
 import { NovaFaseModal, NovaFaseValues } from "./nova-fase-modal";
@@ -105,6 +109,7 @@ export function PipeBoard({
     () => ({ ...paisPorCardIniciais })
   );
   const [view, setView] = useState<ViewValue>("kanban");
+  const [filtro, setFiltro] = useState("");
   const [novaFaseAberta, setNovaFaseAberta] = useState(false);
   const [camposAberto, setCamposAberto] = useState(false);
   const [etiquetasAberto, setEtiquetasAberto] = useState(false);
@@ -117,6 +122,24 @@ export function PipeBoard({
   );
 
   const faseIds = useMemo(() => fases.map((f) => `fase-${f.id}`), [fases]);
+
+  // Filtro do quadro: só oculta cards na renderização. O estado `columns` continua
+  // intacto, então o drag-and-drop e a ordem persistida seguem usando a lista completa.
+  // useDeferredValue mantém a digitação fluida sem precisar de debounce manual.
+  const filtroAdiado = useDeferredValue(filtro);
+  const filtroAtivo = filtroAdiado.trim().length > 0;
+
+  const campoEtiquetasId = useMemo(() => campoPorTipo(campos, "etiquetas")?.id, [campos]);
+  const nomeNormalizadoPorEtiquetaId = useMemo(
+    () => new Map(etiquetas.map((e) => [e.id, normalizarTexto(e.nome)])),
+    [etiquetas]
+  );
+
+  const { columnsFiltradas, total: totalFiltrado } = useMemo(
+    () =>
+      filtrarColunas(columns, cardsById, filtroAdiado, campoEtiquetasId, nomeNormalizadoPorEtiquetaId),
+    [columns, cardsById, filtroAdiado, campoEtiquetasId, nomeNormalizadoPorEtiquetaId]
+  );
 
   function findContainer(id: string): string | undefined {
     if (id in columns) return id;
@@ -388,9 +411,29 @@ export function PipeBoard({
         onValueChange={(v) => setView(v as ViewValue)}
         className="flex flex-1 flex-col overflow-hidden"
       >
-        <ViewTabs />
+        <ViewTabs
+          right={
+            view === "kanban" ? <KanbanFiltro valor={filtro} onChange={setFiltro} /> : null
+          }
+        />
 
         <TabsContent value="kanban" className="flex flex-1 flex-col overflow-hidden bg-neutral-50">
+          {filtroAtivo && totalFiltrado === 0 && (
+            <div
+              data-testid="filtro-sem-resultados"
+              className="mx-6 mt-4 flex flex-wrap items-center gap-3 rounded-md border border-slate-200 bg-white px-4 py-3 text-sm text-slate-600"
+            >
+              <SearchX size={16} className="shrink-0 text-slate-400" />
+              {/* role/aria-live só no texto: uma live region não deve envolver o botão */}
+              <span role="status">Nenhum card encontrado para este filtro.</span>
+              <button
+                onClick={() => setFiltro("")}
+                className="ml-auto rounded-md px-2 py-1 text-sm font-medium text-blue-600 hover:bg-blue-50 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
+              >
+                Limpar filtro
+              </button>
+            </div>
+          )}
           <DndContext
             // id fixo: sem isso, o dnd-kit gera o aria-describedby dos itens arrastáveis
             // (ex.: "DndDescribedBy-57") a partir de um contador incremental em módulo
@@ -411,17 +454,19 @@ export function PipeBoard({
                   <FaseColumn
                     key={fase.id}
                     fase={fase}
-                    cards={(columns[fase.id] ?? []).map((id) => cardsById[id])}
+                    cards={(columnsFiltradas[fase.id] ?? []).map((id) => cardsById[id])}
                     campos={campos}
                     etiquetas={etiquetas}
                     usuarios={usuarios}
                     filhosPorCard={filhosPorCard}
                     paisPorCard={paisPorCard}
                     isDropTarget={Boolean(activeCard) && overFaseId === fase.id}
+                    filtroAtivo={filtroAtivo}
                     onOpenCard={openCard}
                     onCreateCard={handleCreateCard}
                     onUpdateFase={handleUpdateFase}
                     onDeleteFase={handleDeleteFase}
+                    onFiltrarEtiqueta={setFiltro}
                   />
                 ))}
               </SortableContext>

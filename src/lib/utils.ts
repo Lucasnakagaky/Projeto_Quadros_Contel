@@ -7,6 +7,16 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+/** Normaliza texto para busca: sem acentos, minúsculo e sem espaços nas pontas
+ *  ("Manutenção" -> "manutencao"), para que a pesquisa ignore acento e caixa. */
+export function normalizarTexto(texto: string): string {
+  return texto
+    .normalize("NFD")
+    .replace(/\p{M}/gu, "")
+    .toLowerCase()
+    .trim();
+}
+
 export function iniciais(nome: string): string {
   const partes = nome.trim().split(/\s+/);
   if (partes.length === 1) return partes[0].slice(0, 2).toUpperCase();
