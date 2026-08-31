@@ -5,11 +5,11 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
 /**
- * Campo de pesquisa do Kanban — filtra os cards por título ou nome de etiqueta.
+ * Campo de pesquisa do quadro (Kanban) e da Lista — filtra os cards por título ou nome de etiqueta.
  * É controlado por quem monta (pipe-board), porque o mesmo estado também é
  * alimentado pelo clique numa etiqueta do card.
  */
-export function KanbanFiltro({
+export function CardsFiltro({
   valor,
   onChange,
 }: {

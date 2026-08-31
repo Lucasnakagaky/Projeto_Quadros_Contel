@@ -34,6 +34,8 @@ export function TableView({
   etiquetas,
   usuarios,
   cardsFilhos,
+  filtroAtivo = false,
+  onFiltrarEtiqueta,
   onOpenCard,
   onCreateCard,
   onMoverCards,
@@ -47,6 +49,10 @@ export function TableView({
   etiquetas: Etiqueta[];
   usuarios: Usuario[];
   cardsFilhos: Set<string>;
+  /** Há um filtro de pesquisa ativo no quadro — muda só a mensagem de lista vazia. */
+  filtroAtivo?: boolean;
+  /** Clique numa etiqueta da linha aplica o filtro por aquele nome (não abre o card). */
+  onFiltrarEtiqueta?: (nome: string) => void;
   onOpenCard: (cardId: string) => void;
   onCreateCard: (faseId: string) => void;
   onMoverCards: (cardIds: string[], faseId: string) => Promise<void>;
@@ -75,6 +81,12 @@ export function TableView({
     });
     return copia;
   }, [cards, sortColuna, sortDirecao, fases, campos, etiquetas, usuarios]);
+
+  const idsVisiveis = useMemo(() => new Set(cardsOrdenados.map((c) => c.id)), [cardsOrdenados]);
+  const selecionadosVisiveis = useMemo(
+    () => cardsOrdenados.filter((c) => selecionados.has(c.id)).map((c) => c.id),
+    [cardsOrdenados, selecionados]
+  );
 
   const colunasDefs = COLUNAS.filter((c) => colunasVisiveis.includes(c.id));
   const faseDestino = fases.find((f) => f.permiteCriarCards) ?? fases[0];
@@ -109,13 +121,20 @@ export function TableView({
   }
 
   function toggleTodos() {
-    setSelecionados((prev) =>
-      prev.size === cardsOrdenados.length ? new Set() : new Set(cardsOrdenados.map((c) => c.id))
-    );
+    setSelecionados((prev) => {
+      const todosMarcados = selecionadosVisiveis.length === cardsOrdenados.length;
+      if (todosMarcados) {
+        // Desmarca só os visíveis; o que estiver oculto pelo filtro fica como estava.
+        const next = new Set(prev);
+        for (const id of idsVisiveis) next.delete(id);
+        return next;
+      }
+      return new Set([...prev, ...idsVisiveis]);
+    });
   }
 
   async function handleMover(faseId: string) {
-    const ids = Array.from(selecionados);
+    const ids = selecionadosVisiveis;
     try {
       await onMoverCards(ids, faseId);
       const fase = fases.find((f) => f.id === faseId);
@@ -128,7 +147,7 @@ export function TableView({
   }
 
   async function handleExcluir() {
-    const ids = Array.from(selecionados);
+    const ids = selecionadosVisiveis;
     if (!confirm(`Mover ${ids.length} card(s) para a lixeira?`)) return;
     try {
       await onExcluirCards(ids);
@@ -141,7 +160,7 @@ export function TableView({
   }
 
   async function handleEditarEmMassa(campoId: string, valor: unknown) {
-    const ids = Array.from(selecionados);
+    const ids = selecionadosVisiveis;
     try {
       await onEditarEmMassa(ids, campoId, valor);
       toast.success("Configurações atualizadas");
@@ -153,9 +172,9 @@ export function TableView({
   }
 
   const estadoSelecaoTodos: boolean | "indeterminate" =
-    selecionados.size === 0
+    selecionadosVisiveis.length === 0
       ? false
-      : selecionados.size === cardsOrdenados.length
+      : selecionadosVisiveis.length === cardsOrdenados.length
         ? true
         : "indeterminate";
 
@@ -164,14 +183,18 @@ export function TableView({
       <div className="flex items-center justify-between px-6 py-3">
         <span className="text-sm text-slate-500">
           {cards.length} {cards.length === 1 ? "card" : "cards"}
+          {filtroAtivo && (cards.length === 1 ? " encontrado" : " encontrados")}
         </span>
         <ColumnVisibilityPopover colunasVisiveis={colunasVisiveis} onToggle={toggleColuna} />
       </div>
 
       <div className="flex-1 overflow-auto px-6 pb-4">
         {cards.length === 0 ? (
-          <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-slate-300 py-20 text-center text-slate-500">
-            Nenhum card neste pipe ainda.
+          <div
+            data-testid={filtroAtivo ? "lista-sem-resultados" : "lista-vazia"}
+            className="flex flex-col items-center justify-center rounded-lg border border-dashed border-slate-300 py-20 text-center text-slate-500"
+          >
+            {filtroAtivo ? "Nenhum card encontrado para este filtro." : "Nenhum card neste pipe ainda."}
           </div>
         ) : (
           <div className="overflow-x-auto rounded-lg border border-slate-200">
@@ -207,6 +230,7 @@ export function TableView({
                     selecionado={selecionados.has(card.id)}
                     onToggleSelecao={() => toggleCard(card.id)}
                     onAbrir={() => onOpenCard(card.id)}
+                    onFiltrarEtiqueta={onFiltrarEtiqueta}
                   />
                 ))}
               </tbody>
@@ -225,7 +249,7 @@ export function TableView({
       )}
 
       <BulkActionBar
-        quantidade={selecionados.size}
+        quantidade={selecionadosVisiveis.length}
         fases={fases}
         campos={campos}
         etiquetas={etiquetas}

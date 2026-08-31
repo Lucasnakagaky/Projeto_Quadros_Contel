@@ -24,6 +24,7 @@ export function TableRow({
   selecionado,
   onToggleSelecao,
   onAbrir,
+  onFiltrarEtiqueta,
 }: {
   card: Card;
   colunasVisiveis: ColunaId[];
@@ -35,6 +36,8 @@ export function TableRow({
   selecionado: boolean;
   onToggleSelecao: () => void;
   onAbrir: () => void;
+  /** Clique na etiqueta aplica o filtro da lista por aquele nome (não abre o card). */
+  onFiltrarEtiqueta?: (nome: string) => void;
 }) {
   const fase = fases.find((f) => f.id === card.faseId);
 
@@ -96,13 +99,21 @@ export function TableRow({
         return etiquetasCard.length > 0 ? (
           <div className="flex flex-wrap gap-1">
             {etiquetasCard.map((e) => (
-              <span
+              <button
                 key={e.id}
-                className="rounded-full px-2 py-0.5 text-[11px] font-medium whitespace-nowrap"
+                type="button"
+                // stopPropagation impede que o clique chegue ao onClick da <tr> e abra o card.
+                onClick={(ev) => {
+                  ev.stopPropagation();
+                  onFiltrarEtiqueta?.(e.nome);
+                }}
+                title={`Filtrar por etiqueta ${e.nome}`}
+                aria-label={`Filtrar por etiqueta ${e.nome}`}
+                className="cursor-pointer rounded-full px-2 py-0.5 text-[11px] font-medium whitespace-nowrap transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
                 style={{ backgroundColor: `${e.cor}1f`, color: e.cor }}
               >
                 {e.nome}
-              </span>
+              </button>
             ))}
           </div>
         ) : (

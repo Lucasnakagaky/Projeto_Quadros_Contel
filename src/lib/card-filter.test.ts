@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { filtrarColunas, ColumnsMap } from "./card-filter";
+import { filtrarCards, filtrarColunas, ColumnsMap } from "./card-filter";
 import { normalizarTexto } from "./utils";
 import { Card } from "./types";
 
@@ -152,5 +152,43 @@ describe("filtrarColunas", () => {
 
     expect(columnsFiltradas.entrada).toEqual(["c1"]);
     expect(total).toBe(3);
+  });
+});
+
+describe("filtrarCards", () => {
+  function lista(termo: string) {
+    return filtrarCards(CARDS, termo, CAMPO_ETIQUETAS_ID, indiceEtiquetas);
+  }
+
+  it("sem termo, devolve o mesmo array pela mesma referência", () => {
+    expect(lista("")).toBe(CARDS);
+    expect(lista("   ")).toBe(CARDS);
+  });
+
+  it("aplica a mesma regra de correspondência do quadro (título ou etiqueta)", () => {
+    expect(lista("Urgente").map((c) => c.id)).toEqual(["c1", "c2", "c3"]);
+    expect(lista("manut").map((c) => c.id)).toEqual(["c3", "c5"]);
+  });
+
+  it("ignora acento e caixa, e aceita trecho parcial", () => {
+    expect(lista("MANUTENCAO").map((c) => c.id)).toEqual(["c3", "c5"]);
+    expect(lista("urg").map((c) => c.id)).toEqual(["c1", "c2", "c3"]);
+  });
+
+  it("preserva a ordem original dos cards, ignorando o agrupamento por fase", () => {
+    // "Solicitação" casa com c4 (entrega) e c5 (entrada): a ordem seguida é a do array de
+    // entrada, não a das fases.
+    expect(lista("solicitacao").map((c) => c.id)).toEqual(["c4", "c5"]);
+  });
+
+  it("devolve lista vazia quando nada corresponde e não altera a origem", () => {
+    const snapshot = JSON.stringify(CARDS);
+
+    expect(lista("xyz-inexistente")).toEqual([]);
+    expect(JSON.stringify(CARDS)).toBe(snapshot);
+  });
+
+  it("filtra só pelo título quando o pipe não tem campo de etiquetas", () => {
+    expect(filtrarCards(CARDS, "Urgente", undefined, indiceEtiquetas)).toEqual([]);
   });
 });

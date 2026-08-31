@@ -70,3 +70,22 @@ export function filtrarColunas(
 
   return { columnsFiltradas, total };
 }
+
+/**
+ * Mesma regra de correspondência de `filtrarColunas`, só que sobre uma lista plana de cards —
+ * é o formato que a aba Lista usa. Devolve a mesma referência quando não há termo, pelo mesmo
+ * motivo (não invalidar memos à toa).
+ */
+export function filtrarCards(
+  cards: Card[],
+  termo: string,
+  campoEtiquetasId: string | undefined,
+  nomeNormalizadoPorEtiquetaId: Map<string, string>
+): Card[] {
+  const termoNormalizado = normalizarTexto(termo);
+  if (!termoNormalizado) return cards;
+
+  return cards.filter((card) =>
+    cardCorresponde(card, termoNormalizado, campoEtiquetasId, nomeNormalizadoPorEtiquetaId)
+  );
+}

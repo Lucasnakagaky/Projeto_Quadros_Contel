@@ -18,14 +18,14 @@ import { SortableContext, arrayMove, horizontalListSortingStrategy } from "@dnd-
 import { Plus, SearchX } from "lucide-react";
 import { Campo, Card, CardRelacionado, Etiqueta, Fase, Pipe, Usuario } from "@/lib/types";
 import { api } from "@/lib/api-client";
-import { filtrarColunas } from "@/lib/card-filter";
+import { filtrarCards, filtrarColunas } from "@/lib/card-filter";
 import { campoPorTipo } from "@/lib/campo-utils";
 import { normalizarTexto } from "@/lib/utils";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { PipeHeader } from "./pipe-header";
 import { ViewTabs, VIEWS, ViewValue } from "./view-tabs";
-import { KanbanFiltro } from "./kanban-filtro";
+import { CardsFiltro } from "./cards-filtro";
 import { FaseColumn } from "./fase-column";
 import { CardChip } from "./card-chip";
 import { NovaFaseModal, NovaFaseValues } from "./nova-fase-modal";
@@ -139,6 +139,19 @@ export function PipeBoard({
     () =>
       filtrarColunas(columns, cardsById, filtroAdiado, campoEtiquetasId, nomeNormalizadoPorEtiquetaId),
     [columns, cardsById, filtroAdiado, campoEtiquetasId, nomeNormalizadoPorEtiquetaId]
+  );
+
+  // A Lista usa a mesma regra de correspondência, mas sobre a lista plana de cards: ela não é
+  // agrupada por fase, então não dá pra reaproveitar `columnsFiltradas`.
+  const cardsDaLista = useMemo(
+    () =>
+      filtrarCards(
+        Object.values(cardsById),
+        filtroAdiado,
+        campoEtiquetasId,
+        nomeNormalizadoPorEtiquetaId
+      ),
+    [cardsById, filtroAdiado, campoEtiquetasId, nomeNormalizadoPorEtiquetaId]
   );
 
   function findContainer(id: string): string | undefined {
@@ -413,7 +426,11 @@ export function PipeBoard({
       >
         <ViewTabs
           right={
-            view === "kanban" ? <KanbanFiltro valor={filtro} onChange={setFiltro} /> : null
+            // Kanban e Lista compartilham o mesmo estado de filtro de propósito: trocar de aba
+            // mantém a pesquisa aplicada. Nas demais abas o campo some (nada pra filtrar).
+            view === "kanban" || view === "lista" ? (
+              <CardsFiltro valor={filtro} onChange={setFiltro} />
+            ) : null
           }
         />
 
@@ -504,12 +521,14 @@ export function PipeBoard({
         <TabsContent value="lista" className="flex flex-1 flex-col overflow-hidden">
           <TableView
             pipeId={pipe.id}
-            cards={Object.values(cardsById)}
+            cards={cardsDaLista}
             fases={fases}
             campos={campos}
             etiquetas={etiquetas}
             usuarios={usuarios}
             cardsFilhos={cardsFilhos}
+            filtroAtivo={filtroAtivo}
+            onFiltrarEtiqueta={setFiltro}
             onOpenCard={openCard}
             onCreateCard={handleCreateCard}
             onMoverCards={handleBulkMoverCards}
