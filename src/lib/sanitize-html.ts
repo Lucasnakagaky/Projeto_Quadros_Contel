@@ -111,3 +111,9 @@ export function sanitizeHtml(html: string, opts?: SanitizeHtmlOpts): string {
   sanitizarNo(template.content, opts);
   return template.innerHTML;
 }
+
+/** Um HTML "vazio" pode ter só `<br>`/markup residual sem texto — inclui imagens sem legenda, que hoje contam como vazio (mesmo comportamento que já valia para a Descrição da Demanda). */
+export function htmlEstaVazio(html: unknown): boolean {
+  if (typeof html !== "string") return true;
+  return html.replace(/<[^>]*>/g, "").trim().length === 0;
+}

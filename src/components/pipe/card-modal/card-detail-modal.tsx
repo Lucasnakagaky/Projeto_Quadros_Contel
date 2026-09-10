@@ -535,6 +535,9 @@ export function CardDetailModal({
                   cardId={cardId}
                   comentarios={comentarios}
                   onChanged={(c) => setDetail((prev) => (prev ? { ...prev, comentarios: c } : prev))}
+                  onAnexoCriado={(anexo) =>
+                    setDetail((prev) => (prev ? { ...prev, anexos: [...prev.anexos, anexo] } : prev))
+                  }
                 />
               </TabsContent>
 

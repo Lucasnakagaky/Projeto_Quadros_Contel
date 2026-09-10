@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { Paperclip, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -15,23 +15,18 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { CampoIcon } from "./campo-icon";
-import { ImageLightbox, ImagemAmpliada } from "./image-lightbox";
+import { HtmlFormatadoView } from "./html-formatado-view";
 import { RichTextEditor } from "./rich-text-editor";
 import { api } from "@/lib/api-client";
 import { Anexo as AnexoReal, Campo, Usuario } from "@/lib/types";
 import { stringArray } from "@/lib/campo-utils";
-import { sanitizeHtml } from "@/lib/sanitize-html";
+import { htmlEstaVazio, sanitizeHtml } from "@/lib/sanitize-html";
 import { iniciais } from "@/lib/utils";
 
 type Anexo = { nome: string; url: string };
 type RelacaoExterna = { id: string; rotulo: string };
 
 const TIPOS_TEXTO = new Set(["texto_curto", "email", "telefone", "numerico", "tempo"]);
-
-function htmlEstaVazio(html: unknown): boolean {
-  if (typeof html !== "string") return true;
-  return html.replace(/<[^>]*>/g, "").trim().length === 0;
-}
 
 function formatarMoeda(valor: unknown, codigoMoeda: string): string {
   const numero = typeof valor === "number" ? valor : parseFloat(String(valor));
@@ -65,19 +60,6 @@ export function CampoValueRow({
   const [enviando, setEnviando] = useState(false);
   const [relacionandoDb, setRelacionandoDb] = useState(false);
   const [novaRelacaoDb, setNovaRelacaoDb] = useState("");
-  const [imagemAmpliada, setImagemAmpliada] = useState<ImagemAmpliada>(null);
-  const conteudoDescricaoRef = useRef<HTMLDivElement>(null);
-
-  // Torna as imagens da descrição focáveis/anunciáveis por teclado (o conteúdo vem de
-  // dangerouslySetInnerHTML, então não dá pra passar tabIndex/aria-label via JSX direto nelas).
-  // No-op pra qualquer campo.tipo que não seja "texto_formatado" (a ref nunca é anexada).
-  useEffect(() => {
-    conteudoDescricaoRef.current?.querySelectorAll("img").forEach((img) => {
-      img.tabIndex = 0;
-      img.setAttribute("role", "button");
-      img.setAttribute("aria-label", img.alt ? `Ampliar imagem: ${img.alt}` : "Ampliar imagem");
-    });
-  }, [valor]);
 
   function iniciarEdicao() {
     setRascunho(typeof valor === "string" ? valor : "");
@@ -428,45 +410,20 @@ export function CampoValueRow({
   if (campo.tipo === "texto_formatado") {
     const html = typeof valor === "string" ? valor : "";
     if (!editing) {
-      // Clique/Enter/Espaço numa <img> abre o lightbox em vez de entrar em modo de edição —
-      // intercepta antes do onClick do <button> (stopPropagation) só quando o alvo é a imagem;
-      // clicar em qualquer outro ponto do texto continua abrindo a edição normalmente.
-      function aoInteragirComImagem(e: React.SyntheticEvent) {
-        const alvo = e.target as HTMLElement;
-        if (alvo.tagName !== "IMG") return;
-        e.preventDefault();
-        e.stopPropagation();
-        const img = alvo as HTMLImageElement;
-        setImagemAmpliada({ src: img.src, alt: img.alt });
-      }
       return linha(
-        <>
-          <button
-            onClick={iniciarEdicao}
-            className="w-full rounded px-1 -mx-1 text-left text-sm text-slate-700 hover:bg-slate-50"
-          >
-            {htmlEstaVazio(html) ? (
-              <span className="text-slate-400">Clique aqui para adicionar</span>
-            ) : (
-              <div
-                ref={conteudoDescricaoRef}
-                className="[&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_img]:max-w-full [&_img]:rounded [&_img]:cursor-zoom-in"
-                // Sanitiza também na renderização (defesa em profundidade): o valor pode ter
-                // sido salvo por outro caminho que não passa pelo RichTextEditor (ex.: rascunho
-                // de criação de card, que usa um Textarea simples).
-                dangerouslySetInnerHTML={{ __html: sanitizeHtml(html) }}
-                onClick={aoInteragirComImagem}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") aoInteragirComImagem(e);
-                }}
-              />
-            )}
-          </button>
-          <ImageLightbox
-            imagem={imagemAmpliada}
-            onOpenChange={(open) => !open && setImagemAmpliada(null)}
-          />
-        </>
+        // Clique/Enter/Espaço numa <img> abre o lightbox (tratado dentro de HtmlFormatadoView,
+        // que faz stopPropagation) em vez de entrar em modo de edição; clicar em qualquer outro
+        // ponto do texto continua abrindo a edição normalmente.
+        <button
+          onClick={iniciarEdicao}
+          className="w-full rounded px-1 -mx-1 text-left text-sm text-slate-700 hover:bg-slate-50"
+        >
+          {htmlEstaVazio(html) ? (
+            <span className="text-slate-400">Clique aqui para adicionar</span>
+          ) : (
+            <HtmlFormatadoView html={html} />
+          )}
+        </button>
       );
     }
     return linha(

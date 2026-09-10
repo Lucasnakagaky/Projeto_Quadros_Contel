@@ -109,6 +109,10 @@ export function RichTextEditor({
   onSalvar,
   onCancelar,
   onAnexoCriado,
+  ariaLabel = "Editor de atividades",
+  labelSalvar = "Salvar",
+  mostrarCancelar = true,
+  desabilitado = false,
 }: {
   cardId: string;
   valorInicial: string;
@@ -118,6 +122,17 @@ export function RichTextEditor({
    * HTML colado) — permite ao pai (card-detail-modal) refletir o novo anexo na aba "Anexos" ao
    * vivo, sem precisar fechar/reabrir o card. */
   onAnexoCriado?: (anexo: Anexo) => void;
+  /** Nome acessível da área editável. Outros consumidores (ex.: comentários) precisam de um
+   * nome próprio — a Descrição da Demanda fica sempre visível fora das abas do card, então os
+   * dois editores podem estar montados ao mesmo tempo, e não podem compartilhar o mesmo nome. */
+  ariaLabel?: string;
+  /** Texto do botão de ação — "Salvar" edita um valor existente, "Enviar" cria algo novo (ex.: comentário). */
+  labelSalvar?: string;
+  /** Comentários não têm um "estado anterior" pra cancelar (a caixa de compor é sempre vazia). */
+  mostrarCancelar?: boolean;
+  /** Desabilita o botão de ação além do próprio estado de upload em andamento — usado enquanto o
+   * pai está enviando o conteúdo (ex.: POST do comentário). */
+  desabilitado?: boolean;
 }) {
   const editorRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -351,7 +366,7 @@ export function RichTextEditor({
         contentEditable
         role="textbox"
         aria-multiline="true"
-        aria-label="Editor de atividades"
+        aria-label={ariaLabel}
         onPaste={handlePaste}
         onMouseDown={aoPressionarBotaoMouseNoEditor}
         onClick={aoClicarNoEditor}
@@ -365,12 +380,14 @@ export function RichTextEditor({
       <ImageLightbox imagem={imagemAmpliada} onOpenChange={(open) => !open && setImagemAmpliada(null)} />
 
       <div className="flex gap-2">
-        <Button size="sm" onClick={salvar} disabled={enviando}>
-          Salvar
+        <Button size="sm" onClick={salvar} disabled={enviando || desabilitado}>
+          {labelSalvar}
         </Button>
-        <Button size="sm" variant="ghost" onClick={onCancelar}>
-          Cancelar
-        </Button>
+        {mostrarCancelar && (
+          <Button size="sm" variant="ghost" onClick={onCancelar}>
+            Cancelar
+          </Button>
+        )}
       </div>
     </div>
   );
