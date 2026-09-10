@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { AppLink as Link } from "@/components/ui/app-link";
 import { Boxes, LayoutGrid, MoreVertical, Pencil, Trash2, Workflow } from "lucide-react";
 import { Pipe, CORES_FASE } from "@/lib/types";
 import { corDeterministica } from "@/lib/utils";

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
+import { AppLink as Link } from "@/components/ui/app-link";
 import { ArrowLeft } from "lucide-react";
 import { getPipe, listTrashByPipe } from "@/lib/store";
 import type { Card, Pipe } from "@/lib/types";

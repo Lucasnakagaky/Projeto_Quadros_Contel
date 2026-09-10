@@ -31,7 +31,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const naLogin = pathname === "/login" || pathname?.endsWith("/login");
+  // Com `trailingSlash: true` (export estático) o pathname vem como "/login/".
+  // Normaliza tirando a barra final antes de comparar.
+  const semBarra = (pathname ?? "").replace(/\/+$/, "");
+  const naLogin = semBarra === "/login" || semBarra.endsWith("/login");
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {

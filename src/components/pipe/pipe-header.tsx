@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { AppLink as Link } from "@/components/ui/app-link";
 import { ArrowLeft, LogOut, Settings2, Tag, Trash2 } from "lucide-react";
 import { Pipe } from "@/lib/types";
 import { useAuth } from "@/components/auth-provider";

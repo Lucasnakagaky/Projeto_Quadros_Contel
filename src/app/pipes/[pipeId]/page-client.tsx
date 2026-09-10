@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
+import { AppLink as Link } from "@/components/ui/app-link";
 import { cardTitulosPorId, getPipeFull, listConexoesEnvolvendoCards } from "@/lib/store";
 import { CardRelacionado } from "@/lib/types";
 import { PipeBoard } from "@/components/pipe/pipe-board";

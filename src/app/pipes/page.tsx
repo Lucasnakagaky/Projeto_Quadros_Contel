@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
+import { AppLink as Link } from "@/components/ui/app-link";
 import { Plus } from "lucide-react";
 import { listPipesComContagem } from "@/lib/store";
 import { PipesList } from "@/components/pipe/pipes-list";
