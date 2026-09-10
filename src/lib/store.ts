@@ -9,6 +9,7 @@ import {
   Checklist,
   Comentario,
   Conexao,
+  DbSchema,
   Etiqueta,
   Fase,
   ItemChecklist,
@@ -487,6 +488,13 @@ export async function getCard(id: string): Promise<Card> {
   return card;
 }
 
+// Card novo entra no TOPO da coluna. A `ordem` só precisa ser crescente (listCardsByPipe ordena
+// por ela) — não precisa ser densa nem positiva, e moveCard/reorderCardsWithinFase reindexam para
+// 0..n-1 assim que o usuário reordena. Coluna vazia começa em 0.
+function ordemDoTopo(db: DbSchema, faseId: string): number {
+  return db.cards.filter((c) => c.faseId === faseId).reduce((min, c) => Math.min(min, c.ordem), 1) - 1;
+}
+
 export async function createCard(input: {
   pipeId: string;
   faseId: string;
@@ -496,9 +504,6 @@ export async function createCard(input: {
   return mutateDb((db) => {
     const fase = db.fases.find((f) => f.id === input.faseId && f.pipeId === input.pipeId);
     if (!fase) notFound("Fase");
-    const maxOrdem = db.cards
-      .filter((c) => c.faseId === input.faseId)
-      .reduce((max, c) => Math.max(max, c.ordem), -1);
     const card: Card = {
       id: uuid(),
       pipeId: input.pipeId,
@@ -509,7 +514,7 @@ export async function createCard(input: {
       criadoEm: now(),
       atualizadoEm: now(),
       historico: [{ id: uuid(), faseId: fase.id, faseNome: fase.nome, entradaEm: now() }],
-      ordem: maxOrdem + 1,
+      ordem: ordemDoTopo(db, input.faseId),
       excluido: false,
       excluidoEm: null,
     };
@@ -664,9 +669,6 @@ export async function createConexaoComNovoCard(
       if (jaExiste) badRequest("Esta conexão já possui um card filho (permite apenas um)");
     }
 
-    const maxOrdem = db.cards
-      .filter((c) => c.faseId === novoCard.faseId)
-      .reduce((max, c) => Math.max(max, c.ordem), -1);
     const card: Card = {
       id: uuid(),
       pipeId: novoCard.pipeId,
@@ -677,7 +679,7 @@ export async function createConexaoComNovoCard(
       criadoEm: now(),
       atualizadoEm: now(),
       historico: [{ id: uuid(), faseId: fase.id, faseNome: fase.nome, entradaEm: now() }],
-      ordem: maxOrdem + 1,
+      ordem: ordemDoTopo(db, novoCard.faseId),
       excluido: false,
       excluidoEm: null,
     };

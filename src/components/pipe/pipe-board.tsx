@@ -197,24 +197,13 @@ export function PipeBoard({
       return;
     }
 
-    setColumns((prev) => {
-      const activeItems = prev[activeContainer];
-      const overItems = prev[overContainer];
-      const overIndex = overItems.indexOf(overId);
-
-      const newIndex =
-        overId in prev ? overItems.length : overIndex >= 0 ? overIndex : overItems.length;
-
-      return {
-        ...prev,
-        [activeContainer]: activeItems.filter((id) => id !== activeId),
-        [overContainer]: [
-          ...overItems.slice(0, newIndex),
-          activeId,
-          ...overItems.slice(newIndex),
-        ],
-      };
-    });
+    // Trocar de coluna sempre leva o card para o topo, independente de onde ele for solto — a
+    // prévia durante o arraste já mostra essa posição para não "pular" no fim.
+    setColumns((prev) => ({
+      ...prev,
+      [activeContainer]: prev[activeContainer].filter((id) => id !== activeId),
+      [overContainer]: [activeId, ...prev[overContainer].filter((id) => id !== activeId)],
+    }));
   }
 
   async function handleDragEnd(event: DragEndEvent) {
@@ -245,15 +234,19 @@ export function PipeBoard({
       const oldIndex = items.indexOf(activeId);
       const newIndex = overId in columns ? items.length - 1 : items.indexOf(overId);
 
+      const card = cardsById[activeId];
+      const movedToOtherFase = card && card.faseId !== container;
+
       let finalItems = items;
-      if (oldIndex !== newIndex && oldIndex !== -1 && newIndex !== -1) {
+      if (movedToOtherFase) {
+        // Mudar de coluna ignora a posição do drop e vai para o topo.
+        finalItems = [activeId, ...items.filter((id) => id !== activeId)];
+        setColumns((prev) => ({ ...prev, [container]: finalItems }));
+      } else if (oldIndex !== newIndex && oldIndex !== -1 && newIndex !== -1) {
+        // Reordenar dentro da mesma coluna continua respeitando onde o card foi solto.
         finalItems = arrayMove(items, oldIndex, newIndex);
         setColumns((prev) => ({ ...prev, [container]: finalItems }));
       }
-
-      const card = cardsById[activeId];
-      const movedToOtherFase = card && card.faseId !== container;
-      const finalIndex = finalItems.indexOf(activeId);
 
       if (movedToOtherFase) {
         setCardsById((prev) => ({
@@ -261,7 +254,7 @@ export function PipeBoard({
           [activeId]: { ...prev[activeId], faseId: container },
         }));
         try {
-          await api.post(`/api/cards/${activeId}/mover`, { faseId: container, index: finalIndex });
+          await api.post(`/api/cards/${activeId}/mover`, { faseId: container, index: 0 });
           const fase = fases.find((f) => f.id === container);
           toast.success(`Card movido com sucesso para ${fase?.nome ?? ""}`);
         } catch {
@@ -353,7 +346,7 @@ export function PipeBoard({
         titulo: "Novo card",
       });
       setCardsById((prev) => ({ ...prev, [card.id]: card }));
-      setColumns((prev) => ({ ...prev, [faseId]: [...prev[faseId], card.id] }));
+      setColumns((prev) => ({ ...prev, [faseId]: [card.id, ...prev[faseId]] }));
       toast.success("Card criado com sucesso");
       openCard(card.id);
     } catch (err) {
@@ -369,7 +362,9 @@ export function PipeBoard({
       Object.keys(prev).forEach((faseId) => {
         next[faseId] = prev[faseId].filter((id) => id !== card.id);
       });
-      next[card.faseId] = [...(next[card.faseId] ?? []), card.id];
+      // Topo da coluna: o servidor já grava esses movimentos com index 0 (popover "Mover para
+      // fase", arquivar e ação em massa), então o estado local precisa refletir a mesma posição.
+      next[card.faseId] = [card.id, ...(next[card.faseId] ?? [])];
       return next;
     });
   }
@@ -412,7 +407,7 @@ export function PipeBoard({
   }
 
   return (
-    <div className="flex h-full flex-1 flex-col overflow-hidden">
+    <div className="flex h-dvh flex-col overflow-hidden">
       <PipeHeader
         pipe={pipe}
         onAbrirCampos={() => setCamposAberto(true)}
@@ -465,7 +460,7 @@ export function PipeBoard({
             onDragOver={handleDragOver}
             onDragEnd={handleDragEnd}
           >
-            <ScrollFade className="flex items-start gap-2 px-6 py-4" fadeFrom="from-neutral-50">
+            <ScrollFade className="flex items-stretch gap-2 px-6 py-4" fadeFrom="from-neutral-50" passoScroll={288}>
               <SortableContext items={faseIds} strategy={horizontalListSortingStrategy}>
                 {fases.map((fase) => (
                   <FaseColumn

@@ -18,7 +18,7 @@ export type ViewValue = (typeof VIEWS)[number]["value"];
  */
 export function ViewTabs({ right }: { right?: React.ReactNode }) {
   return (
-    <div className="flex flex-wrap items-center gap-3 border-b border-slate-200 px-6 py-2">
+    <div className="flex shrink-0 flex-wrap items-center gap-3 border-b border-slate-200 px-6 py-2">
       <TabsList>
         {VIEWS.map((v) => (
           <TabsTrigger key={v.value} value={v.value}>

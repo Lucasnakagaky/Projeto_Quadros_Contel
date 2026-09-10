@@ -71,7 +71,7 @@ export function FaseColumn({
     <div
       ref={setNodeRef}
       style={style}
-      className={cn("flex w-[280px] shrink-0 flex-col", isDragging && "opacity-50")}
+      className={cn("flex h-full w-[280px] shrink-0 flex-col", isDragging && "opacity-50")}
     >
       <div className="h-1 shrink-0" style={{ backgroundColor: fase.cor }} />
 
@@ -148,9 +148,25 @@ export function FaseColumn({
           isDropTarget && "bg-blue-50 ring-2 ring-inset ring-blue-300"
         )}
       >
+        {fase.permiteCriarCards && (
+          <div className="shrink-0 px-3 pb-2 pt-3">
+            <Button
+              onClick={() => onCreateCard(fase.id)}
+              size="pill"
+              className={cn(
+                "w-full gap-1.5 rounded-md bg-[#1d4ed8] hover:bg-[#1a44bd]",
+                FOCUS_RING
+              )}
+            >
+              <Plus size={16} />
+              Criar novo card
+            </Button>
+          </div>
+        )}
+
         <div
           ref={setDroppableRef}
-          className="flex min-h-[8px] flex-1 flex-col gap-2 overflow-y-auto px-3 pb-2 pt-3"
+          className="scrollbar-fina flex min-h-[8px] flex-1 flex-col gap-2 overflow-y-auto px-3 pb-3 pt-0"
         >
           <SortableContext items={cards.map((c) => c.id)} strategy={verticalListSortingStrategy}>
             {cards.map((card) => (
@@ -180,22 +196,6 @@ export function FaseColumn({
             </div>
           )}
         </div>
-
-        {fase.permiteCriarCards && (
-          <div className="px-3 pb-3">
-            <Button
-              onClick={() => onCreateCard(fase.id)}
-              size="pill"
-              className={cn(
-                "w-full gap-1.5 rounded-md bg-[#1d4ed8] hover:bg-[#1a44bd]",
-                FOCUS_RING
-              )}
-            >
-              <Plus size={16} />
-              Criar novo card
-            </Button>
-          </div>
-        )}
       </div>
 
       <NovaFaseModal

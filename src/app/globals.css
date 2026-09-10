@@ -26,3 +26,27 @@ body {
 * {
   box-sizing: border-box;
 }
+
+/* Barra de rolagem discreta para o quadro (horizontal) e as colunas (vertical). */
+.scrollbar-fina {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(203 213 225) transparent;
+}
+
+.scrollbar-fina::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.scrollbar-fina::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-fina::-webkit-scrollbar-thumb {
+  background: rgb(203 213 225);
+  border-radius: 4px;
+}
+
+.scrollbar-fina::-webkit-scrollbar-thumb:hover {
+  background: rgb(148 163 184);
+}
