@@ -46,3 +46,7 @@ next-env.d.ts
 # local JSON "database" and uploaded files (runtime data, not source)
 /data/db.json
 /public/uploads/
+
+# Supabase CLI (cache local; o que versionamos fica em supabase/*.sql e supabase/functions/)
+/supabase/.temp/
+
