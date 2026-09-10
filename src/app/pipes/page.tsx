@@ -1,12 +1,11 @@
 import Link from "next/link";
 import { Plus } from "lucide-react";
-import { readDb } from "@/lib/db";
+import { listPipesComContagem } from "@/lib/store";
 import { PipesList } from "@/components/pipe/pipes-list";
 import { Button } from "@/components/ui/button";
 
 export default async function PipesPage() {
-  const db = await readDb();
-  const pipes = [...db.pipes].sort((a, b) => (a.criadoEm < b.criadoEm ? 1 : -1));
+  const pipesComContagem = await listPipesComContagem();
 
   return (
     <div className="mx-auto w-full max-w-6xl flex-1 px-6 py-10">
@@ -23,7 +22,7 @@ export default async function PipesPage() {
         </Link>
       </div>
 
-      {pipes.length === 0 ? (
+      {pipesComContagem.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-slate-300 py-20 text-center">
           <p className="text-slate-500">Você ainda não tem nenhum pipe.</p>
           <Link href="/pipes/new" className="mt-4">
@@ -34,13 +33,7 @@ export default async function PipesPage() {
           </Link>
         </div>
       ) : (
-        <PipesList
-          initialPipes={pipes.map((pipe) => ({
-            pipe,
-            faseCount: db.fases.filter((f) => f.pipeId === pipe.id).length,
-            cardCount: db.cards.filter((c) => c.pipeId === pipe.id && !c.excluido).length,
-          }))}
-        />
+        <PipesList initialPipes={pipesComContagem} />
       )}
     </div>
   );

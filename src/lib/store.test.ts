@@ -1,27 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
-import type { DbSchema } from "./types";
+import { criarFakeSupabase } from "./__mocks__/fake-supabase";
 
-vi.mock("./db", () => {
-  const db: DbSchema = {
-    usuarios: [{ id: "user-1", nome: "Você", email: "voce@exemplo.com", corAvatar: "#000000" }],
-    pipes: [],
-    fases: [],
-    campos: [],
-    cards: [],
-    conexoes: [],
-    cardLinks: [],
-    etiquetas: [],
-    checklists: [],
-    comentarios: [],
-    anexos: [],
-  };
-  return {
-    readDb: async () => db,
-    mutateDb: async (fn: (db: DbSchema) => unknown) => fn(db),
-    writeDb: async () => {},
-    CURRENT_USER_ID: "user-1",
-  };
-});
+// store.ts fala com o Supabase; nos testes, um fake in-memory no lugar do cliente.
+vi.mock("./supabase", () => criarFakeSupabase());
 
 const {
   createCampo,

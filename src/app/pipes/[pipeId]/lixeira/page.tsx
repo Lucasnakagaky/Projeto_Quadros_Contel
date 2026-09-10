@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
-import { readDb } from "@/lib/db";
+import { getPipe, listTrashByPipe } from "@/lib/store";
 import { LixeiraCard } from "@/components/pipe/lixeira-card";
 
 export default async function LixeiraPage({
@@ -10,13 +10,15 @@ export default async function LixeiraPage({
   params: Promise<{ pipeId: string }>;
 }) {
   const { pipeId } = await params;
-  const db = await readDb();
-  const pipe = db.pipes.find((p) => p.id === pipeId);
-  if (!pipe) notFound();
 
-  const cards = db.cards
-    .filter((c) => c.pipeId === pipeId && c.excluido)
-    .sort((a, b) => ((a.excluidoEm ?? "") < (b.excluidoEm ?? "") ? 1 : -1));
+  let pipe;
+  try {
+    pipe = await getPipe(pipeId);
+  } catch {
+    notFound();
+  }
+
+  const cards = await listTrashByPipe(pipeId);
 
   return (
     <div className="mx-auto w-full max-w-3xl flex-1 px-6 py-10">
