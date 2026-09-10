@@ -14,6 +14,8 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     // Standalone static site (unrelated to the Next.js kanban app).
     "acme-website/**",
+    // Supabase Edge Functions rodam em Deno, não no ambiente do Next.
+    "supabase/functions/**",
   ]),
 ]);
 

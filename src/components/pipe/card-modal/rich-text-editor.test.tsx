@@ -1,6 +1,24 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+
+// O upload de anexo passa pelo api-client (que hoje sobe pro Supabase Storage).
+// Aqui só interessa a lógica de paste/inserção/sanitização do editor, então o
+// upload devolve uma URL fixa de /uploads/ (que o sanitizador aceita).
+vi.mock("@/lib/api-client", () => ({
+  api: {
+    post: vi.fn(async () => ({
+      id: "anexo-1",
+      cardId: "card-1",
+      nome: "imagem.png",
+      tipo: "image/png",
+      tamanho: 4,
+      url: "/uploads/card-1/imagem.png",
+      criadoEm: "2026-01-01T00:00:00.000Z",
+    })),
+  },
+}));
+
 import { RichTextEditor } from "./rich-text-editor";
 
 describe("RichTextEditor - colar texto + imagem embutida", () => {

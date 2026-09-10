@@ -48,11 +48,19 @@ export interface SanitizeHtmlOpts {
   permitirImagemTemporaria?: boolean;
 }
 
-// O "src" da imagem só é aceito se apontar para um upload local do próprio app, ou (com
-// permitirImagemTemporaria) para uma imagem temporária ainda não enviada — bloqueia sempre
-// "javascript:", que é a garantia anti-XSS que este arquivo protege.
+// Host público do Supabase Storage (onde os anexos moram desde a migração). O prefixo
+// vem do NEXT_PUBLIC_SUPABASE_URL para não cravar o id do projeto no código.
+const PREFIXO_STORAGE = process.env.NEXT_PUBLIC_SUPABASE_URL
+  ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/uploads/`
+  : null;
+
+// O "src" da imagem só é aceito se apontar para um upload do próprio app (Storage do
+// Supabase, ou o antigo "/uploads/" para HTML legado), ou (com permitirImagemTemporaria)
+// para uma imagem temporária ainda não enviada — bloqueia sempre "javascript:", que é a
+// garantia anti-XSS que este arquivo protege.
 function srcValido(valor: string, opts?: SanitizeHtmlOpts): boolean {
   if (valor.startsWith("/uploads/")) return true;
+  if (PREFIXO_STORAGE && valor.startsWith(PREFIXO_STORAGE)) return true;
   if (opts?.permitirImagemTemporaria) {
     if (valor.startsWith("data:") || valor.startsWith("blob:")) return true;
     if (valor.startsWith("http://") || valor.startsWith("https://")) return true;

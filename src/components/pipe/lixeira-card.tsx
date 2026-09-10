@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { ArchiveRestore, Trash2 } from "lucide-react";
@@ -9,8 +8,7 @@ import { Button } from "@/components/ui/button";
 import { api } from "@/lib/api-client";
 import { tempoRelativo } from "@/lib/utils";
 
-export function LixeiraCard({ card }: { card: Card }) {
-  const router = useRouter();
+export function LixeiraCard({ card, onRemovido }: { card: Card; onRemovido: () => void }) {
   const [loading, setLoading] = useState(false);
 
   async function restaurar() {
@@ -18,7 +16,7 @@ export function LixeiraCard({ card }: { card: Card }) {
     try {
       await api.post(`/api/cards/${card.id}/restaurar`);
       toast.success("Card restaurado");
-      router.refresh();
+      onRemovido();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Erro ao restaurar card");
     } finally {
@@ -36,7 +34,7 @@ export function LixeiraCard({ card }: { card: Card }) {
     try {
       await api.delete(`/api/cards/${card.id}`);
       toast.success("Card excluído definitivamente");
-      router.refresh();
+      onRemovido();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Erro ao excluir card");
     } finally {

@@ -215,7 +215,11 @@ export function RichTextEditor({
     void enviarImagensColadasEmbutidas();
   }
 
+  // URL pública do Supabase Storage — onde os anexos moram. Um src assim JÁ é o arquivo final.
+  const PREFIXO_STORAGE = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/uploads/`;
+
   function precisaReupload(src: string): boolean {
+    if (src.startsWith(PREFIXO_STORAGE)) return false; // já é anexo nosso
     return (
       src.startsWith("data:") ||
       src.startsWith("blob:") ||
@@ -224,12 +228,11 @@ export function RichTextEditor({
     );
   }
 
-  // Se o src colado for uma URL absoluta apontando pro próprio /uploads/ deste app (ex.:
-  // usuário colou um trecho de OUTRA descrição que já tinha essa imagem), não é uma imagem
-  // nova — só normaliza pra forma relativa (a forma que sanitizeHtml exige pra sobreviver ao
-  // Salvar), sem reenviar. Sem isso, um src absoluto do próprio host cairia no fetch+upload
-  // abaixo e duplicaria o anexo.
+  // Se o src colado já aponta pro próprio Storage (ex.: colou um trecho de OUTRA descrição
+  // que já tinha essa imagem) ou pro antigo "/uploads/" relativo, não é imagem nova — mantém
+  // como está, sem reenviar (evita duplicar o anexo).
   function resolverUploadProprio(src: string): string | null {
+    if (src.startsWith(PREFIXO_STORAGE)) return src;
     try {
       const url = new URL(src, window.location.href);
       if (url.origin === window.location.origin && url.pathname.startsWith("/uploads/")) {
