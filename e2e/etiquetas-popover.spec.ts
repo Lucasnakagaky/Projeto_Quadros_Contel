@@ -1,24 +1,15 @@
 import { expect, test } from "@playwright/test";
-import { abrirCard, cleanupCard, seedCard } from "./helpers";
+import { abrirCard, cleanupCard, db, seedCard } from "./helpers";
 
 test.describe("Etiquetas — popover de busca/toggle/criar no card", () => {
   test("busca filtra em tempo real e o toggle aplica/remove instantaneamente, sem botão salvar", async ({
     page,
-    request,
   }) => {
-    const seed = await seedCard(request, "[E2E] etiquetas popover - busca e toggle");
+    const seed = await seedCard("[E2E] etiquetas popover - busca e toggle");
     const criadas: string[] = [];
     try {
-      const urgente = await (
-        await request.post(`/api/pipes/${seed.pipeId}/etiquetas`, {
-          data: { nome: "Urgente", cor: "#ef4444" },
-        })
-      ).json();
-      const bloqueado = await (
-        await request.post(`/api/pipes/${seed.pipeId}/etiquetas`, {
-          data: { nome: "Bloqueado", cor: "#000000" },
-        })
-      ).json();
+      const urgente = await db.criarEtiqueta(seed.pipeId, "Urgente", "#ef4444");
+      const bloqueado = await db.criarEtiqueta(seed.pipeId, "Bloqueado", "#000000");
       criadas.push(urgente.id, bloqueado.id);
 
       await abrirCard(page, seed);
@@ -57,18 +48,15 @@ test.describe("Etiquetas — popover de busca/toggle/criar no card", () => {
 
       await expect(page.getByRole("button", { name: "+ Adicionar etiquetas" })).toBeVisible();
     } finally {
-      for (const id of criadas) {
-        await request.delete(`/api/pipes/${seed.pipeId}/etiquetas/${id}`);
-      }
-      await cleanupCard(request, seed);
+      for (const id of criadas) await db.apagarEtiqueta(id);
+      await cleanupCard(seed);
     }
   });
 
   test("busca sem resultado abre criação com o texto preenchido; hex inválido barra salvar; preset preenche o hex", async ({
     page,
-    request,
   }) => {
-    const seed = await seedCard(request, "[E2E] etiquetas popover - criar com hex e presets");
+    const seed = await seedCard("[E2E] etiquetas popover - criar com hex e presets");
     let criadaId: string | undefined;
     try {
       await abrirCard(page, seed);
@@ -102,13 +90,11 @@ test.describe("Etiquetas — popover de busca/toggle/criar no card", () => {
       await page.getByText("Fase atual").click();
       await expect(page.getByRole("button", { name: "Prioridade Alta", exact: true })).toBeVisible();
 
-      const listagem: { id: string; nome: string }[] = await (
-        await request.get(`/api/pipes/${seed.pipeId}/etiquetas`)
-      ).json();
+      const listagem = await db.listarEtiquetas(seed.pipeId);
       criadaId = listagem.find((e) => e.nome === "Prioridade Alta")?.id;
     } finally {
-      if (criadaId) await request.delete(`/api/pipes/${seed.pipeId}/etiquetas/${criadaId}`);
-      await cleanupCard(request, seed);
+      if (criadaId) await db.apagarEtiqueta(criadaId);
+      await cleanupCard(seed);
     }
   });
 });

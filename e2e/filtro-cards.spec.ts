@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { cleanupCard, seedCard } from "./helpers";
+import { cleanupCard, db, seedCard } from "./helpers";
 
 // Títulos com um prefixo improvável ("zz…"): o pipe usado pelo seed é o pipe real do usuário e
 // já tem cards dele: o filtro precisa de termos que só casem com os cards deste teste.
@@ -10,34 +10,23 @@ const ETIQUETA = "ZZUrgência";
 test.describe("Filtro de cards — Kanban e Lista", () => {
   test("filtra por título e por etiqueta, e o clique na etiqueta do card aplica o filtro", async ({
     page,
-    request,
   }) => {
-    const seed = await seedCard(request, TITULO_A);
+    const seed = await seedCard(TITULO_A);
     let etiquetaId: string | undefined;
     let cardBId: string | undefined;
     try {
-      const cardB = await (
-        await request.post(`/api/pipes/${seed.pipeId}/cards`, {
-          data: { faseId: seed.faseId, titulo: TITULO_B },
-        })
-      ).json();
+      const cardB = await db.criarCard(seed.pipeId, seed.faseId, TITULO_B);
       cardBId = cardB.id;
 
-      const etiqueta = await (
-        await request.post(`/api/pipes/${seed.pipeId}/etiquetas`, {
-          data: { nome: ETIQUETA, cor: "#ef4444" },
-        })
-      ).json();
+      const etiqueta = await db.criarEtiqueta(seed.pipeId, ETIQUETA, "#ef4444");
       etiquetaId = etiqueta.id;
 
       // só o card A recebe a etiqueta — é o que separa "filtrou por etiqueta" de "filtrou por título"
-      const detalhe = await (await request.get(`/api/cards/${seed.cardId}`)).json();
-      const campoEtiquetas = detalhe.campos.find((c: { tipo: string }) => c.tipo === "etiquetas");
-      await request.patch(`/api/cards/${seed.cardId}`, {
-        data: { valoresCampos: { [campoEtiquetas.id]: [etiqueta.id] } },
-      });
+      const campos = await db.camposDoPipe(seed.pipeId);
+      const campoEtiquetas = campos.find((c) => c.tipo === "etiquetas")!;
+      await db.setValorCampo(seed.cardId, campoEtiquetas.id, [etiqueta.id]);
 
-      await page.goto(`/pipes/${seed.pipeId}`);
+      await page.goto(`pipes/${seed.pipeId}/`);
       const busca = page.getByLabel("Pesquisar cards ou etiquetas");
       const cardA = page.getByText(TITULO_A);
       const cardBNoQuadro = page.getByText(TITULO_B);
@@ -81,41 +70,30 @@ test.describe("Filtro de cards — Kanban e Lista", () => {
       await expect(page.getByRole("dialog")).toHaveCount(0);
       await expect(cardBNoQuadro).toHaveCount(0);
     } finally {
-      if (cardBId) await request.delete(`/api/cards/${cardBId}`);
-      if (etiquetaId) await request.delete(`/api/pipes/${seed.pipeId}/etiquetas/${etiquetaId}`);
-      await cleanupCard(request, seed);
+      if (cardBId) await db.apagarCard(cardBId);
+      if (etiquetaId) await db.apagarEtiqueta(etiquetaId);
+      await cleanupCard(seed);
     }
   });
 
   test("o filtro continua aplicado ao trocar para a aba Lista e filtra as linhas da tabela", async ({
     page,
-    request,
   }) => {
-    const seed = await seedCard(request, TITULO_A);
+    const seed = await seedCard(TITULO_A);
     let etiquetaId: string | undefined;
     let cardBId: string | undefined;
     try {
-      const cardB = await (
-        await request.post(`/api/pipes/${seed.pipeId}/cards`, {
-          data: { faseId: seed.faseId, titulo: TITULO_B },
-        })
-      ).json();
+      const cardB = await db.criarCard(seed.pipeId, seed.faseId, TITULO_B);
       cardBId = cardB.id;
 
-      const etiqueta = await (
-        await request.post(`/api/pipes/${seed.pipeId}/etiquetas`, {
-          data: { nome: ETIQUETA, cor: "#ef4444" },
-        })
-      ).json();
+      const etiqueta = await db.criarEtiqueta(seed.pipeId, ETIQUETA, "#ef4444");
       etiquetaId = etiqueta.id;
 
-      const detalhe = await (await request.get(`/api/cards/${seed.cardId}`)).json();
-      const campoEtiquetas = detalhe.campos.find((c: { tipo: string }) => c.tipo === "etiquetas");
-      await request.patch(`/api/cards/${seed.cardId}`, {
-        data: { valoresCampos: { [campoEtiquetas.id]: [etiqueta.id] } },
-      });
+      const campos = await db.camposDoPipe(seed.pipeId);
+      const campoEtiquetas = campos.find((c) => c.tipo === "etiquetas")!;
+      await db.setValorCampo(seed.cardId, campoEtiquetas.id, [etiqueta.id]);
 
-      await page.goto(`/pipes/${seed.pipeId}`);
+      await page.goto(`pipes/${seed.pipeId}/`);
       const busca = page.getByLabel("Pesquisar cards ou etiquetas");
       await busca.fill("zzalpha");
 
@@ -143,9 +121,9 @@ test.describe("Filtro de cards — Kanban e Lista", () => {
       await expect(page.getByRole("cell", { name: TITULO_A })).toBeVisible();
       await expect(page.getByRole("cell", { name: TITULO_B })).toHaveCount(0);
     } finally {
-      if (cardBId) await request.delete(`/api/cards/${cardBId}`);
-      if (etiquetaId) await request.delete(`/api/pipes/${seed.pipeId}/etiquetas/${etiquetaId}`);
-      await cleanupCard(request, seed);
+      if (cardBId) await db.apagarCard(cardBId);
+      if (etiquetaId) await db.apagarEtiqueta(etiquetaId);
+      await cleanupCard(seed);
     }
   });
 });

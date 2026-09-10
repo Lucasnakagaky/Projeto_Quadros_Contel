@@ -1,12 +1,11 @@
 import { expect, test } from "@playwright/test";
-import { abrirCard, cleanupCard, seedCard } from "./helpers";
+import { abrirCard, cleanupCard, db, seedCard } from "./helpers";
 
 test.describe("Criar card filho — Descrição da Demanda", () => {
   test("ao criar um card filho, o app navega pro card recém-criado com o campo Descrição visível", async ({
     page,
-    request,
   }) => {
-    const seed = await seedCard(request, "[E2E] card pai - criação de filho");
+    const seed = await seedCard("[E2E] card pai - criação de filho");
     let cardFilhoId: string | null = null;
     try {
       await abrirCard(page, seed);
@@ -33,8 +32,8 @@ test.describe("Criar card filho — Descrição da Demanda", () => {
       await expect(campoDescricao).toBeVisible();
       await expect(campoDescricao.getByRole("button", { name: "Clique aqui para adicionar" })).toBeVisible();
     } finally {
-      if (cardFilhoId) await request.delete(`/api/cards/${cardFilhoId}`).catch(() => {});
-      await cleanupCard(request, seed);
+      if (cardFilhoId) await db.apagarCard(cardFilhoId);
+      await cleanupCard(seed);
     }
   });
 });
