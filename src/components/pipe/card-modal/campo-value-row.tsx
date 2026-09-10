@@ -26,7 +26,7 @@ import { iniciais } from "@/lib/utils";
 type Anexo = { nome: string; url: string };
 type RelacaoExterna = { id: string; rotulo: string };
 
-const TIPOS_TEXTO = new Set(["texto_curto", "conteudo_dinamico", "email", "telefone", "numerico", "tempo"]);
+const TIPOS_TEXTO = new Set(["texto_curto", "email", "telefone", "numerico", "tempo"]);
 
 function htmlEstaVazio(html: unknown): boolean {
   if (typeof html !== "string") return true;
@@ -544,7 +544,7 @@ export function CampoValueRow({
     );
   }
 
-  // Tipos de texto curto (padrão): texto_curto, conteudo_dinamico, email, telefone, numerico, tempo
+  // Tipos de texto curto (padrão): texto_curto, email, telefone, numerico, tempo
   if (TIPOS_TEXTO.has(campo.tipo)) {
     if (!editing) {
       return linha(

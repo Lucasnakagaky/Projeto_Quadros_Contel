@@ -1,7 +1,7 @@
 "use client";
 
 import { toast } from "sonner";
-import { Sparkles, Workflow, Users, ListPlus } from "lucide-react";
+import { Workflow, Users, ListPlus } from "lucide-react";
 
 export function PhaseActionsList({
   onAdicionarCampos,
@@ -11,12 +11,6 @@ export function PhaseActionsList({
   onAtribuirMembros: () => void;
 }) {
   const acoes = [
-    {
-      label: "Adicionar agente de IA",
-      icon: Sparkles,
-      cor: "text-violet-500",
-      onClick: () => toast("Agentes de IA — em breve"),
-    },
     {
       label: "Adicionar automação",
       icon: Workflow,

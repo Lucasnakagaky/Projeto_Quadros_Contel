@@ -4,6 +4,7 @@ import {
   CalendarClock,
   CheckSquare,
   CircleDot,
+  CircleHelp,
   Clock,
   DollarSign,
   Database,
@@ -17,7 +18,6 @@ import {
   Paperclip,
   PenLine,
   Phone,
-  Sparkles,
   Tag,
   Type,
   User,
@@ -29,7 +29,6 @@ const ICONS: Record<TipoCampo, LucideIcon> = {
   texto_curto: Type,
   texto_longo: AlignLeft,
   texto_formatado: PenLine,
-  conteudo_dinamico: Sparkles,
   anexo: Paperclip,
   checkbox: CheckSquare,
   responsavel: User,
@@ -52,6 +51,8 @@ const ICONS: Record<TipoCampo, LucideIcon> = {
 };
 
 export function CampoIcon({ tipo, size = 14 }: { tipo: TipoCampo; size?: number }) {
-  const Icone = ICONS[tipo];
+  // Fallback para dados legados: um campo salvo com um `tipo` que não existe mais no union
+  // (ex.: pipe antigo, db.json editado à mão) não pode derrubar o quadro inteiro.
+  const Icone = ICONS[tipo] ?? CircleHelp;
   return <Icone size={size} className="shrink-0 text-slate-400" />;
 }

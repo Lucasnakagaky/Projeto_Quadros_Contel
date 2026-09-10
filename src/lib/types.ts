@@ -47,7 +47,6 @@ export type TipoCampo =
   | "texto_curto"
   | "texto_longo"
   | "texto_formatado"
-  | "conteudo_dinamico"
   | "anexo"
   | "checkbox"
   | "responsavel"
@@ -220,7 +219,6 @@ export const TIPOS_CAMPO: { tipo: TipoCampo; label: string; grupo: GrupoTipoCamp
   { tipo: "texto_curto", label: "Texto curto", grupo: "campo" },
   { tipo: "texto_longo", label: "Texto longo", grupo: "campo" },
   { tipo: "texto_formatado", label: "Texto formatado", grupo: "campo" },
-  { tipo: "conteudo_dinamico", label: "Conteúdo dinâmico", grupo: "campo" },
   { tipo: "anexo", label: "Anexo", grupo: "campo" },
   { tipo: "checkbox", label: "Checkbox", grupo: "campo" },
   { tipo: "responsavel", label: "Responsável", grupo: "campo" },
