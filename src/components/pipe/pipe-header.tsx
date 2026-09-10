@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, Settings2, Tag, Trash2 } from "lucide-react";
+import { ArrowLeft, LogOut, Settings2, Tag, Trash2 } from "lucide-react";
 import { Pipe } from "@/lib/types";
+import { useAuth } from "@/components/auth-provider";
 
 export function PipeHeader({
   pipe,
@@ -13,6 +14,7 @@ export function PipeHeader({
   onAbrirCampos: () => void;
   onAbrirEtiquetas: () => void;
 }) {
+  const { sair } = useAuth();
   return (
     <header className="flex shrink-0 items-center gap-3 border-b border-slate-200 bg-white px-6 py-3">
       <Link
@@ -48,6 +50,15 @@ export function PipeHeader({
         <Trash2 size={14} />
         Lixeira
       </Link>
+
+      <button
+        onClick={sair}
+        className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium text-slate-500 hover:bg-slate-100"
+        aria-label="Sair"
+      >
+        <LogOut size={14} />
+        Sair
+      </button>
     </header>
   );
 }
