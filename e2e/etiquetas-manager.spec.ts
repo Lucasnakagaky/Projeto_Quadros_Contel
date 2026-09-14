@@ -19,7 +19,7 @@ test.describe("Gerenciar etiquetas — tela de administração do pipe", () => {
       // "Gerenciar etiquetas" fica no cabeçalho do pipe — precisa ser aberto a partir do board,
       // sem nenhum card já aberto: o overlay do modal do card cobre o cabeçalho inteiro, então um
       // clique nesse botão cairia no overlay (fechando o card) em vez de abrir a tela de gerenciar.
-      await page.goto(`pipes/${seed.pipeId}/`);
+      await page.goto(`pipes/quadro/?id=${seed.pipeId}`);
       await page.getByRole("button", { name: "Gerenciar etiquetas" }).click();
       const gerenciar = page.getByRole("dialog", { name: "Gerenciar etiquetas" });
       await expect(gerenciar).toBeVisible();
@@ -68,7 +68,7 @@ test.describe("Gerenciar etiquetas — tela de administração do pipe", () => {
       await db.setValorCampo(seedB.cardId, campoEtiquetas.id, [etiqueta.id]);
 
       // idem: abre "Gerenciar etiquetas" a partir do board, sem card aberto por cima
-      await page.goto(`pipes/${seedA.pipeId}/`);
+      await page.goto(`pipes/quadro/?id=${seedA.pipeId}`);
       await page.getByRole("button", { name: "Gerenciar etiquetas" }).click();
       const gerenciar = page.getByRole("dialog", { name: "Gerenciar etiquetas" });
       await gerenciar.getByRole("button", { name: "Excluir etiqueta Compartilhada" }).click();

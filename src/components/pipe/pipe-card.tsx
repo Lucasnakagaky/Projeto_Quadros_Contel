@@ -29,7 +29,7 @@ export function PipeCard({
 
   return (
     <Link
-      href={`/pipes/${pipe.id}`}
+      href={`/pipes/quadro?id=${pipe.id}`}
       className="group flex flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
     >
       <div className="h-1.5 shrink-0" style={{ backgroundColor: cor }} />

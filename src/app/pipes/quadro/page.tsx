@@ -1,21 +1,30 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { AppLink as Link } from "@/components/ui/app-link";
 import { cardTitulosPorId, getPipeFull, listConexoesEnvolvendoCards } from "@/lib/store";
 import { CardRelacionado } from "@/lib/types";
 import { PipeBoard } from "@/components/pipe/pipe-board";
 import { useAuth } from "@/components/auth-provider";
 
+// Rota estática fixa (sem [pipeId]) — o id do pipe vem da query string (?id=...), não de
+// um segmento dinâmico. Um segmento dinâmico exigiria generateStaticParams no export
+// estático, e todo pipe criado DEPOIS do build ficaria 404 até o próximo deploy (era assim
+// antes: /pipes/[pipeId] com dynamicParams=false). Query string é 100% client-side, então um
+// pipe novo funciona na hora, sem rebuild.
+
 type Props = React.ComponentProps<typeof PipeBoard>;
 
-export function PipeBoardClient({ pipeId }: { pipeId: string }) {
+function PipeBoardContent() {
   const { session } = useAuth();
+  const searchParams = useSearchParams();
+  const pipeId = searchParams.get("id");
   const [props, setProps] = useState<Props | null>(null);
   const [erro, setErro] = useState(false);
 
   useEffect(() => {
-    if (!session) return;
+    if (!session || !pipeId) return;
     let vivo = true;
     (async () => {
       try {
@@ -69,7 +78,7 @@ export function PipeBoardClient({ pipeId }: { pipeId: string }) {
     };
   }, [pipeId, session]);
 
-  if (erro) {
+  if (!pipeId || erro) {
     return (
       <div className="flex flex-1 flex-col items-center justify-center gap-3 p-10 text-center">
         <p className="text-slate-500">Pipe não encontrado.</p>
@@ -87,4 +96,18 @@ export function PipeBoardClient({ pipeId }: { pipeId: string }) {
     );
   }
   return <PipeBoard {...props} />;
+}
+
+export default function PipeQuadroPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex flex-1 items-center justify-center p-10 text-sm text-slate-400">
+          Carregando quadro…
+        </div>
+      }
+    >
+      <PipeBoardContent />
+    </Suspense>
+  );
 }

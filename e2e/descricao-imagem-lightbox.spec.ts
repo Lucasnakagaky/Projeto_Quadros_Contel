@@ -25,7 +25,7 @@ test.describe.skip("Descrição da Demanda — zoom da imagem (lightbox)", () =>
       await campo.getByRole("button", { name: "Salvar" }).click();
 
       // fecha e reabre pra garantir que estamos testando a visualização salva, não o editor
-      await page.goto(`/pipes/${seed.pipeId}`);
+      await page.goto(`pipes/quadro/?id=${seed.pipeId}`);
       await abrirCard(page, seed);
 
       const imgSalva = page.locator(`#campo-${seed.campoId} img`);
@@ -97,7 +97,7 @@ test.describe.skip("Descrição da Demanda — zoom da imagem (lightbox)", () =>
 
       // Salvar continua funcionando normalmente depois de fechar o lightbox
       await campo.getByRole("button", { name: "Salvar" }).click();
-      await page.goto(`/pipes/${seed.pipeId}`);
+      await page.goto(`pipes/quadro/?id=${seed.pipeId}`);
       await abrirCard(page, seed);
 
       const campoFinal = page.locator(`#campo-${seed.campoId}`);

@@ -26,7 +26,7 @@ test.describe("Filtro de cards — Kanban e Lista", () => {
       const campoEtiquetas = campos.find((c) => c.tipo === "etiquetas")!;
       await db.setValorCampo(seed.cardId, campoEtiquetas.id, [etiqueta.id]);
 
-      await page.goto(`pipes/${seed.pipeId}/`);
+      await page.goto(`pipes/quadro/?id=${seed.pipeId}`);
       const busca = page.getByLabel("Pesquisar cards ou etiquetas");
       const cardA = page.getByText(TITULO_A);
       const cardBNoQuadro = page.getByText(TITULO_B);
@@ -93,7 +93,7 @@ test.describe("Filtro de cards — Kanban e Lista", () => {
       const campoEtiquetas = campos.find((c) => c.tipo === "etiquetas")!;
       await db.setValorCampo(seed.cardId, campoEtiquetas.id, [etiqueta.id]);
 
-      await page.goto(`pipes/${seed.pipeId}/`);
+      await page.goto(`pipes/quadro/?id=${seed.pipeId}`);
       const busca = page.getByLabel("Pesquisar cards ou etiquetas");
       await busca.fill("zzalpha");
 

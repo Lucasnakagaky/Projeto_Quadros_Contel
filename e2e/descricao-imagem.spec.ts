@@ -47,7 +47,7 @@ test.describe.skip("Descrição da Demanda — colar imagem embutida (data:) no 
       await botaoSalvar.click();
 
       // fecha e reabre de verdade (navega pra fora e volta com cardId na URL de novo)
-      await page.goto(`/pipes/${seed.pipeId}`);
+      await page.goto(`pipes/quadro/?id=${seed.pipeId}`);
       await abrirCard(page, seed);
 
       const imgFinal = page.locator(`#campo-${seed.campoId} img`);
@@ -95,7 +95,7 @@ test.describe.skip("Descrição da Demanda — colar imagem embutida (data:) no 
 
       await campo.getByRole("button", { name: "Salvar" }).click();
 
-      await page.goto(`/pipes/${seed.pipeId}`);
+      await page.goto(`pipes/quadro/?id=${seed.pipeId}`);
       await abrirCard(page, seed);
 
       const imgsFinais = page.locator(`#campo-${seed.campoId} img`);
@@ -150,7 +150,7 @@ test.describe.skip("Descrição da Demanda — colar imagem embutida (data:) no 
       await expect(botaoSalvar).toBeEnabled();
       await botaoSalvar.click();
 
-      await page.goto(`/pipes/${seed.pipeId}`);
+      await page.goto(`pipes/quadro/?id=${seed.pipeId}`);
       await abrirCard(page, seed);
 
       const campoFinal = page.locator(`#campo-${seed.campoId}`);
@@ -190,7 +190,7 @@ test.describe.skip("Descrição da Demanda — colar imagem embutida (data:) no 
       await expect(editor.locator("img")).toHaveCount(1);
 
       await campo.getByRole("button", { name: "Salvar" }).click();
-      await page.goto(`/pipes/${seed.pipeId}`);
+      await page.goto(`pipes/quadro/?id=${seed.pipeId}`);
       await abrirCard(page, seed);
 
       const campoFinal = page.locator(`#campo-${seed.campoId}`);
@@ -233,7 +233,7 @@ test.describe.skip("Descrição da Demanda — colar imagem embutida (data:) no 
       await expect(editor).toContainText("Texto que deve sobreviver");
 
       await campo.getByRole("button", { name: "Salvar" }).click();
-      await page.goto(`/pipes/${seed.pipeId}`);
+      await page.goto(`pipes/quadro/?id=${seed.pipeId}`);
       await abrirCard(page, seed);
 
       const campoFinal = page.locator(`#campo-${seed.campoId}`);
@@ -281,7 +281,7 @@ test.describe.skip("Descrição da Demanda — colar imagem embutida (data:) no 
       await expect(editor.locator("img").nth(1)).toHaveAttribute("src", srcOriginal ?? "");
 
       await campo.getByRole("button", { name: "Salvar" }).click();
-      await page.goto(`/pipes/${seed.pipeId}`);
+      await page.goto(`pipes/quadro/?id=${seed.pipeId}`);
       await abrirCard(page, seed);
 
       const campoFinal = page.locator(`#campo-${seed.campoId}`);
@@ -331,7 +331,7 @@ test.describe.skip("Descrição da Demanda — sanitização de HTML sujo no mom
       expect(htmlEditor).not.toContain('class="c1"');
 
       await campo.getByRole("button", { name: "Salvar" }).click();
-      await page.goto(`/pipes/${seed.pipeId}`);
+      await page.goto(`pipes/quadro/?id=${seed.pipeId}`);
       await abrirCard(page, seed);
 
       const htmlFinal = await page.locator(`#campo-${seed.campoId}`).innerHTML();
@@ -395,7 +395,7 @@ test.describe.skip("Descrição da Demanda — sanitização de HTML sujo no mom
       await expect(editor.locator("li").nth(1)).toHaveText("Item colado");
 
       await campo.getByRole("button", { name: "Salvar" }).click();
-      await page.goto(`/pipes/${seed.pipeId}`);
+      await page.goto(`pipes/quadro/?id=${seed.pipeId}`);
       await abrirCard(page, seed);
 
       const campoFinal = page.locator(`#campo-${seed.campoId}`);
@@ -424,7 +424,7 @@ test.describe.skip("Descrição da Demanda — sanitização de HTML sujo no mom
       await expect(editor).toContainText("linha 3");
 
       await campo.getByRole("button", { name: "Salvar" }).click();
-      await page.goto(`/pipes/${seed.pipeId}`);
+      await page.goto(`pipes/quadro/?id=${seed.pipeId}`);
       await abrirCard(page, seed);
 
       await expect(page.locator(`#campo-${seed.campoId} br`)).toHaveCount(2);

@@ -59,8 +59,9 @@ export const db = {
 
 export async function abrirCard(page: Page, seed: Seed) {
   // caminho relativo ao baseURL (que termina em /Projeto_Quadros_Contel/) e com barra
-  // final antes da query, por causa do trailingSlash do export estático.
-  await page.goto(`pipes/${seed.pipeId}/?cardId=${seed.cardId}`);
+  // final antes da query, por causa do trailingSlash do export estático. Rota estática fixa
+  // (/pipes/quadro), o pipe é identificado por ?id= — ver plano "Corrigir 404 ao criar Pipe".
+  await page.goto(`pipes/quadro/?id=${seed.pipeId}&cardId=${seed.cardId}`);
   await expect(page.locator(`#campo-${seed.campoId}`)).toBeVisible();
 }
 

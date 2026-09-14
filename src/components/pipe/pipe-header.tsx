@@ -44,7 +44,7 @@ export function PipeHeader({
       </button>
 
       <Link
-        href={`/pipes/${pipe.id}/lixeira`}
+        href={`/pipes/lixeira?id=${pipe.id}`}
         className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium text-slate-500 hover:bg-slate-100"
       >
         <Trash2 size={14} />

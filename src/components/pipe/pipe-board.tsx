@@ -162,12 +162,13 @@ export function PipeBoard({
   function openCard(id: string, opts?: { focarDescricao?: boolean }) {
     setCardId(id);
     setFocarDescricaoAoAbrir(Boolean(opts?.focarDescricao));
-    router.push(`${pathname}?cardId=${id}`, { scroll: false });
+    // preserva o ?id= do pipe na URL — router.push troca a query inteira, não só adiciona.
+    router.push(`${pathname}?id=${pipe.id}&cardId=${id}`, { scroll: false });
   }
 
   function closeCard() {
     setCardId(null);
-    router.push(pathname, { scroll: false });
+    router.push(`${pathname}?id=${pipe.id}`, { scroll: false });
   }
 
   function handleDragStart(event: DragStartEvent) {

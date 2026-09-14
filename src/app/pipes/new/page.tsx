@@ -25,7 +25,7 @@ export default function NewPipePage() {
     try {
       const pipe = await api.post<Pipe>("/api/pipes", { nome });
       toast.success("Pipe criado com sucesso!");
-      router.push(`/pipes/${pipe.id}`);
+      router.push(`/pipes/quadro?id=${pipe.id}`);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Erro ao criar pipe");
       setLoading(false);
