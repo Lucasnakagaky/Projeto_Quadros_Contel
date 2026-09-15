@@ -12,7 +12,6 @@ import {
   Mail,
   MessageSquare,
   Paperclip,
-  Plus,
   Settings2,
   Trash2,
 } from "lucide-react";
@@ -448,15 +447,6 @@ export function CardDetailModal({
                   <FileText size={14} />
                   PDF
                 </TabsTrigger>
-                <button
-                  type="button"
-                  disabled
-                  title="Mais funcionalidades — em breve"
-                  aria-label="Mais funcionalidades (em breve)"
-                  className="mr-1.5 mb-1.5 flex h-[26px] w-[26px] shrink-0 cursor-not-allowed items-center justify-center rounded-full border border-slate-200 bg-white text-slate-300"
-                >
-                  <Plus size={14} />
-                </button>
               </TabsList>
 
               <div className="mt-2 border-t border-[rgb(220,223,229)]" />
