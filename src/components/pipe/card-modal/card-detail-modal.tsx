@@ -8,8 +8,6 @@ import {
   CalendarClock,
   CheckSquare,
   ClipboardList,
-  FileText,
-  Mail,
   MessageSquare,
   Paperclip,
   Settings2,
@@ -45,17 +43,6 @@ function ContadorAba({ valor }: { valor: number }) {
     <span className="rounded-full bg-slate-200 px-1.5 py-px text-[11px] font-semibold tabular-nums text-slate-600 transition-colors duration-(--duracao-rapida) group-data-[state=active]/aba:bg-blue-100 group-data-[state=active]/aba:text-blue-700">
       {valor}
     </span>
-  );
-}
-
-/** Placeholder honesto para abas cuja funcionalidade ainda não existe no sistema
- * (Email, PDF) — navegação real, sem simular envio/geração que não existem. */
-function AbaEmBreve({ label }: { label: string }) {
-  return (
-    <div className="flex flex-col items-center gap-1.5 rounded-lg border border-dashed border-slate-200 px-4 py-8 text-center">
-      <p className="text-sm font-medium text-slate-500">{label}</p>
-      <p className="text-xs text-slate-400">Em breve</p>
-    </div>
   );
 }
 
@@ -412,8 +399,8 @@ export function CardDetailModal({
             <div className="border-t border-[rgb(220,223,229)]" />
 
             {/* Barra de funcionalidades do card — navegação (padrão Pipefy: Form,
-                Atividades, Anexos, Checklists, Comentários, Email, PDF, +). Quebra para a
-                segunda linha naturalmente via flex-wrap quando não há espaço na primeira. */}
+                Atividades, Anexos, Checklists, Comentários). Quebra para a segunda linha
+                naturalmente via flex-wrap quando não há espaço na primeira. */}
             <Tabs value={tabAtiva} onValueChange={setTabAtiva}>
               <TabsList className="items-center gap-0">
                 <TabsTrigger value="form" className={CLASSE_ABA}>
@@ -438,14 +425,6 @@ export function CardDetailModal({
                   <MessageSquare size={14} />
                   Comentários
                   <ContadorAba valor={comentarios.length} />
-                </TabsTrigger>
-                <TabsTrigger value="email" className={CLASSE_ABA}>
-                  <Mail size={14} />
-                  Email
-                </TabsTrigger>
-                <TabsTrigger value="pdf" className={CLASSE_ABA}>
-                  <FileText size={14} />
-                  PDF
                 </TabsTrigger>
               </TabsList>
 
@@ -531,13 +510,6 @@ export function CardDetailModal({
                 />
               </TabsContent>
 
-              <TabsContent value="email" className="pt-2">
-                <AbaEmBreve label="Enviar card por email" />
-              </TabsContent>
-
-              <TabsContent value="pdf" className="pt-2">
-                <AbaEmBreve label="Exportar card em PDF" />
-              </TabsContent>
             </Tabs>
           </div>
 
