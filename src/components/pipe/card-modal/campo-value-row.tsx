@@ -142,11 +142,11 @@ export function CampoValueRow({
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             {opts?.htmlForLabel ? (
-              <label htmlFor={opts.htmlForLabel} className="block text-xs font-medium text-slate-500">
+              <label htmlFor={opts.htmlForLabel} className="block text-[10px] font-semibold uppercase tracking-wide text-slate-400">
                 {rotulo}
               </label>
             ) : (
-              <span className="block text-xs font-medium text-slate-500">{rotulo}</span>
+              <span className="block text-[10px] font-semibold uppercase tracking-wide text-slate-400">{rotulo}</span>
             )}
             {opts?.acao}
           </div>

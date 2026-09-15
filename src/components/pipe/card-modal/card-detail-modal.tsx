@@ -38,12 +38,12 @@ import { CommentsSection } from "./comments-section";
 import { AttachmentsSection } from "./attachments-section";
 
 const CLASSE_ABA =
-  "mr-1.5 mb-1.5 flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full border border-slate-200 bg-white px-2.5 py-1 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-50 hover:text-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 data-[state=active]:border-slate-300 data-[state=active]:bg-slate-100 data-[state=active]:font-semibold data-[state=active]:text-slate-900";
+  "group/aba mr-1.5 mb-1.5 flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full border border-slate-200 bg-white px-2.5 py-1 text-xs font-medium text-slate-600 transition-[background-color,color,border-color,transform] duration-(--duracao-rapida) hover:-translate-y-px hover:bg-slate-50 hover:text-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 data-[state=active]:border-blue-200 data-[state=active]:bg-blue-50 data-[state=active]:font-semibold data-[state=active]:text-blue-700";
 
 function ContadorAba({ valor }: { valor: number }) {
   if (valor <= 0) return null;
   return (
-    <span className="rounded-full bg-slate-200 px-1.5 py-px text-[11px] font-semibold text-slate-600">
+    <span className="rounded-full bg-slate-200 px-1.5 py-px text-[11px] font-semibold tabular-nums text-slate-600 transition-colors duration-(--duracao-rapida) group-data-[state=active]/aba:bg-blue-100 group-data-[state=active]/aba:text-blue-700">
       {valor}
     </span>
   );

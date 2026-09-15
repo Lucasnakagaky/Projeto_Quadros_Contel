@@ -32,6 +32,8 @@ export function FaseColumn({
   paisPorCard,
   isDropTarget = false,
   filtroAtivo = false,
+  animarEntrada = false,
+  indice = 0,
   onOpenCard,
   onCreateCard,
   onUpdateFase,
@@ -48,6 +50,10 @@ export function FaseColumn({
   isDropTarget?: boolean;
   /** Há um filtro de pesquisa ativo no quadro — muda só a mensagem de coluna vazia. */
   filtroAtivo?: boolean;
+  /** Só é true no primeiro render do quadro — ver `animarEntrada` no pipe-board. */
+  animarEntrada?: boolean;
+  /** Posição da coluna no quadro, usada só para escalonar a entrada. */
+  indice?: number;
   onOpenCard: (id: string) => void;
   onCreateCard: (faseId: string) => void;
   onUpdateFase: (faseId: string, patch: Partial<NovaFaseValues> & { cor?: string }) => void;
@@ -65,13 +71,18 @@ export function FaseColumn({
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
+    ...(animarEntrada ? { animationDelay: `${Math.min(indice, 6) * 45}ms` } : null),
   };
 
   return (
     <div
       ref={setNodeRef}
       style={style}
-      className={cn("flex h-full w-[280px] shrink-0 flex-col", isDragging && "opacity-50")}
+      className={cn(
+        "flex h-full w-[280px] shrink-0 flex-col",
+        animarEntrada && "anim-coluna-entra",
+        isDragging && "opacity-50"
+      )}
     >
       <div className="h-1 shrink-0" style={{ backgroundColor: fase.cor }} />
 
@@ -94,11 +105,11 @@ export function FaseColumn({
           onConfigurar={() => setConfigurando(true)}
         />
 
-        <span className="ml-auto rounded bg-[rgb(237,239,243)] px-1 py-0.5 text-xs font-normal text-[rgb(16,24,32)]">
+        <span className="ml-auto rounded bg-[rgb(237,239,243)] px-1 py-0.5 text-xs font-normal tabular-nums text-[rgb(16,24,32)] transition-colors duration-(--duracao-rapida)">
           {cards.length}
         </span>
 
-        <div className="flex items-center opacity-0 transition-opacity focus-within:opacity-100 group-hover:opacity-100">
+        <div className="flex items-center opacity-0 transition-opacity duration-(--duracao-rapida) focus-within:opacity-100 group-hover:opacity-100">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button
@@ -144,7 +155,7 @@ export function FaseColumn({
 
       <div
         className={cn(
-          "flex flex-1 flex-col overflow-hidden rounded-b border border-t-0 border-[#e3e6eb] bg-[#f7f8fa] transition-colors",
+          "flex flex-1 flex-col overflow-hidden rounded-b border border-t-0 border-borda bg-quadro transition-colors duration-(--duracao-base)",
           isDropTarget && "bg-blue-50 ring-2 ring-inset ring-blue-300"
         )}
       >
@@ -169,7 +180,7 @@ export function FaseColumn({
           className="scrollbar-fina flex min-h-[8px] flex-1 flex-col gap-2 overflow-y-auto px-3 pb-3 pt-0"
         >
           <SortableContext items={cards.map((c) => c.id)} strategy={verticalListSortingStrategy}>
-            {cards.map((card) => (
+            {cards.map((card, i) => (
               <CardChip
                 key={card.id}
                 card={card}
@@ -181,6 +192,8 @@ export function FaseColumn({
                 onOpen={() => onOpenCard(card.id)}
                 onOpenCard={onOpenCard}
                 onFiltrarEtiqueta={onFiltrarEtiqueta}
+                animarEntrada={animarEntrada}
+                indice={i}
               />
             ))}
           </SortableContext>
@@ -189,13 +202,19 @@ export function FaseColumn({
             <div className="flex flex-col items-center gap-1.5 px-2 py-6 text-center">
               <Inbox size={20} className="text-slate-300" />
               <p className="text-[13px] text-slate-500">
-                {filtroAtivo
-                  ? "Nenhum card nesta fase com esse filtro."
-                  : fase.descricao || "Nenhum card nesta fase."}
+                {filtroAtivo ? "Nenhum card nesta fase com esse filtro." : "Nenhum card nesta fase."}
               </p>
             </div>
           )}
         </div>
+
+        {/* Descrição da fase como rodapé fixo (padrão Pipefy). Antes ela só aparecia
+            quando a coluna estava vazia, então sumia justamente quando havia trabalho. */}
+        {fase.descricao && (
+          <p className="shrink-0 border-t border-borda px-3 py-2.5 text-center text-[11px] leading-4 text-slate-400">
+            {fase.descricao}
+          </p>
+        )}
       </div>
 
       <NovaFaseModal

@@ -38,7 +38,7 @@ export function CampoValueList({
                 <CalendarPlus size={14} className="shrink-0 text-slate-400" />
               </div>
               <div className="min-w-0 flex-1">
-                <span className="block text-xs font-medium text-slate-500">Criação do card</span>
+                <span className="block text-[10px] font-semibold uppercase tracking-wide text-slate-400">Criação do card</span>
                 <span className="text-sm text-slate-700">{formatarData(card.criadoEm)}</span>
               </div>
             </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useDeferredValue, useMemo, useState } from "react";
+import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import {
@@ -84,6 +84,15 @@ export function PipeBoard({
   // true só na navegação logo após criar um card filho (ver openCard) — pede pro modal abrir
   // já rolado/destacado no campo "Descrição da Demanda", que é onde o upload de imagem funciona.
   const [focarDescricaoAoAbrir, setFocarDescricaoAoAbrir] = useState(false);
+  // A cascata de entrada roda UMA vez, ao abrir o quadro. Sem isso ela re-dispararia a
+  // cada tecla digitada na busca (o filtro remonta a lista de cards), e o quadro ficaria
+  // piscando enquanto o usuário digita.
+  const [animarEntrada, setAnimarEntrada] = useState(true);
+  useEffect(() => {
+    const t = setTimeout(() => setAnimarEntrada(false), 600);
+    return () => clearTimeout(t);
+  }, []);
+
   const [cardIdParamAnterior, setCardIdParamAnterior] = useState(cardIdParam);
   if (cardIdParam !== cardIdParamAnterior) {
     setCardIdParamAnterior(cardIdParam);
@@ -463,7 +472,7 @@ export function PipeBoard({
           >
             <ScrollFade className="flex items-stretch gap-2 px-6 py-4" fadeFrom="from-neutral-50" passoScroll={288}>
               <SortableContext items={faseIds} strategy={horizontalListSortingStrategy}>
-                {fases.map((fase) => (
+                {fases.map((fase, i) => (
                   <FaseColumn
                     key={fase.id}
                     fase={fase}
@@ -475,6 +484,8 @@ export function PipeBoard({
                     paisPorCard={paisPorCard}
                     isDropTarget={Boolean(activeCard) && overFaseId === fase.id}
                     filtroAtivo={filtroAtivo}
+                    animarEntrada={animarEntrada}
+                    indice={i}
                     onOpenCard={openCard}
                     onCreateCard={handleCreateCard}
                     onUpdateFase={handleUpdateFase}
@@ -495,7 +506,7 @@ export function PipeBoard({
 
             <DragOverlay>
               {activeCard ? (
-                <div className="w-[256px] rotate-2 opacity-90">
+                <div className="w-[256px] rotate-2 scale-105 opacity-95 drop-shadow-[0_12px_24px_rgba(38,50,56,0.25)]">
                   <CardChip
                     card={activeCard}
                     campos={campos}
@@ -506,7 +517,7 @@ export function PipeBoard({
                 </div>
               ) : null}
               {activeFase ? (
-                <div className="w-[280px] rotate-1 rounded border border-[rgb(220,223,229)] bg-white p-3 opacity-90">
+                <div className="w-[280px] rotate-1 scale-105 rounded border border-divisor bg-white p-3 opacity-95 drop-shadow-[0_12px_24px_rgba(38,50,56,0.25)]">
                   <span className="font-semibold text-slate-700">{activeFase.nome}</span>
                 </div>
               ) : null}
