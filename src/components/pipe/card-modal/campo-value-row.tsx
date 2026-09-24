@@ -21,12 +21,16 @@ import { api } from "@/lib/api-client";
 import { Anexo as AnexoReal, Campo, Usuario } from "@/lib/types";
 import { stringArray } from "@/lib/campo-utils";
 import { htmlEstaVazio, sanitizeHtml } from "@/lib/sanitize-html";
-import { iniciais } from "@/lib/utils";
+import { cn, formatarVencimento, iniciais, parseDataSolta } from "@/lib/utils";
 
 type Anexo = { nome: string; url: string };
 type RelacaoExterna = { id: string; rotulo: string };
 
 const TIPOS_TEXTO = new Set(["texto_curto", "email", "telefone", "numerico", "tempo"]);
+
+// Formato legado de data_vencimento/data_hora (de quando o campo era <input type="date">),
+// sem componente de horário — usado só pra normalizar o rascunho ao entrar em edição.
+const REGEX_DATA_PURA_LOCAL = /^\d{4}-\d{2}-\d{2}$/;
 
 function formatarMoeda(valor: unknown, codigoMoeda: string): string {
   const numero = typeof valor === "number" ? valor : parseFloat(String(valor));
@@ -335,35 +339,61 @@ export function CampoValueRow({
 
   // Data / Data e hora / Data de vencimento
   if (campo.tipo === "data" || campo.tipo === "data_hora" || campo.tipo === "data_vencimento") {
-    const inputType = campo.tipo === "data_hora" ? "datetime-local" : "date";
+    // data_vencimento usa o mesmo datetime-local que data_hora já usava — dá pra editar
+    // data e hora juntos ou só um dos dois, com o mesmo widget nativo (nenhum componente novo).
+    const inputType = campo.tipo === "data" ? "date" : "datetime-local";
+
+    function iniciarEdicaoData() {
+      const bruto = typeof valor === "string" ? valor : "";
+      // Cards antigos guardam só "YYYY-MM-DD" (de quando o campo era <input type="date">).
+      // Isso não é um valor válido pra <input type="datetime-local">: sem normalizar, o
+      // navegador mostraria o campo vazio ao editar. Só ajusta o rascunho em memória — o
+      // valor salvo no banco não muda até o usuário salvar de novo.
+      const normalizado =
+        inputType === "datetime-local" && REGEX_DATA_PURA_LOCAL.test(bruto) ? `${bruto}T00:00` : bruto;
+      setRascunho(normalizado);
+      setEditing(true);
+    }
+
     if (!editing) {
       return linha(
         vazio ? (
-          <button onClick={iniciarEdicao} className="text-sm text-slate-400 hover:text-slate-600">
+          <button onClick={iniciarEdicaoData} className="text-sm text-slate-400 hover:text-slate-600">
             Clique aqui para adicionar
           </button>
         ) : (
-          <button onClick={iniciarEdicao} className="text-sm text-slate-700 hover:underline">
-            {campo.tipo === "data_hora"
-              ? new Date(valor as string).toLocaleString("pt-BR")
-              : new Date(valor as string).toLocaleDateString("pt-BR")}
+          <button onClick={iniciarEdicaoData} className="text-sm text-slate-700 hover:underline">
+            {campo.tipo === "data_vencimento"
+              ? formatarVencimento(valor as string)
+              : campo.tipo === "data_hora"
+                ? parseDataSolta(valor as string).toLocaleString("pt-BR")
+                : parseDataSolta(valor as string).toLocaleDateString("pt-BR")}
           </button>
         )
       );
     }
     return linha(
-      <div className="flex items-center gap-2">
+      // flex-wrap: se o vencimento estiver no grid apertado ao lado de "Criação do card"
+      // (campo-value-list.tsx) e não couber tudo numa linha só, Salvar/Cancelar quebram
+      // pra uma segunda linha em vez de estourar o layout.
+      <div className="flex flex-wrap items-center gap-2">
         <Input
           autoFocus
           type={inputType}
           value={rascunho}
           onChange={(e) => setRascunho(e.target.value)}
-          className="h-8 w-auto text-sm"
+          // Largura fixa (não w-auto): um <input type="date"/"datetime-local"> nativo com
+          // largura automática muda de tamanho entre fechado e focado (o navegador reserva
+          // espaço extra pro ícone/segmentos), e isso empurrava o Salvar/Cancelar pro lado.
+          className={cn(
+            "h-8 shrink-0 text-sm",
+            inputType === "datetime-local" ? "w-52" : "w-36"
+          )}
         />
-        <Button size="sm" onClick={salvar}>
+        <Button size="sm" className="shrink-0" onClick={salvar}>
           Salvar
         </Button>
-        <Button size="sm" variant="ghost" onClick={cancelar}>
+        <Button size="sm" variant="ghost" className="shrink-0" onClick={cancelar}>
           Cancelar
         </Button>
       </div>

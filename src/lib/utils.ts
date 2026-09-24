@@ -52,6 +52,40 @@ export function formatarDataHora(iso: string | null | undefined): string {
   return `${d.toLocaleDateString("pt-BR")} ${d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}`;
 }
 
+const REGEX_DATA_PURA = /^(\d{4})-(\d{2})-(\d{2})$/;
+
+/** Interpreta um valor de data "solto" (sem instância real de servidor por trás, como
+ *  data/data_vencimento) sempre no fuso do navegador — nunca em UTC.
+ *
+ *  `new Date("2026-09-25")` (data pura, sem hora) é tratado pela especificação do JS
+ *  como meia-noite em UTC, não meia-noite local. Formatar esse instante com
+ *  `toLocaleDateString` no fuso do navegador derruba a data em 1 dia em qualquer fuso
+ *  atrás de UTC (Brasil, -3). Aqui, uma data pura é montada com o construtor de
+ *  componentes (`new Date(ano, mes, dia)`), que é sempre local — sem essa armadilha.
+ *
+ *  Um valor com horário (`YYYY-MM-DDTHH:mm`, formato nativo de `<input type="datetime-local">`)
+ *  já não tem esse problema: sem `Z`/offset, o parser nativo do `Date` já interpreta como
+ *  hora local. Passa direto para `new Date()`. */
+export function parseDataSolta(valor: string): Date {
+  const m = REGEX_DATA_PURA.exec(valor);
+  if (m) {
+    const [, ano, mes, dia] = m;
+    return new Date(Number(ano), Number(mes) - 1, Number(dia));
+  }
+  return new Date(valor);
+}
+
+/** Formata um valor de vencimento pra exibição: só a data para valores legados (sem
+ *  horário, formato antigo `YYYY-MM-DD`) e "data às hora" para os que já têm horário. */
+export function formatarVencimento(valor: string): string {
+  const d = parseDataSolta(valor);
+  if (Number.isNaN(d.getTime())) return "";
+  const dataFmt = d.toLocaleDateString("pt-BR");
+  if (REGEX_DATA_PURA.test(valor)) return dataFmt;
+  const horaFmt = d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+  return `${dataFmt} às ${horaFmt}`;
+}
+
 /** Duração humana entre duas datas, ex.: "4 minutos", "2 horas", "3 dias". */
 export function duracaoEntre(inicio: Date, fim: Date): string {
   if (Number.isNaN(inicio.getTime()) || Number.isNaN(fim.getTime())) return "";

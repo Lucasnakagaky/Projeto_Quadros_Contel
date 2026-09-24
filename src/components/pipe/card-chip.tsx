@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { Campo, Card, CardRelacionado, Etiqueta, Usuario } from "@/lib/types";
 import { campoPorTipo, stringArray } from "@/lib/campo-utils";
-import { cn, iniciais } from "@/lib/utils";
+import { cn, iniciais, parseDataSolta } from "@/lib/utils";
 import { CampoIcon } from "./card-modal/campo-icon";
 
 const TIPOS_SEM_PREVIA_COMPACTA = new Set([
@@ -50,7 +50,10 @@ function formatarValorPreview(campo: Campo, valor: unknown): string {
 
 function statusVencimento(iso?: string): "atrasado" | "proximo" | "normal" | null {
   if (!iso) return null;
-  const data = new Date(iso);
+  // parseDataSolta em vez de new Date(iso): uma data pura ("YYYY-MM-DD", formato legado)
+  // vira meia-noite UTC no new Date() nativo, não meia-noite local — em fusos atrás de UTC
+  // isso classificava um vencimento como atrasado/normal um dia adiantado.
+  const data = parseDataSolta(iso);
   if (Number.isNaN(data.getTime())) return null;
   const hoje = new Date();
   hoje.setHours(0, 0, 0, 0);
@@ -267,7 +270,7 @@ export function CardChip({
               title={status === "atrasado" ? "Vencimento atrasado" : status === "proximo" ? "Vencimento próximo" : undefined}
             >
               {status === "atrasado" ? <AlertCircle size={11} /> : <CalendarClock size={11} />}
-              {new Date(vencimento).toLocaleDateString("pt-BR", { day: "2-digit", month: "short" })}
+              {parseDataSolta(vencimento).toLocaleDateString("pt-BR", { day: "2-digit", month: "short" })}
             </span>
           )}
 
