@@ -1,0 +1,1152 @@
+{
+  "importados": [
+    {
+      "bitrixId": "771",
+      "titulo": "PORTAL CONTEL - FABRICA E SOLICITAÇÕES DE TI E FRETE: alerta ao tentar mover o card",
+      "fase": "Concluído"
+    },
+    {
+      "bitrixId": "783",
+      "titulo": "PORTAL CONTEL - FRETE - Nova Solicitação de Frete configurar campo Valor Alvo",
+      "fase": "Concluído"
+    },
+    {
+      "bitrixId": "789",
+      "titulo": "PORTAL CONTEL - TICKET TI : Evidenciar erros e melhorias",
+      "fase": "Concluído"
+    },
+    {
+      "bitrixId": "793",
+      "titulo": "Ajustar o fluxo da tela de gerenciamento de solicitações",
+      "fase": "Concluído"
+    },
+    {
+      "bitrixId": "799",
+      "titulo": "PORTAL CONTEL - SITE: Criar página trabalhe conosco",
+      "fase": "Concluído"
+    },
+    {
+      "bitrixId": "801",
+      "titulo": "Feedback visual de campos obrigatórios ao \"enviar requisitos\"",
+      "fase": "Concluído"
+    },
+    {
+      "bitrixId": "803",
+      "titulo": "PORTAL CONTEL - FRETE - SOLICITAÇÕES - NEW Aplicar sincronização entre TS e PLATAFORMA CONTEL",
+      "fase": "Concluído"
+    },
+    {
+      "bitrixId": "809",
+      "titulo": "PORTAL CONTEL - FABRICA - SOLICTAÇÃO: Mudar a forma como escreve e aparece os quilos",
+      "fase": "Concluído"
+    },
+    {
+      "bitrixId": "823",
+      "titulo": "CONTEL - TOWER SYSTEM - RELATÓRIOS",
+      "fase": "Kick-Off"
+    },
+    {
+      "bitrixId": "869",
+      "titulo": "TOWER SYSTEM - PAGAMENTOS - SALDO ADIATAMENTO: Filtro não funciona",
+      "fase": "Concluído"
+    },
+    {
+      "bitrixId": "871",
+      "titulo": "TOWER SYSTEM - REPOSITORIO DE ARQUIVOS: Símbolos no nomes das pastas",
+      "fase": "Concluído"
+    },
+    {
+      "bitrixId": "873",
+      "titulo": "PORTAL CONTEL - TICKET TI : Permitir visualização de arquivos online sem necessidade de download",
+      "fase": "Concluído"
+    },
+    {
+      "bitrixId": "955",
+      "titulo": "Power BI - Replicar Metas Financeiro",
+      "fase": "Concluído"
+    },
+    {
+      "bitrixId": "957",
+      "titulo": "Hotflix: CONTEL - TOWER SYSTEM: Folha premiação",
+      "fase": "Concluído"
+    },
+    {
+      "bitrixId": "969",
+      "titulo": "POWER BI - Transferir Relatórios para outro Workspace",
+      "fase": "Concluído"
+    },
+    {
+      "bitrixId": "971",
+      "titulo": "PORTAL CONTEL - Dificuldade em mover o kanban para o lado",
+      "fase": "Concluído"
+    },
+    {
+      "bitrixId": "1005",
+      "titulo": "CONTEL - TOWER SYSTEM - Solucionar acesso á Lançamento de Ranking e Ordem de serviço",
+      "fase": "Concluído"
+    },
+    {
+      "bitrixId": "1015",
+      "titulo": "CONTEL TOWER SYSTEM - CONFIGURAÇÕES - Menu Usuário",
+      "fase": "Concluído"
+    },
+    {
+      "bitrixId": "1045",
+      "titulo": "CONTEL TOWER SYSTEM - Exportar ordem de serviço",
+      "fase": "Concluído"
+    },
+    {
+      "bitrixId": "1047",
+      "titulo": "TOWER SYSTEM - LANÇAMENTO RANKING",
+      "fase": "Concluído"
+    },
+    {
+      "bitrixId": "1123",
+      "titulo": "CONTEL TOWER SYSTEM - Filtro Ordem de Serviço",
+      "fase": "Concluído"
+    },
+    {
+      "bitrixId": "1139",
+      "titulo": "CONTEL PORTAL - SOLICITAÇÃO DE TI - TICKET : Lista de Ticlets",
+      "fase": "Concluído"
+    },
+    {
+      "bitrixId": "1141",
+      "titulo": "HOTFIX: CONTEL PORTAL - INVENTARIO Bug ao criar uma impressora",
+      "fase": "Concluído"
+    },
+    {
+      "bitrixId": "1151",
+      "titulo": "PORTAL CONTEL - FRETE - Ajustes ao salvar",
+      "fase": "Concluído"
+    },
+    {
+      "bitrixId": "1155",
+      "titulo": "POWER BI - INDICADORES DE DIRETORIA solucionar problemas no financeiro",
+      "fase": "Concluído"
+    },
+    {
+      "bitrixId": "1161",
+      "titulo": "HOTFIX: PORTAL CONTEL INVENTARIO - ATIVOS: Bug ao tentar filtrar",
+      "fase": "Concluído"
+    },
+    {
+      "bitrixId": "1179",
+      "titulo": "PORTAL CONTEL CENTRO DE CUSTO Bug especifico relatado pelo João",
+      "fase": "Concluído"
+    },
+    {
+      "bitrixId": "1187",
+      "titulo": "CONTEL TOWER SYSTEM - ORDEM DE SERVIÇO - EDIÇÃO DE PLANILHA  campos que deseja editar",
+      "fase": "Concluído"
+    },
+    {
+      "bitrixId": "1199",
+      "titulo": "POWER BI - Corrigir erro de atualização do Power BI — Planejamento_Fabrica",
+      "fase": "Concluído"
+    },
+    {
+      "bitrixId": "1235",
+      "titulo": "Não esta vindo a notificação no ticket",
+      "fase": "Pendente"
+    },
+    {
+      "bitrixId": "1237",
+      "titulo": "HOTFLIX - ORDEM DE SERVÇO - CORREÇÃO DE BUGS",
+      "fase": "Concluído"
+    },
+    {
+      "bitrixId": "1337",
+      "titulo": "Modulo ADMINISTRAÇÃO no menu Colaboradores",
+      "fase": "Concluído"
+    },
+    {
+      "bitrixId": "1351",
+      "titulo": "API para subir anexos dentro de OS na aba anexos",
+      "fase": "Concluído"
+    },
+    {
+      "bitrixId": "1373",
+      "titulo": "POWER BI - Erro de atualização painel",
+      "fase": "Desenvolvimento"
+    },
+    {
+      "bitrixId": "1375",
+      "titulo": "Visão anual do dashboard com análise mês a mês",
+      "fase": "Deploy"
+    },
+    {
+      "bitrixId": "1377",
+      "titulo": "Rótulos de dados nos gráficos de Faturamento e Resultado/Margem",
+      "fase": "Validação de Uso"
+    },
+    {
+      "bitrixId": "1379",
+      "titulo": "Filtro por empresa nos indicadores do dashboard",
+      "fase": "Validação de Uso"
+    },
+    {
+      "bitrixId": "1381",
+      "titulo": "Cadastro de fornecedor deve ser o mesmo de credor do frete",
+      "fase": "Concluído"
+    },
+    {
+      "bitrixId": "1383",
+      "titulo": "Validação dos cálculos de Resultado, Resultado Acumulado e Margem Líquida",
+      "fase": "Concluído"
+    },
+    {
+      "bitrixId": "1385",
+      "titulo": "Solicitação de TI anotações  para solucionar",
+      "fase": "Concluído"
+    },
+    {
+      "bitrixId": "1387",
+      "titulo": "Frete - A sessão de Dados da Separação esta na localizado errado",
+      "fase": "Concluído"
+    },
+    {
+      "bitrixId": "1389",
+      "titulo": "Ajustes para o ADMINISTRAÇÃO",
+      "fase": "Validação de Uso"
+    },
+    {
+      "bitrixId": "1391",
+      "titulo": "MENU COLABORADORES",
+      "fase": "Validação de Uso"
+    },
+    {
+      "bitrixId": "1393",
+      "titulo": "Poder vincular os funcionários na empresa Terceiro PJ",
+      "fase": "Concluído"
+    },
+    {
+      "bitrixId": "1395",
+      "titulo": "abrindo uma pagina sem menu chamada \"employees\"",
+      "fase": "Concluído"
+    },
+    {
+      "bitrixId": "1399",
+      "titulo": "Adição da Coluna \"Cliente_alias\" e Renomeação de \"Título Cliente\" para \"Título Sienge\"",
+      "fase": "Concluído"
+    },
+    {
+      "bitrixId": "1401",
+      "titulo": "Tower System - Ranking: Lançamento, Dashboard e Premiação",
+      "fase": "Melhoria Contínua"
+    },
+    {
+      "bitrixId": "1403",
+      "titulo": "Módulo Administração: Empresa, Repositório, Credores, Colaboradores, Fornecedores, Auditoria, Homologações e Tipo de Documento",
+      "fase": "Melhoria Contínua"
+    },
+    {
+      "bitrixId": "1405",
+      "titulo": "Navegação por Setas e Enter entre Células",
+      "fase": "Deploy"
+    },
+    {
+      "bitrixId": "1407",
+      "titulo": "Hotfix - Os campos de \"cotação\" e \"Dados de separação\" devem ser obrigatórios para finalizar um frete",
+      "fase": "Concluído"
+    },
+    {
+      "bitrixId": "1409",
+      "titulo": "TRASNFERIR O FRETE DO PORTAL PARA TOWER SYSTEM",
+      "fase": "Priorização"
+    },
+    {
+      "bitrixId": "1413",
+      "titulo": "Webhook: Portal dispara evento → Tower System importa o pedido automaticamente",
+      "fase": "Kick-Off"
+    },
+    {
+      "bitrixId": "1415",
+      "titulo": "Solicitação de TI anotações das correções",
+      "fase": "Pendente"
+    },
+    {
+      "bitrixId": "1417",
+      "titulo": "Hotfix - Fase do Relatório de executivo",
+      "fase": "Concluído"
+    },
+    {
+      "bitrixId": "1419",
+      "titulo": "Solicitação de TI - Ajuste no fluxo de \"Status\" do kanban",
+      "fase": "Deploy"
+    },
+    {
+      "bitrixId": "1421",
+      "titulo": "Alterar o nome do módulo \"Dashboard\" para \"Atalhos\"",
+      "fase": "Concluído"
+    },
+    {
+      "bitrixId": "1423",
+      "titulo": "Automação de Pré-Emissão de NF",
+      "fase": "Desenvolvimento"
+    },
+    {
+      "bitrixId": "1425",
+      "titulo": "HOTFIX — Correções no Inventário",
+      "fase": "Desenvolvimento"
+    },
+    {
+      "bitrixId": "1427",
+      "titulo": "Ordem de serviços - Listar - na etapa Prazos",
+      "fase": "Pendente"
+    },
+    {
+      "bitrixId": "1429",
+      "titulo": "PORTAL CONTEL REALIZAR BACKUP",
+      "fase": "Desenvolvimento"
+    },
+    {
+      "bitrixId": "1431",
+      "titulo": "Solicitação de TI: Melhoria na Solicitação de Uso",
+      "fase": "Pendente"
+    },
+    {
+      "bitrixId": "1433",
+      "titulo": "Solicitação de TI: Erros & Melhorias",
+      "fase": "Pendente"
+    },
+    {
+      "bitrixId": "1435",
+      "titulo": "Comentários formatados na solicitação de TI",
+      "fase": "Pendente"
+    },
+    {
+      "bitrixId": "1437",
+      "titulo": "HotFix - Ordem de serviço",
+      "fase": "Pendente"
+    },
+    {
+      "bitrixId": "1439",
+      "titulo": "CONTEL - Em Ordem de Serviço criar Status de Serviços",
+      "fase": "Comunicação de Entrega"
+    },
+    {
+      "bitrixId": "1441",
+      "titulo": "HotFix - Ordem de Serviço coluna Data Fim",
+      "fase": "Pendente"
+    },
+    {
+      "bitrixId": "1443",
+      "titulo": "CONTEL - ORDEM DE SERVIÇO - Região Micro derivada da cidade do site (exibição e filtro)",
+      "fase": "Entrada da Demanda"
+    },
+    {
+      "bitrixId": "1445",
+      "titulo": "Correção layouts Tower system",
+      "fase": "Pendente"
+    },
+    {
+      "bitrixId": "1447",
+      "titulo": "Micro Sistema de Compras TOWER COMPRAS",
+      "fase": "Kick-Off"
+    },
+    {
+      "bitrixId": "1449",
+      "titulo": "Micro Sistema de Fabrica CONTEL FABRICA",
+      "fase": "Kick-Off"
+    },
+    {
+      "bitrixId": "1451",
+      "titulo": "Micro Sistema de Quadro de Equipes\nAlimentação\nDiárias\nIfractal",
+      "fase": "Kick-Off"
+    },
+    {
+      "bitrixId": "1453",
+      "titulo": "Notificações no aplicativo",
+      "fase": "Desenvolvimento"
+    },
+    {
+      "bitrixId": "1455",
+      "titulo": "Criar tela de gerenciamento de micro apps",
+      "fase": "Desenvolvimento"
+    },
+    {
+      "bitrixId": "1457",
+      "titulo": "Base de conhecimentos Wiki alteração sobre modo rascunho",
+      "fase": "Pendente"
+    },
+    {
+      "bitrixId": "1463",
+      "titulo": "Relatórios Fotográficos (IA)",
+      "fase": "Entrada da Demanda"
+    },
+    {
+      "bitrixId": "1465",
+      "titulo": "WhatsApp — cobranças em massa",
+      "fase": "Entrada da Demanda"
+    },
+    {
+      "bitrixId": "1467",
+      "titulo": "Remoção da data  duplicada de vencimento Linha telefônica",
+      "fase": "Pendente"
+    },
+    {
+      "bitrixId": "1469",
+      "titulo": "CONTEL - API INSUMOS",
+      "fase": "Desenvolvimento"
+    },
+    {
+      "bitrixId": "1471",
+      "titulo": "Correções em QUADROS DE EQUIPE",
+      "fase": "Pendente"
+    },
+    {
+      "bitrixId": "1473",
+      "titulo": "CONTEL - Copiar e-custos e microapp do Marcos para o Tower",
+      "fase": "Levantamento de Requisitos"
+    },
+    {
+      "bitrixId": "1475",
+      "titulo": "Mover menu \"Equipes em Campo\" para Planejamento",
+      "fase": "Pendente"
+    },
+    {
+      "bitrixId": "1477",
+      "titulo": "Criar lógica de Rota para colaboradores da Preventiva",
+      "fase": "Pendente"
+    },
+    {
+      "bitrixId": "1479",
+      "titulo": "Criar menu \"Folha\" e tela de Funções e Valores em Administração",
+      "fase": "Pendente"
+    },
+    {
+      "bitrixId": "1481",
+      "titulo": "CONTEL - RELATÓRIOS FORNECEDORES",
+      "fase": "Priorização"
+    },
+    {
+      "bitrixId": "1483",
+      "titulo": "CONTEL - PAGAMENTOS -> SALDO ADIANTAMENTO",
+      "fase": "Priorização"
+    },
+    {
+      "bitrixId": "1485",
+      "titulo": "CONTEL - Receita e custo no pagamento",
+      "fase": "Priorização"
+    },
+    {
+      "bitrixId": "1487",
+      "titulo": "CONTEL - IA de Orçamentos: base de dados para a IA",
+      "fase": "Priorização"
+    },
+    {
+      "bitrixId": "1489",
+      "titulo": "CONTEL - IA de Orçamentos integrada ao Bitrix24 por API",
+      "fase": "Priorização"
+    },
+    {
+      "bitrixId": "1491",
+      "titulo": "CONTEL - Compras integrado ao Tower (saída do Trello)",
+      "fase": "Levantamento de Requisitos"
+    },
+    {
+      "bitrixId": "1493",
+      "titulo": "CONTEL - Almoxarifado: separação e envio à logística",
+      "fase": "Priorização"
+    },
+    {
+      "bitrixId": "1495",
+      "titulo": "CONTEL - Gestão dos projetistas",
+      "fase": "Priorização"
+    },
+    {
+      "bitrixId": "1497",
+      "titulo": "CONTEL - MCP IA",
+      "fase": "Priorização"
+    }
+  ],
+  "jaExistem": [
+    {
+      "bitrixId": "763",
+      "titulo": "BI Melhorias - Automatizar atualização de Power BI",
+      "cardId": "fb42fa48-2106-469c-9869-38e58bf12b36"
+    },
+    {
+      "bitrixId": "765",
+      "titulo": "RELATÓRIOS DE TESTE ENCONTRADOS DO PORTAL CONTEL",
+      "cardId": "c1fba52d-50b9-433d-994c-fbf0f93ba13f"
+    },
+    {
+      "bitrixId": "769",
+      "titulo": "BI Indicadores Globais",
+      "cardId": "fd978c53-099d-46b6-9179-95eac00016a8"
+    },
+    {
+      "bitrixId": "773",
+      "titulo": "PORTAL CONTEL- NOTIFICAÇÃO: Criar uma notificação de atualização",
+      "cardId": "8118b5e3-f6a1-459d-98a3-6e1e6c6ffba4"
+    },
+    {
+      "bitrixId": "785",
+      "titulo": "PORTAL CONTEL - SIENGE - Criar RPA de baixa de relatórios no Sienge",
+      "cardId": "14a2a254-1152-4eee-873c-0472aea6a770"
+    },
+    {
+      "bitrixId": "787",
+      "titulo": "PORTAL CONTEL - SOLICITAÇÃO DE TI: Criar etapa de \"Desenvolvimento\" no módulo de desenvolvimento",
+      "cardId": "856ab6f5-73f7-4a4b-9ad2-c9ad691dd719"
+    },
+    {
+      "bitrixId": "791",
+      "titulo": "PORTAL CONTEL - INVENTÁRIO - Novo dashboard",
+      "cardId": "d62d83e5-9c96-46cd-a46e-5995667b7349"
+    },
+    {
+      "bitrixId": "795",
+      "titulo": "PORTAL CONTEL - FRETE Adicionar solicitação de pagamento a frete",
+      "cardId": "1c74407a-ecec-4b7f-b6ab-fdad2b89e590"
+    },
+    {
+      "bitrixId": "797",
+      "titulo": "PORTAL CONTEL - O responsável daquela equipe, irá receber por e-mail todas as demandas que forem definidas para aquela equipe na etapa de \"Aguardando definição de equipe\" feita pelo Fábio.",
+      "cardId": "d0ce71a1-8016-468e-9591-4ad5187fb37e"
+    },
+    {
+      "bitrixId": "811",
+      "titulo": "PORTAL CONTEL - FRETE - Ajustes",
+      "cardId": "b592b451-2b60-41e7-9a34-f44108d85878"
+    },
+    {
+      "bitrixId": "817",
+      "titulo": "TS Melhorias Avulsa - Atualizar em tempo real os centro de custo no TS",
+      "cardId": "803d0511-216c-4e4e-b20b-6c9897ae767e"
+    },
+    {
+      "bitrixId": "819",
+      "titulo": "CONTEL - GESTÃO DE AJUDA DE ALIMENTAÇÃO / CUSTO",
+      "cardId": "dd81fe6e-20be-490b-9ce0-279136bb33c1"
+    },
+    {
+      "bitrixId": "821",
+      "titulo": "CONTEL - GESTÃO DE DIARIAS",
+      "cardId": "66a23013-a62e-4dab-b282-72b702bee8ee"
+    },
+    {
+      "bitrixId": "825",
+      "titulo": "CONTEL - ADMINISTRAÇÃO",
+      "cardId": "7db077aa-a3c3-4bae-a17e-bd722ba9c31d"
+    },
+    {
+      "bitrixId": "835",
+      "titulo": "CONTEL - TOWER SYSTEM - os anexos do sites",
+      "cardId": "40b53322-a6b7-49c3-9d56-848ed0cc5b25"
+    },
+    {
+      "bitrixId": "843",
+      "titulo": "CONTEL - TOWER SYSTEM - Validar se anexo",
+      "cardId": "f91f5785-639b-45de-9369-38e2aee91a7c"
+    },
+    {
+      "bitrixId": "845",
+      "titulo": "CONTEL - TOWER SYSTEM - PAGAMENTOS -> LISTAR -> CAMPO SELECT",
+      "cardId": "8daccea0-5a43-40c9-83a2-29ae3f3b0c51"
+    },
+    {
+      "bitrixId": "847",
+      "titulo": "Melhorar relatório de cobrança observações do Elias",
+      "cardId": "b5609c3e-6b33-4851-9c0d-ab212c2b6be4"
+    },
+    {
+      "bitrixId": "857",
+      "titulo": "TOWER SYSTEM - NOTIIFCAÇÃO: Notificação das Novidades",
+      "cardId": "b3be8d39-3ab2-434d-b136-c7db15cfc812"
+    },
+    {
+      "bitrixId": "863",
+      "titulo": "ORDEM DE SERVIÇO -> LISTAR: Mostra o tamanho do arquivo",
+      "cardId": "fbcc14a9-88f0-44c2-b4d6-cdf2bdf4d7a7"
+    },
+    {
+      "bitrixId": "875",
+      "titulo": "melhorias no sistema da RunrunIT",
+      "cardId": "46e78602-41c8-41f8-974f-a2c6b2034c68"
+    },
+    {
+      "bitrixId": "877",
+      "titulo": "CONTEL - TOWER SYSTEM - AGRUPAMENTO",
+      "cardId": "1de38f74-b462-4209-8e6e-51902ecc5272"
+    },
+    {
+      "bitrixId": "937",
+      "titulo": "Criar Avaliação de fornecedor",
+      "cardId": "c5e01948-97c6-471b-9df3-91991b1f43d1"
+    },
+    {
+      "bitrixId": "945",
+      "titulo": "CONTEL - CORRIGIR RANKING",
+      "cardId": "352b64f3-61ef-4c32-a037-8591870fbf1a"
+    },
+    {
+      "bitrixId": "951",
+      "titulo": "CONTEL - TOWER SYSTEM Erro nas Configurações",
+      "cardId": "2e8bae7f-c414-4462-aae5-afc2f0e52961"
+    },
+    {
+      "bitrixId": "953",
+      "titulo": "CONTEL - TOWER SYSTEM - PAGAMENTO LISTAR: Informações adicionadas na Solicitação de Pagamento",
+      "cardId": "3486a155-ff91-47aa-a6d4-d8eb437307b2"
+    },
+    {
+      "bitrixId": "961",
+      "titulo": "CONTEL - PORTAL - CONFIGURAÇÕES - PERFIL",
+      "cardId": "4c261365-26a9-467d-a1d8-29e312ab321f"
+    },
+    {
+      "bitrixId": "965",
+      "titulo": "CONTEL - POWER BI - Tower System - Valores Cancelados",
+      "cardId": "ebc69eb4-9aa8-42c7-b258-1e533c3fc161"
+    },
+    {
+      "bitrixId": "967",
+      "titulo": "POWER BI - Atualização Incremental",
+      "cardId": "a754e9e8-83eb-4ca8-93d7-ff39681bd9c7"
+    },
+    {
+      "bitrixId": "975",
+      "titulo": "POWER BI - Criar BI Realizado com base no Orçado Gestores - orçado versus realizado",
+      "cardId": "ca987f18-cb57-463f-a5f5-10f99cb36a8a"
+    },
+    {
+      "bitrixId": "981",
+      "titulo": "PORTAL CONTEL - Ajustar menu de \"Automações\"",
+      "cardId": "c83960bc-bcee-4d81-9be7-71664cf107fa"
+    },
+    {
+      "bitrixId": "987",
+      "titulo": "Criar BI Indicadores Execução",
+      "cardId": "856f84a1-0be6-437d-907e-97643582a0a6"
+    },
+    {
+      "bitrixId": "989",
+      "titulo": "Criar BI Indicadores Comercial",
+      "cardId": "be2d916f-ea78-46a3-9c15-9d517ecd6e55"
+    },
+    {
+      "bitrixId": "991",
+      "titulo": "Criar BI Indicadores Planejamento",
+      "cardId": "e2eebd9c-5ff0-44e0-b447-014bc10dd8a9"
+    },
+    {
+      "bitrixId": "993",
+      "titulo": "Criar BI Indicadores Adm/RH",
+      "cardId": "d0bc9caf-bbd5-493f-9819-c88cbcac11a6"
+    },
+    {
+      "bitrixId": "999",
+      "titulo": "Desenvolvimento TI - Refinar próximas etapas do módulo de desenvolvimento",
+      "cardId": "fb6694bd-22ae-43eb-831f-c16c5dbe29f9"
+    },
+    {
+      "bitrixId": "1003",
+      "titulo": "PORTAL CONTEL - RPA CENTRO DE CUSTO",
+      "cardId": "11822601-2913-4bc3-ba46-01d8ecfe0b49"
+    },
+    {
+      "bitrixId": "1017",
+      "titulo": "Melhorar layout da tela de logs dos RPAs",
+      "cardId": "c7294371-7e6a-45b0-8d97-f0fed40bbbfd"
+    },
+    {
+      "bitrixId": "1019",
+      "titulo": "PORTAL CONTEL - FRETE - Filtros devem ser respeitados após clicar em \"Exportar PDF\"",
+      "cardId": "f26e9bea-d534-4757-bfaf-9e0e2f3b980e"
+    },
+    {
+      "bitrixId": "1021",
+      "titulo": "Criar etapa de \"Validação de uso\" e \"Melhorias contínua\" no módulo de desenvolvimento",
+      "cardId": "22a8657c-9d7b-4b3a-971f-7c953bfe35e7"
+    },
+    {
+      "bitrixId": "1023",
+      "titulo": "PORTAL CONTEL- SOLICITAÇÃO DE TI - Criar etapa de \"Relatório executivo\" no módulo de desenvolvimento",
+      "cardId": "07978429-4410-495a-a93e-ed5b99c1cadf"
+    },
+    {
+      "bitrixId": "1053",
+      "titulo": "PORTAL CONTEL CONFIGURAÇÃO AUDIOTORIA - Algumas funcionalidades do sistema não estão sendo registradas nos logs",
+      "cardId": "7dcfd4df-137e-42c6-b6da-2340f4d4be0e"
+    },
+    {
+      "bitrixId": "1063",
+      "titulo": "CONTEL - TOWER SYSTEM Botão 'Copiar localização' na tela de listagem de OS",
+      "cardId": "1b935f98-2b66-4880-985a-fdb2a294d4c6"
+    },
+    {
+      "bitrixId": "1097",
+      "titulo": "CONTEL - TOWER SYSTEM RANKING",
+      "cardId": "08abefcf-e373-4452-ba90-31f378b54b1b"
+    },
+    {
+      "bitrixId": "1105",
+      "titulo": "CONTEL PORTAL - CONFIGURAÇÃO - PERFIL Visualizar os usuários da coluna usuários",
+      "cardId": "75c6aa5f-128d-4021-9a6f-4d9909ae4cfd"
+    },
+    {
+      "bitrixId": "1109",
+      "titulo": "PORTAL CONTEL -  Melhoria dentro de “Nova Linha Telefônica”  Campos e colunas condicionais",
+      "cardId": "89baf4c9-b52e-4b43-839d-47cf6a53757b"
+    },
+    {
+      "bitrixId": "1125",
+      "titulo": "CONTEL TOWER SYSTEM ORDEM DE SERVIÇO Lixeira",
+      "cardId": "3f979d8d-5a28-4b82-bc7e-5e7ce7cd307d"
+    },
+    {
+      "bitrixId": "1127",
+      "titulo": "CONTEL SISTEMA REALIZAR BACKUP",
+      "cardId": "12718a6b-74d5-4afd-92e4-f61beedb613d"
+    },
+    {
+      "bitrixId": "1133",
+      "titulo": "CONTEL PORTAL - INVENTARIO ver todos os vencimentos",
+      "cardId": "b3dd8591-59a6-4182-9b37-1307d8f1d22e"
+    },
+    {
+      "bitrixId": "1143",
+      "titulo": "CONTEL PORTAL - SOLICITAÇÃO DE TI - TICKET : Adicionar um card",
+      "cardId": "6d1be423-1d97-42ff-901d-78c11e68efec"
+    },
+    {
+      "bitrixId": "1145",
+      "titulo": "PORTAL CONTEL - FRETE - Item do centro de custo",
+      "cardId": "68a16124-432f-4cfe-bf67-db1dbe59df93"
+    },
+    {
+      "bitrixId": "1147",
+      "titulo": "PORTAL CONTEL - RH - VAGAS vaga sigilosa",
+      "cardId": "cb131a3b-19b3-46fe-bd46-4444dec4dd98"
+    },
+    {
+      "bitrixId": "1159",
+      "titulo": "CONTEL TOWER SYSTEM - ORDEM DE SERVIÇO erro ao enviar e excluir pasta usuário analista",
+      "cardId": "5597a516-0715-4b67-9495-bd26504d3689"
+    },
+    {
+      "bitrixId": "1181",
+      "titulo": "CONTEL - TOWER SYSTEM: Folha premiação",
+      "cardId": "d8286ddf-2a48-40b7-90a8-192b81972850"
+    },
+    {
+      "bitrixId": "1183",
+      "titulo": "HOTFLIX - CONTEL - TOWER SYSTEM - Acrescentar filtro de OS Pagas",
+      "cardId": "5ba12336-6d03-4040-9823-b644577cd1da"
+    },
+    {
+      "bitrixId": "1185",
+      "titulo": "Preenchimento automático de endereço pelo CEP no Cadastro de Frete",
+      "cardId": "9b0b9a7d-075f-45f4-9d48-cb40efaff6d6"
+    },
+    {
+      "bitrixId": "1189",
+      "titulo": "PORTAL CONTEL INVENTARIO ATIVOS",
+      "cardId": "c9d6267c-5570-4190-a0f4-5fa1ebcb626c"
+    },
+    {
+      "bitrixId": "1191",
+      "titulo": "CONTEL TOWER SYSTEM - SITES - LISTAR : Realizar alterações localização do Sites",
+      "cardId": "73352c19-c2b8-4c4e-a269-1b1df033c45e"
+    },
+    {
+      "bitrixId": "1195",
+      "titulo": "CONTEL - PORTAL Criar campo de \"Referência\" na abertura de uma nova solicitação de desenvolvimento",
+      "cardId": "1265363f-a4d8-4a17-8e01-9fb04e3297f3"
+    },
+    {
+      "bitrixId": "1197",
+      "titulo": "CONTEL TOWER SYSTEM - modificação na lista de Pedido de Compra",
+      "cardId": "67c1b39d-78ab-4b37-8845-27cc1324316f"
+    },
+    {
+      "bitrixId": "1205",
+      "titulo": "CONTEL TOWER SYSTEM - ORDEM DE SERVIÇO - demanda de migrar custo/pagamento",
+      "cardId": "be0eb922-2618-4513-9569-dbe5fa7a9afa"
+    },
+    {
+      "bitrixId": "1207",
+      "titulo": "CONTEL TOWER SYSTEM Cadastro com defeito de preencher as informações de localização ver com o Fabio",
+      "cardId": "9bcc6801-c28a-4e4d-a334-a52618918733"
+    },
+    {
+      "bitrixId": "1211",
+      "titulo": "CONTEL TOWER SYSTEM IA",
+      "cardId": "e190b9f5-de50-4311-aecf-ed89f7e0f0b4"
+    },
+    {
+      "bitrixId": "1219",
+      "titulo": "Criar trava de movimentação de card nos kanbans de solicitação de TI e Módulo de desenvolvimento",
+      "cardId": "251dea6f-2ba6-4067-be61-812e04a83d1d"
+    },
+    {
+      "bitrixId": "1221",
+      "titulo": "HOTFIX - Valor do frete está com comportamento e cálculo incorreto",
+      "cardId": "98605c5a-4d76-4a21-ab3e-81a8224d1f82"
+    },
+    {
+      "bitrixId": "1223",
+      "titulo": "Aplicar ajustes no módulo de frete",
+      "cardId": "e9b82b5c-c068-41fc-abcb-f1691df49f9e"
+    },
+    {
+      "bitrixId": "1225",
+      "titulo": "PORTAL CONTEL - Aplicar teste avulso",
+      "cardId": "59cd2b74-36d7-4caa-9102-4202fc34abdb"
+    },
+    {
+      "bitrixId": "1227",
+      "titulo": "CONTEL TOWER SYSTEM - Export esta com Bug",
+      "cardId": "fb1f7575-9b01-42ac-a3e0-5d01f773a87d"
+    },
+    {
+      "bitrixId": "1229",
+      "titulo": "CONTEL - TOWER SYSTEM - Aplicar teste avulso",
+      "cardId": "c3e88488-ce20-4bf8-bc00-a107c58d6c03"
+    },
+    {
+      "bitrixId": "1231",
+      "titulo": "CONTEL TOWER SYSTEM - Bug no cadastro de Credores",
+      "cardId": "e708b97c-5d81-4c12-b7e7-dd2403d218ad"
+    },
+    {
+      "bitrixId": "1233",
+      "titulo": "Modificações no menu FRETE",
+      "cardId": "cedc66eb-1731-4b94-aeba-69ebb2a0df7d"
+    },
+    {
+      "bitrixId": "1239",
+      "titulo": "CONTEL - TOWER SYSTEM - ROTAS filtro que salva a filtragem",
+      "cardId": "16aa9787-6c0c-46f0-a7d0-3abe7541698b"
+    },
+    {
+      "bitrixId": "1243",
+      "titulo": "PORTAL CONTEL - Novo Modulo Financeiro - Controle de pagamentos de cartão",
+      "cardId": "17e7826d-5a79-4874-8766-f8b669800682"
+    },
+    {
+      "bitrixId": "1245",
+      "titulo": "CONTEL TOWER SYSTEM - ORDEM DE SERVIÇO - problema que ocorreu na OS 29381",
+      "cardId": "e8b8247c-3c92-4e41-9436-e65d2805b4e7"
+    },
+    {
+      "bitrixId": "1249",
+      "titulo": "CONTEL - TOWER SYSTEM - Bugs centro de custos",
+      "cardId": "13a9adf3-a27a-405f-b030-7069857b0c70"
+    },
+    {
+      "bitrixId": "1251",
+      "titulo": "CONTEL - TOWER SYSTEM - Ordem de Serviço no #38285",
+      "cardId": "663bf871-4748-4db8-9b30-a2d7a666c873"
+    },
+    {
+      "bitrixId": "1253",
+      "titulo": "Criar automação de conversão de PO recebidas e PO lançadas no sistema",
+      "cardId": "38989d21-95be-44ca-81bf-7732fdba40ed"
+    },
+    {
+      "bitrixId": "1255",
+      "titulo": "Alterar layout da página de frete",
+      "cardId": "594078a9-21e5-49fe-b027-322012f67865"
+    },
+    {
+      "bitrixId": "1259",
+      "titulo": "Solicitação de TI nos Cards da criação de Ticket",
+      "cardId": "beb4d6ae-0c90-48f0-9f73-75bf77dbcb01"
+    },
+    {
+      "bitrixId": "1261",
+      "titulo": "OS | Impedir Exclusão de Credor com Ordens de Serviço Vinculadas",
+      "cardId": "f8059b65-f21c-4253-8922-6a57a59731bc"
+    },
+    {
+      "bitrixId": "1263",
+      "titulo": "API Atividade - Ordem de serviço",
+      "cardId": "fd17cef9-822f-4a89-9dad-2631ab06dd49"
+    },
+    {
+      "bitrixId": "1265",
+      "titulo": "CONTEL - TOWER SYSTEM - Melhorias Avulsa -> Criar controle de contratos de credor e de clientes",
+      "cardId": "8dfdf255-7bfd-47a9-a26b-2d102d86945f"
+    },
+    {
+      "bitrixId": "1269",
+      "titulo": "HOTFIX CONTEL - TOWER SYSTEM -  SITES- AJUSTES DE USABILIDADE E PADRONIZAÇÃO DO SISTEMA",
+      "cardId": "c88f2055-ad0a-410b-8957-5a69b32f95a2"
+    },
+    {
+      "bitrixId": "1275",
+      "titulo": "Deslogar usuário do Portal por tempo de inatividade",
+      "cardId": "6425137a-aae8-44ca-89bf-ad493856fca2"
+    },
+    {
+      "bitrixId": "1277",
+      "titulo": "Configurar a wiki para notificar atualizações",
+      "cardId": "e7fec89e-259e-4f35-aaca-2976c7eb3a91"
+    },
+    {
+      "bitrixId": "1279",
+      "titulo": "Criar automação de conversão de PO em .CSV",
+      "cardId": "b0dbe27f-cdfb-488a-aef3-7ab4ed66ee76"
+    },
+    {
+      "bitrixId": "1281",
+      "titulo": "Tower System melhorias e Bugs para resolver após terminar Administração",
+      "cardId": "b3b9ba9d-a270-4611-a43c-1c3d59cd9296"
+    },
+    {
+      "bitrixId": "1283",
+      "titulo": "Criar app para técnicos atender ordens de serviço",
+      "cardId": "756e3ec3-870a-4eee-bacb-e815d4755593"
+    },
+    {
+      "bitrixId": "1287",
+      "titulo": "TOWER SYSTEM  adicionar a funcionalidade Edição de planilha no menu Sites",
+      "cardId": "7081314e-e492-4c86-91cd-495703a15883"
+    },
+    {
+      "bitrixId": "1289",
+      "titulo": "RH - Currículo: Filtros, Responsividade e Triagem Automática por IA",
+      "cardId": "0557d3b1-0d36-4461-b02b-4f936c413aea"
+    },
+    {
+      "bitrixId": "1293",
+      "titulo": "Criar no Perfil as permissões para o menu  Contratos",
+      "cardId": "d343f12d-0395-4494-b87b-c7a50062936c"
+    },
+    {
+      "bitrixId": "1295",
+      "titulo": "CONTEL TOWER SYSTEM - Monitoramento de conclusão de OS via notificação",
+      "cardId": "fdee5df4-1edc-4d7d-8be8-ced0b9f0b7f0"
+    },
+    {
+      "bitrixId": "1297",
+      "titulo": "No menu Contratos tem Divergências e bugs",
+      "cardId": "c24b2807-eb18-40f7-8320-4610baea1303"
+    },
+    {
+      "bitrixId": "1299",
+      "titulo": "CORREÇÃO NO FILTRO POR STATUS AGRUPADO",
+      "cardId": "77c9a797-e604-4de9-8652-12eeafbdb0da"
+    },
+    {
+      "bitrixId": "1301",
+      "titulo": "PORTAL CONTEL - CONTRATOS melhoria na lista",
+      "cardId": "85745058-4a6d-4e72-a778-0c5169b777d7"
+    },
+    {
+      "bitrixId": "1303",
+      "titulo": "TOWER SYSTEM NOVIDADES melhoria",
+      "cardId": "43cab761-0bd4-482c-bedf-81ba1116ab9e"
+    },
+    {
+      "bitrixId": "1305",
+      "titulo": "Melhorias solicitadas pelo Jose",
+      "cardId": "f6cf34a4-bdd1-404f-80c9-a03c8efd671f"
+    },
+    {
+      "bitrixId": "1307",
+      "titulo": "HOTFIX resolver o Bug de mostrar alerta de campos vazio em Credor na solicitação de Frete",
+      "cardId": "a9563527-8d71-449e-be11-4698f3784bc7"
+    },
+    {
+      "bitrixId": "1309",
+      "titulo": "Exibir anexos do Sienge no Pedido de Compra via pop-up",
+      "cardId": "082fd25f-2736-44c5-b4a7-4bed7af87bf2"
+    },
+    {
+      "bitrixId": "1311",
+      "titulo": "Tower System - OS Gerencial - Valor Falta Medir: Inconsistência com status Faturado no Dydata",
+      "cardId": "bb449cf4-3c9e-4dec-aa9f-0019cbded1d3"
+    },
+    {
+      "bitrixId": "1313",
+      "titulo": "TOWER SYSTEM PAGAMENTO LISTAR  acrescentar novas colunas",
+      "cardId": "1f23fd48-506e-4e98-a4e2-9006b85646be"
+    },
+    {
+      "bitrixId": "1315",
+      "titulo": "Ajuste no vínculo de obras - Solicitação de Frete",
+      "cardId": "1182d335-997d-4d81-ab7d-ab1f9be93790"
+    },
+    {
+      "bitrixId": "1317",
+      "titulo": "CONTEL - MELHORIAS NA API",
+      "cardId": "896cab0b-5bfb-40e4-9279-a87bf85e92f9"
+    },
+    {
+      "bitrixId": "1319",
+      "titulo": "Adicionar na Aba Custos um botão chamado PT",
+      "cardId": "3caaf6e0-5801-4b8b-b654-e472031c73bd"
+    },
+    {
+      "bitrixId": "1323",
+      "titulo": "PORTAL CONTEL - Requisito Técnico — Renovação Rápida de Linha Telefônica",
+      "cardId": "f9426bb7-f97b-4d54-a1ee-21a68ba6ebb6"
+    },
+    {
+      "bitrixId": "1325",
+      "titulo": "No menu Inventários em Ativos",
+      "cardId": "f24932b8-7cc8-40f8-bf55-ac72b2625ad7"
+    },
+    {
+      "bitrixId": "1327",
+      "titulo": "Aplicar validação das POs cadastradas no portal no Sienge via API",
+      "cardId": "ea2e24cb-fe98-4274-88e3-8b437d166af5"
+    },
+    {
+      "bitrixId": "1329",
+      "titulo": "Adicionar indicadores ao portal",
+      "cardId": "9d4f3bbf-a160-46c9-9fa0-db153344ed41"
+    },
+    {
+      "bitrixId": "1331",
+      "titulo": "TOWER SYSTEM Permitir que no Anexo e no Repositório de Arquivos permita arquivo xlsm",
+      "cardId": "bc43332b-22d8-48df-9f79-fea9ca1217d4"
+    },
+    {
+      "bitrixId": "1333",
+      "titulo": "TOWER SYSTEM  adicionar alias_names em Ordem de Serviço",
+      "cardId": "754b0317-32b5-438e-9b8a-9b6891fbac25"
+    },
+    {
+      "bitrixId": "1335",
+      "titulo": "Hotfix: crash ao abrir ativo sem tipo ou sem responsável (inventário)",
+      "cardId": "90ef1ee9-b961-4160-b863-e1333d081c68"
+    },
+    {
+      "bitrixId": "1339",
+      "titulo": "Controle do cartão corporativo",
+      "cardId": "9834e4c1-e58f-4599-8eb3-3c91a3397eba"
+    },
+    {
+      "bitrixId": "1341",
+      "titulo": "Defeito no status faturamento pois esta como PENDENTE DE 181 DIAS A 1 ANO",
+      "cardId": "6f667179-a4d4-406d-9630-0d453c330f7c"
+    },
+    {
+      "bitrixId": "1343",
+      "titulo": "Hotfix - Menu inventário não está aparecendo na listagem de liberação das permissões",
+      "cardId": "f81f2e9d-e1a2-49d5-be51-b70b7caebe41"
+    },
+    {
+      "bitrixId": "1345",
+      "titulo": "Em CONTRATOS colocar filtros e um Dasboard",
+      "cardId": "9b2156ad-5f46-4208-b76f-b8c6bbf706b5"
+    },
+    {
+      "bitrixId": "1347",
+      "titulo": "o Dashboard do Frete nos box de Custos e Valor x Distancia não esta funcionando",
+      "cardId": "30365c50-d27b-4818-a664-35005cc3bc6f"
+    },
+    {
+      "bitrixId": "1353",
+      "titulo": "Criar nova coluna na tela de número da linha telefônica",
+      "cardId": "3d547030-77bb-434a-a736-502bbfb03c0b"
+    },
+    {
+      "bitrixId": "1355",
+      "titulo": "Exibir o campo de observações da tela de linha telefônica na tela de \"Informações do ativo\"",
+      "cardId": "d9773112-e1ce-4546-a445-3698ea5f29b3"
+    },
+    {
+      "bitrixId": "1357",
+      "titulo": "Ajustes na automação de criação de PO (Contratos)",
+      "cardId": "43224399-db9f-4e37-b4bb-87e22b0e1868"
+    },
+    {
+      "bitrixId": "1359",
+      "titulo": "Criar contrato no SIENGE para cadastro de PO",
+      "cardId": "b1f18a3e-e2f9-4015-922c-d9a9b50f491b"
+    },
+    {
+      "bitrixId": "1361",
+      "titulo": "Lançar itens do contrato no Sienge",
+      "cardId": "de7836e9-f6c2-4e78-bb08-00049c4f4f56"
+    },
+    {
+      "bitrixId": "1363",
+      "titulo": "Demandas do CONTRATOS",
+      "cardId": "b27d88f0-fc69-41e4-b109-ca5ac1974add"
+    },
+    {
+      "bitrixId": "1365",
+      "titulo": "CONTEL TOWER SYSTEM - Correção de Bugs",
+      "cardId": "2035d938-5ca8-4b27-a32e-90710c0eaf7d"
+    },
+    {
+      "bitrixId": "1369",
+      "titulo": "Documento Técnico - Implementação de Status Virtuais e Filtros",
+      "cardId": "38012f4c-6cbc-4a7f-a4b4-1e62ccd481b9"
+    },
+    {
+      "bitrixId": "1371",
+      "titulo": "TOWER SYSEM - poder editar valor com liberdade de cancelar parcial",
+      "cardId": "6321311f-1df0-4d2f-a8ec-aecda83f41c8"
+    },
+    {
+      "bitrixId": "1411",
+      "titulo": "CONTEL TOWER SYSTEM QUADROS DE EQUIPES",
+      "cardId": "bcf9d549-ccab-48a7-b89d-b21926d2f6ac"
+    }
+  ],
+  "repetidosNoJson": [
+    {
+      "bitrixId": "779",
+      "titulo": "BI Indicadores Globais"
+    },
+    {
+      "bitrixId": "1459",
+      "titulo": "Solicitação de TI: Erros & Melhorias"
+    },
+    {
+      "bitrixId": "1461",
+      "titulo": "Solicitação de TI: Melhoria na Solicitação de Uso"
+    },
+    {
+      "bitrixId": "1499",
+      "titulo": "CONTEL - ORDEM DE SERVIÇO - Região Micro derivada da cidade do site (exibição e filtro)"
+    }
+  ],
+  "revisar": [
+    {
+      "bitrixId": "839",
+      "tituloBitrix": "CONTEL -  CRIAR MENU GERANCIAL PARA NOVIDADES DO SISTEMA",
+      "cardParecido": "CONTEL - CRIAR MENU GERENCIAL PARA NOVIDADES DO SISTEMA",
+      "cardId": "826f627c-d54e-49c2-89d5-62a54cb889dc",
+      "similaridade": 0.75
+    },
+    {
+      "bitrixId": "1061",
+      "tituloBitrix": "CONTEL - TOWER SYSTEM - Repositório: view de documentos dentro de empresa e site/torre",
+      "cardParecido": "CONTEL - TOWER SYSTEM - Repositório: view de documentos dentro de empresa e site",
+      "cardId": "3b516c42-8f18-4be1-87e3-873ea52f2c55",
+      "similaridade": 0.9
+    },
+    {
+      "bitrixId": "1209",
+      "tituloBitrix": "CONTEL TOWER SYSTEM - SISTES - LISTAR: Bug no placeholder",
+      "cardParecido": "CONTEL TOWER SYSTEM - SITES - LISTAR: Bug no placeholder",
+      "cardId": "8c700024-8b00-4be5-bd6d-a609ae64d168",
+      "similaridade": 0.75
+    },
+    {
+      "bitrixId": "1285",
+      "tituloBitrix": "Hotflix Correção de bug para o centro de custo",
+      "cardParecido": "Hotfix Correção de bug para o centro de custo",
+      "cardId": "0d048f41-c74d-44b6-ab1f-aa30dcca21ec",
+      "similaridade": 0.71
+    },
+    {
+      "bitrixId": "1291",
+      "tituloBitrix": "HOTFIX Tower system Correção do do excel do botão exportar",
+      "cardParecido": "HOTFIX Tower system Correção do excel do botão exportar",
+      "cardId": "45b08b2c-36a6-4a36-bfe1-f79221695b60",
+      "similaridade": 1
+    }
+  ],
+  "semFase": []
+}
