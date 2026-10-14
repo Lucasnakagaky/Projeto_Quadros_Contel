@@ -23,10 +23,12 @@ export function PhaseCard({
     data: { type: "fase" },
   });
 
+  // `--fase` alimenta .gdt-coluna / .gdt-coluna-topo (globals.css). Só leitura de fase.cor.
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-  };
+    "--fase": fase.cor,
+  } as React.CSSProperties;
 
   const Icon = fase.ehFinal ? CheckCircle2 : Layers;
 
@@ -35,16 +37,22 @@ export function PhaseCard({
       ref={setNodeRef}
       style={style}
       className={cn(
-        "flex w-64 shrink-0 flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md",
+        "gdt-coluna gdt-fluxo-card flex w-64 shrink-0 flex-col overflow-hidden",
         isDragging && "opacity-50"
       )}
     >
+      <div className="gdt-coluna-topo shrink-0" />
       <div
         className="flex items-center gap-2 px-4 py-2.5"
-        style={{ backgroundColor: `${fase.cor}1f` }}
+        // tinta leve: o degradê da própria coluna (.gdt-coluna) já ilumina o cartão a partir do topo
+        style={{ backgroundColor: "color-mix(in srgb, var(--fase) 9%, transparent)" }}
       >
         <Icon size={16} style={{ color: fase.cor }} />
-        <span className="flex-1 truncate text-sm font-semibold" style={{ color: fase.cor }}>
+        {/* Texto escurecido a partir da cor da fase: cores claras (amarelo, lima) perdem contraste sobre a tinta. */}
+        <span
+          className="flex-1 truncate text-sm font-semibold"
+          style={{ color: "color-mix(in srgb, var(--fase) 66%, #0f172a)" }}
+        >
           {fase.nome}
         </span>
         <button
@@ -58,8 +66,8 @@ export function PhaseCard({
         </button>
       </div>
 
-      <button onClick={onAbrir} className="px-4 pt-3 text-left">
-        <p className="line-clamp-2 text-sm text-slate-500">
+      <button onClick={onAbrir} className="gdt-focus px-4 pt-3 text-left cursor-pointer">
+        <p className="line-clamp-2 text-sm text-slate-600">
           {fase.descricao || "Sem descrição."}
         </p>
       </button>

@@ -109,8 +109,8 @@ export function TableRow({
                 }}
                 title={`Filtrar por etiqueta ${e.nome}`}
                 aria-label={`Filtrar por etiqueta ${e.nome}`}
-                className="cursor-pointer rounded-full px-2 py-0.5 text-[11px] font-medium whitespace-nowrap transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
-                style={{ backgroundColor: `${e.cor}1f`, color: e.cor }}
+                className="gdt-etiqueta cursor-pointer rounded-full px-2.5 py-0.5 text-[11px] font-medium whitespace-nowrap transition-opacity duration-(--duracao-rapida) hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:ring-offset-1"
+                style={{ "--cor": e.cor } as React.CSSProperties}
               >
                 {e.nome}
               </button>
@@ -134,11 +134,18 @@ export function TableRow({
     <tr
       onClick={onAbrir}
       className={cn(
-        "cursor-pointer border-b border-slate-100 transition-colors hover:bg-slate-50",
-        selecionado && "bg-blue-50/60 hover:bg-blue-50"
+        "cursor-pointer border-b border-slate-100/80 transition-colors duration-(--duracao-rapida) hover:bg-indigo-50/50",
+        selecionado && "bg-indigo-50/70 hover:bg-indigo-50"
       )}
     >
-      <td className="w-10 px-3 py-2.5" onClick={(e) => e.stopPropagation()}>
+      <td
+        className={cn(
+          "w-10 px-3 py-2.5",
+          // indicador lateral fino na linha selecionada (no td: box-shadow em <tr> não é confiável)
+          selecionado && "shadow-[inset_3px_0_0_var(--gdt-acento-2),inset_14px_0_16px_-14px_rgb(124_92_240/0.4)]"
+        )}
+        onClick={(e) => e.stopPropagation()}
+      >
         <Checkbox checked={selecionado} onCheckedChange={onToggleSelecao} />
       </td>
       {colunasVisiveis.map((id) => (

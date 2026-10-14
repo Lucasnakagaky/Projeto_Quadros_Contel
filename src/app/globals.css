@@ -67,6 +67,426 @@ body {
 }
 
 /* ==========================================================================
+   Gestão de Demandas de TI — design system (prefixo gdt-)
+   Escopo: tudo vive sob `.gdt-shell` (container do PipeBoard). Nada aqui toca
+   o <body> nem outras áreas do sistema. `--fase` é definido inline em cada
+   coluna/cartão a partir de `fase.cor` (somente leitura).
+   ========================================================================== */
+
+:root {
+  /* Raios */
+  --gdt-raio-barra: 18px;
+  --gdt-raio-painel: 20px;
+  --gdt-raio-card: 14px;
+
+  /* Intensidade do neon — um único ponto de ajuste.
+     --gdt-glow multiplica a opacidade de TODO halo/brilho (0 = sem glow, 1 = padrão).
+     --gdt-tint multiplica a tinta que a cor da fase dá ao painel da coluna. */
+  --gdt-glow: 1;
+  --gdt-tint: 1;
+
+  /* Sombras em 3 níveis (tom azul-ardósia, nunca preto puro) */
+  --gdt-sombra-1: 0 1px 2px rgb(30 41 90 / 0.06), 0 1px 1px rgb(30 41 90 / 0.04);
+  --gdt-sombra-2: 0 4px 14px -6px rgb(30 41 90 / 0.18), 0 1px 3px rgb(30 41 90 / 0.06);
+  --gdt-sombra-3: 0 14px 32px -12px rgb(30 41 90 / 0.28), 0 3px 8px rgb(30 41 90 / 0.08);
+  /* Card em repouso: "alguns pixels acima" da coluna (2 camadas + realce). */
+  --gdt-sombra-card:
+    0 1px 2px rgb(30 41 90 / 0.05), 0 8px 16px -10px rgb(30 41 90 / 0.14),
+    inset 0 1px 0 rgb(255 255 255 / 1);
+  --gdt-sombra-painel:
+    0 4px 14px -6px rgb(30 41 90 / 0.18), 0 1px 3px rgb(30 41 90 / 0.06),
+    inset 0 1px 0 rgb(255 255 255 / 0.85);
+
+  /* Acentos da interface (foco, estados) */
+  --gdt-acento-1: #3b82f6;
+  --gdt-acento-2: #7c5cf0;
+  --gdt-acento-glow: rgb(99 102 241 / 0.45);
+  --gdt-foco: rgb(99 102 241 / 0.55);
+
+  /* Aba ativa / botão principal da interface: azul → índigo → violeta, vivo. */
+  --gdt-aba-1: #2b8cff;
+  --gdt-aba-2: #5b6cff;
+  --gdt-aba-3: #8b5cf6;
+  --gdt-aba-sombra:
+    inset 0 1px 0 rgb(255 255 255 / 0.5), inset 0 0 0 1px rgb(255 255 255 / 0.12),
+    0 0 0 1px rgb(99 102 241 / calc(0.3 * var(--gdt-glow))),
+    0 8px 20px -6px rgb(91 108 255 / calc(0.62 * var(--gdt-glow))),
+    0 0 14px -2px rgb(59 130 246 / calc(0.4 * var(--gdt-glow)));
+  --gdt-botao-sombra:
+    inset 0 1px 0 rgb(255 255 255 / 0.4),
+    0 0 12px -3px rgb(91 108 255 / calc(0.5 * var(--gdt-glow))),
+    0 10px 18px -10px rgb(91 108 255 / calc(0.7 * var(--gdt-glow)));
+
+  /* Vidro das barras (poucos elementos grandes; só aqui há backdrop-filter) */
+  --gdt-vidro-1: rgb(255 255 255 / 0.86);
+  --gdt-vidro-2: rgb(236 242 255 / 0.7);
+  --gdt-vidro-3: rgb(246 239 255 / 0.72);
+  --gdt-vidro-borda: rgb(255 255 255 / 0.9);
+  --gdt-anel-vidro: rgb(147 171 255 / 0.2);
+  --gdt-linha: rgb(148 163 184 / 0.28);
+
+  /* Vidro das colunas do Kanban (.gdt-coluna-vidro): os 3 botões de ajuste do material.
+     blur moderado de propósito; se houver perda de fluidez, baixe --gdt-vidro-blur (6–8px)
+     antes de pensar em remover o efeito. */
+  --gdt-vidro-blur: 10px; /* não subir: custo de composição nas colunas */
+  --gdt-vidro-sat: 1.1; /* >1 intensifica as cores do fundo dentro do vidro; mantido quase neutro */
+  --gdt-vidro-base: 0.28; /* alfa do branco-base: quanto menor, mais o fundo aparece */
+  /* Onde a cor da fase aparece no vidro (% de --fase, multiplicado por --gdt-tint):
+     luz sob a barra, cantos superiores e tinta vertical (topo → 14% → 34% → some em 58%). */
+  --gdt-vidro-luz-topo: 34%;
+  --gdt-vidro-canto: 22%;
+  --gdt-vidro-tint-1: 15%;
+  --gdt-vidro-tint-2: 7%;
+  --gdt-vidro-tint-3: 2.5%;
+
+  /* Cor para onde o ScrollFade esmaece nas bordas (próxima do fundo claro do shell). */
+  --gdt-fade: rgb(244 247 253 / 0.92);
+}
+
+/* Fundo claro luminoso: glows de canto (lilás/azul no topo, rosa à esquerda, cyan à
+   direita) + feixes diagonais discretos. Só gradientes estáticos de CSS, no próprio
+   background do container: ficam atrás da interface, sem imagem, animação ou repintura. */
+.gdt-shell {
+  background:
+    /* feixes diagonais (largos e suaves + filetes finos) */
+    linear-gradient(
+      118deg,
+      transparent 8%,
+      rgb(255 255 255 / 0.5) 15%,
+      rgb(233 213 255 / 0.2) 17%,
+      transparent 24%
+    ),
+    linear-gradient(
+      118deg,
+      transparent 27%,
+      rgb(255 255 255 / 0.75) 27.2%,
+      rgb(196 210 255 / 0.35) 27.6%,
+      transparent 28.4%
+    ),
+    linear-gradient(118deg, transparent 33.6%, rgb(255 255 255 / 0.5) 33.8%, transparent 34.6%),
+    linear-gradient(
+      118deg,
+      transparent 54%,
+      rgb(255 255 255 / 0.3) 63%,
+      rgb(186 230 253 / 0.14) 68%,
+      transparent 76%
+    ),
+    /* iluminação difusa */
+      radial-gradient(760px 620px at -5% 42%, rgb(244 114 182 / 0.15), transparent 62%),
+    radial-gradient(760px 620px at 105% 56%, rgb(34 211 238 / 0.15), transparent 62%),
+    radial-gradient(900px 520px at 8% -10%, rgb(167 139 250 / 0.24), transparent 62%),
+    radial-gradient(820px 500px at 94% -6%, rgb(96 165 250 / 0.26), transparent 62%),
+    radial-gradient(760px 520px at 55% 115%, rgb(244 114 182 / 0.1), transparent 62%),
+    linear-gradient(180deg, #f7f9ff 0%, #eff4fd 100%);
+  font-family:
+    var(--font-geist-sans),
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    Helvetica,
+    Arial,
+    sans-serif;
+  font-feature-settings: "tnum" 1;
+}
+
+/* Barras flutuantes (cabeçalho e abas): vidro com leve iridescência azul/lilás, borda
+   branca luminosa e sombra fria. O blur fica restrito a estes 2 elementos (14px). */
+.gdt-barra {
+  background: linear-gradient(
+    135deg,
+    var(--gdt-vidro-1),
+    var(--gdt-vidro-2) 55%,
+    var(--gdt-vidro-3)
+  );
+  border: 1px solid var(--gdt-vidro-borda);
+  border-radius: var(--gdt-raio-barra);
+  box-shadow:
+    0 0 0 1px var(--gdt-anel-vidro),
+    0 14px 34px -16px rgb(79 70 229 / calc(0.38 * var(--gdt-glow))),
+    0 2px 6px -2px rgb(30 41 90 / 0.08),
+    inset 0 1px 0 rgb(255 255 255 / 0.95),
+    inset 0 -1px 0 rgb(147 171 255 / 0.12);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
+  backdrop-filter: blur(14px) saturate(1.2);
+}
+
+/* Painel claro (Lista, Relatórios, controles). Sem backdrop-filter. */
+.gdt-painel {
+  background: rgb(255 255 255 / 0.88);
+  border: 1px solid var(--gdt-vidro-borda);
+  border-radius: var(--gdt-raio-painel);
+  box-shadow:
+    0 0 0 1px rgb(165 180 252 / 0.16),
+    var(--gdt-sombra-painel);
+}
+
+/* Cartão de Relatórios ("em breve"): vidro com iluminação azul/lilás e borda luminosa discreta. */
+.gdt-painel-luz {
+  background:
+    radial-gradient(420px 220px at 50% -25%, rgb(165 180 252 / 0.32), transparent 70%),
+    rgb(255 255 255 / 0.9);
+  box-shadow:
+    0 0 0 1px rgb(165 180 252 / 0.36),
+    0 18px 40px -20px rgb(99 102 241 / calc(0.5 * var(--gdt-glow))),
+    0 0 28px -8px rgb(139 92 246 / calc(0.26 * var(--gdt-glow))),
+    inset 0 1px 0 rgb(255 255 255 / 1);
+}
+
+/* Kanban — tudo derivado de `--fase` (hex vindo de fase.cor, definido inline).
+   Em @layer components para que utilitários do Tailwind (border-dashed, opacity,
+   shadow-none do card em arraste) continuem vencendo.
+   A cor "ilumina" o painel a partir do topo: tinta forte em cima, fraca embaixo; halo
+   curto só no topo e nas laterais superiores (nada de sombra colorida ao redor inteiro). */
+@layer components {
+  .gdt-coluna {
+    border-radius: var(--gdt-raio-painel);
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--fase) calc(17% * var(--gdt-tint)), rgb(255 255 255 / 0.84)) 0%,
+      color-mix(in srgb, var(--fase) calc(8% * var(--gdt-tint)), rgb(255 255 255 / 0.82)) 36%,
+      rgb(255 255 255 / 0.78) 100%
+    );
+    border: 1px solid;
+    /* topo mais presente, laterais médias, base quase neutra */
+    border-color:
+      color-mix(in srgb, var(--fase) 42%, white) color-mix(in srgb, var(--fase) 24%, white)
+      color-mix(in srgb, var(--fase) 14%, white) color-mix(in srgb, var(--fase) 24%, white);
+    box-shadow:
+      0 -2px 14px -5px color-mix(in srgb, var(--fase) calc(62% * var(--gdt-glow)), transparent),
+      -7px -4px 16px -12px color-mix(in srgb, var(--fase) calc(42% * var(--gdt-glow)), transparent),
+      7px -4px 16px -12px color-mix(in srgb, var(--fase) calc(42% * var(--gdt-glow)), transparent),
+      0 18px 26px -22px rgb(30 41 90 / 0.3),
+      inset 0 1px 0 rgb(255 255 255 / 0.8);
+    transition:
+      background-color var(--duracao-base) var(--ease-entrada),
+      box-shadow var(--duracao-base) var(--ease-entrada);
+  }
+
+  /* Vidro das colunas do KANBAN (o Fluxo usa só .gdt-coluna, sem isto).
+     Corpo = vidro NEUTRO; a cor da fase entra como LUZ refletida, concentrada nas
+     extremidades: logo abaixo da barra, nos cantos superiores, na borda e no halo externo.
+     Metade inferior sem tinta alguma. Camadas, de cima para baixo: reflexo vertical neutro,
+     brilho diagonal, luz da fase sob a barra, luz nos 2 cantos superiores, tinta vertical que
+     some em 58% da altura e uma base branca translúcida (deixa o fundo do shell aparecer).
+     O backdrop-filter borra esse fundo (moderado). Só este painel tem blur: cards, etiquetas
+     e linhas da Lista não. Os percentuais ficam nos tokens --gdt-vidro-* (:root). */
+  .gdt-coluna-vidro {
+    --tint-mult: 1;
+    background:
+      linear-gradient(
+        180deg,
+        rgb(255 255 255 / 0.5) 0%,
+        rgb(255 255 255 / 0.14) 22%,
+        rgb(255 255 255 / 0) 46%
+      ),
+      linear-gradient(115deg, rgb(255 255 255 / 0.2) 0%, rgb(255 255 255 / 0) 38%),
+      radial-gradient(
+        130% 80px at 50% 0,
+        color-mix(
+          in srgb,
+          var(--fase) calc(var(--gdt-vidro-luz-topo) * var(--gdt-tint) * var(--tint-mult)),
+          transparent
+        ),
+        transparent 100%
+      ),
+      radial-gradient(
+        120px 200px at 0 0,
+        color-mix(
+          in srgb,
+          var(--fase) calc(var(--gdt-vidro-canto) * var(--gdt-tint) * var(--tint-mult)),
+          transparent
+        ),
+        transparent 100%
+      ),
+      radial-gradient(
+        120px 200px at 100% 0,
+        color-mix(
+          in srgb,
+          var(--fase) calc(var(--gdt-vidro-canto) * var(--gdt-tint) * var(--tint-mult)),
+          transparent
+        ),
+        transparent 100%
+      ),
+      linear-gradient(
+        180deg,
+        color-mix(
+            in srgb,
+            var(--fase) calc(var(--gdt-vidro-tint-1) * var(--gdt-tint) * var(--tint-mult)),
+            transparent
+          )
+          0%,
+        color-mix(
+            in srgb,
+            var(--fase) calc(var(--gdt-vidro-tint-2) * var(--gdt-tint) * var(--tint-mult)),
+            transparent
+          )
+          14%,
+        color-mix(
+            in srgb,
+            var(--fase) calc(var(--gdt-vidro-tint-3) * var(--gdt-tint) * var(--tint-mult)),
+            transparent
+          )
+          34%,
+        transparent 58%
+      ),
+      rgb(255 255 255 / var(--gdt-vidro-base));
+    /* borda de vidro: topo com a fase, laterais discretas, base neutra */
+    border-color:
+      color-mix(in srgb, var(--fase) 55%, rgb(255 255 255 / 0.9))
+      color-mix(in srgb, var(--fase) 16%, rgb(255 255 255 / 0.75)) rgb(255 255 255 / 0.5)
+      color-mix(in srgb, var(--fase) 16%, rgb(255 255 255 / 0.75));
+    box-shadow:
+      0 -2px 14px -5px color-mix(in srgb, var(--fase) calc(62% * var(--gdt-glow)), transparent),
+      -7px -4px 16px -12px color-mix(in srgb, var(--fase) calc(42% * var(--gdt-glow)), transparent),
+      7px -4px 16px -12px color-mix(in srgb, var(--fase) calc(42% * var(--gdt-glow)), transparent),
+      0 18px 26px -22px rgb(30 41 90 / 0.3),
+      /* reflexos internos NEUTROS do vidro: lábio do topo, anel interno, luz do topo e da base */
+      inset 0 1px 0 rgb(255 255 255 / 0.9),
+      inset 0 0 0 1px rgb(255 255 255 / 0.28),
+      inset 0 26px 30px -26px rgb(255 255 255 / 0.75),
+      inset 0 -16px 24px -20px rgb(255 255 255 / 0.5);
+    -webkit-backdrop-filter: blur(var(--gdt-vidro-blur)) saturate(var(--gdt-vidro-sat));
+    backdrop-filter: blur(var(--gdt-vidro-blur)) saturate(var(--gdt-vidro-sat));
+  }
+
+  /* Coluna que está recebendo um card durante o arraste: anel + halo + vidro mais iluminado
+     (--tint-mult sobe a cor da fase dentro do vidro de .gdt-coluna-vidro). */
+  .gdt-coluna-alvo {
+    --tint-mult: 2.2;
+    box-shadow:
+      0 0 0 2px color-mix(in srgb, var(--fase) 66%, white),
+      0 -2px 18px -4px color-mix(in srgb, var(--fase) calc(72% * var(--gdt-glow)), transparent),
+      0 0 30px -4px color-mix(in srgb, var(--fase) calc(45% * var(--gdt-glow)), transparent),
+      inset 0 1px 0 rgb(255 255 255 / 0.9),
+      inset 0 26px 30px -26px rgb(255 255 255 / 0.75);
+  }
+
+  /* Faixa superior da fase: luminosa (gradiente na família da cor + realce + glow curto). */
+  .gdt-coluna-topo {
+    height: 6px;
+    border-radius: calc(var(--gdt-raio-painel) - 1px) calc(var(--gdt-raio-painel) - 1px) 0 0;
+    background: linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--fase) 68%, white),
+      var(--fase) 38%,
+      color-mix(in srgb, var(--fase) 86%, #312e81)
+    );
+    box-shadow:
+      0 0 12px 0 color-mix(in srgb, var(--fase) calc(55% * var(--gdt-glow)), transparent),
+      0 3px 10px -3px color-mix(in srgb, var(--fase) calc(55% * var(--gdt-glow)), transparent),
+      inset 0 1px 0 rgb(255 255 255 / 0.55);
+  }
+
+  /* Contador: pílula tingida pela fase, com halo curtíssimo. */
+  .gdt-contador {
+    border-radius: 999px;
+    padding: 1px 9px;
+    font-size: 12px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    background: color-mix(in srgb, var(--fase) 18%, white);
+    color: color-mix(in srgb, var(--fase) 62%, #0f172a);
+    box-shadow:
+      inset 0 0 0 1px color-mix(in srgb, var(--fase) 26%, transparent),
+      0 0 8px -2px color-mix(in srgb, var(--fase) calc(50% * var(--gdt-glow)), transparent);
+  }
+
+  /* "Criar novo card": gradiente glossy na cor da fase, borda luminosa, glow curto.
+     A cor do texto vem inline (--fase-texto, por contraste em lib/cor-fase.ts); o brilho
+     do topo é discreto para não reduzir o contraste do texto branco. */
+  .gdt-botao-fase {
+    background:
+      linear-gradient(180deg, rgb(255 255 255 / 0.14) 0%, rgb(255 255 255 / 0) 52%),
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--fase) 88%, white) 0%,
+        var(--fase) 100%
+      );
+    border: 1px solid color-mix(in srgb, var(--fase) 55%, white);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.55),
+      0 0 14px -3px color-mix(in srgb, var(--fase) calc(55% * var(--gdt-glow)), transparent),
+      0 10px 18px -10px color-mix(in srgb, var(--fase) calc(80% * var(--gdt-glow)), transparent);
+    transition:
+      translate var(--duracao-rapida) var(--ease-entrada),
+      box-shadow var(--duracao-rapida) var(--ease-entrada),
+      filter var(--duracao-rapida) var(--ease-entrada);
+  }
+
+  .gdt-botao-fase:hover {
+    translate: 0 -1px;
+    filter: brightness(1.06) saturate(1.06);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.62),
+      0 0 20px -2px color-mix(in srgb, var(--fase) calc(70% * var(--gdt-glow)), transparent),
+      0 14px 22px -10px color-mix(in srgb, var(--fase) calc(85% * var(--gdt-glow)), transparent);
+  }
+
+  .gdt-botao-fase:active {
+    translate: 0 0;
+  }
+
+  /* Cartão de fase do Fluxo: mesma linguagem do painel do Kanban (usa .gdt-coluna + --fase). */
+  .gdt-fluxo-card {
+    transition:
+      translate var(--duracao-rapida) var(--ease-entrada),
+      box-shadow var(--duracao-base) var(--ease-entrada);
+  }
+
+  .gdt-fluxo-card:hover {
+    translate: 0 -2px;
+    box-shadow:
+      0 -2px 18px -4px color-mix(in srgb, var(--fase) calc(75% * var(--gdt-glow)), transparent),
+      0 22px 34px -22px color-mix(in srgb, var(--fase) calc(70% * var(--gdt-glow)), transparent),
+      var(--gdt-sombra-2),
+      inset 0 1px 0 rgb(255 255 255 / 0.85);
+  }
+
+  /* Card do Kanban: branco e limpo; a cor da fase só aparece no hover.
+     `translate` (e não transform) para compor com o transform inline do dnd-kit. */
+  .gdt-card {
+    background: #fff;
+    border: 1px solid rgb(226 232 240 / 0.75);
+    border-radius: var(--gdt-raio-card);
+    box-shadow: var(--gdt-sombra-card);
+    transition:
+      translate var(--duracao-rapida) var(--ease-entrada),
+      box-shadow var(--duracao-base) var(--ease-entrada),
+      border-color var(--duracao-base) var(--ease-entrada);
+  }
+
+  .gdt-card:hover {
+    translate: 0 -2px;
+    border-color: color-mix(in srgb, var(--fase, #94a3b8) 48%, white);
+    box-shadow:
+      0 0 0 1px color-mix(in srgb, var(--fase, #6366f1) calc(18% * var(--gdt-glow)), transparent),
+      0 12px 24px -12px color-mix(in srgb, var(--fase, #6366f1) calc(55% * var(--gdt-glow)), transparent),
+      0 0 16px -6px color-mix(in srgb, var(--fase, #6366f1) calc(40% * var(--gdt-glow)), transparent),
+      inset 0 1px 0 rgb(255 255 255 / 1);
+  }
+
+  /* Etiqueta: pastel com acabamento (anel interno de 1px, sem mudar o tamanho). `--cor`
+     vem inline de etiqueta.cor; o texto é escurecido para manter contraste em cores claras. */
+  .gdt-etiqueta {
+    background: color-mix(in srgb, var(--cor) 14%, white);
+    color: color-mix(in srgb, var(--cor) 78%, #0f172a);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--cor) 24%, transparent);
+  }
+}
+
+/* Foco visível consistente (teclado), com o acento da interface. */
+.gdt-focus {
+  outline: none;
+}
+
+.gdt-focus:focus-visible {
+  box-shadow:
+    0 0 0 2px #fff,
+    0 0 0 4px var(--gdt-foco);
+}
+
+/* ==========================================================================
    Animações
    Só transform/opacity — nada que force reflow ou cause layout shift.
    ========================================================================== */

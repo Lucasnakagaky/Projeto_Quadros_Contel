@@ -40,7 +40,7 @@ export function PhaseActionsList({
             e.stopPropagation();
             acao.onClick();
           }}
-          className="flex items-center gap-2.5 rounded-md px-2 py-2 text-left text-sm text-slate-600 hover:bg-slate-50"
+          className="gdt-focus flex cursor-pointer items-center gap-2.5 rounded-lg px-2 py-2 text-left text-sm text-slate-600 transition-colors duration-(--duracao-rapida) hover:bg-white/80 hover:text-indigo-700"
         >
           <acao.icon size={15} className={acao.cor} />
           {acao.label}

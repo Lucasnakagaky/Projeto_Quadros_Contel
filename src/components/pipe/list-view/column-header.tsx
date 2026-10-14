@@ -27,7 +27,7 @@ export function ColumnHeader({
     >
       <button
         onClick={onClick}
-        className="flex items-center gap-1.5 hover:text-slate-900"
+        className="gdt-focus flex cursor-pointer items-center gap-1.5 rounded transition-colors duration-(--duracao-rapida) hover:text-indigo-700"
       >
         <Icon size={13} className="shrink-0 text-slate-400" />
         {label}

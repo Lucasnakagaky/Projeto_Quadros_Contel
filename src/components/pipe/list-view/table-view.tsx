@@ -180,26 +180,26 @@ export function TableView({
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
-      <div className="flex items-center justify-between px-6 py-3">
-        <span className="text-sm text-slate-500">
+      <div className="flex items-center justify-between px-5 py-3">
+        <span className="text-sm font-medium text-slate-600">
           {cards.length} {cards.length === 1 ? "card" : "cards"}
           {filtroAtivo && (cards.length === 1 ? " encontrado" : " encontrados")}
         </span>
         <ColumnVisibilityPopover colunasVisiveis={colunasVisiveis} onToggle={toggleColuna} />
       </div>
 
-      <div className="flex-1 overflow-auto px-6 pb-4">
+      <div className="scrollbar-fina flex-1 overflow-auto px-4 pb-4">
         {cards.length === 0 ? (
           <div
             data-testid={filtroAtivo ? "lista-sem-resultados" : "lista-vazia"}
-            className="flex flex-col items-center justify-center rounded-lg border border-dashed border-slate-300 py-20 text-center text-slate-500"
+            className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-300/80 bg-white/60 py-20 text-center text-slate-500"
           >
             {filtroAtivo ? "Nenhum card encontrado para este filtro." : "Nenhum card neste pipe ainda."}
           </div>
         ) : (
-          <div className="overflow-x-auto rounded-lg border border-slate-200">
-            <table className="w-full min-w-[1200px] border-collapse bg-white">
-              <thead className="bg-slate-50">
+          <div className="gdt-painel scrollbar-fina overflow-x-auto">
+            <table className="w-full min-w-[1200px] border-collapse">
+              <thead className="border-b border-indigo-100/70 bg-indigo-50/40">
                 <tr>
                   <th className="w-10 px-3 py-2.5">
                     <Checkbox checked={estadoSelecaoTodos} onCheckedChange={toggleTodos} />
@@ -240,8 +240,12 @@ export function TableView({
       </div>
 
       {faseDestino && (
-        <div className="px-6 pb-6">
-          <Button onClick={() => onCreateCard(faseDestino.id)} size="pill" className="gap-1.5">
+        <div className="px-4 pb-6">
+          <Button
+            onClick={() => onCreateCard(faseDestino.id)}
+            size="pill"
+            className="gap-1.5 bg-linear-to-r from-(--gdt-aba-1) via-(--gdt-aba-2) to-(--gdt-aba-3) font-semibold shadow-(--gdt-botao-sombra) transition-[filter,box-shadow] duration-(--duracao-rapida) hover:brightness-105"
+          >
             <Plus size={16} />
             Criar novo card
           </Button>

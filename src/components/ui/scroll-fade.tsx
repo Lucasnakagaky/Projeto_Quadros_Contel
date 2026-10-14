@@ -17,17 +17,15 @@ function comportamentoScroll(): ScrollBehavior {
 const VELOCIDADE_HOVER = 10;
 
 const CLASSE_SETA =
-  "pointer-events-auto absolute top-1/2 z-10 flex h-11 w-11 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 shadow-md transition-opacity duration-200 hover:bg-slate-50 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1";
+  "pointer-events-auto absolute top-1/2 z-10 flex h-11 w-11 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-white/80 bg-white/90 text-slate-600 shadow-(--gdt-sombra-2) transition-[opacity,color,box-shadow] duration-200 hover:bg-white hover:text-indigo-700 hover:shadow-(--gdt-sombra-3) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:ring-offset-1";
 
 export function ScrollFade({
   children,
   className,
-  fadeFrom = "from-white",
   passoScroll,
 }: {
   children: ReactNode;
   className?: string;
-  fadeFrom?: string;
   /** Pixels por clique nas setas de navegação. Sem esta prop, as setas não são renderizadas. */
   passoScroll?: number;
 }) {
@@ -98,6 +96,9 @@ export function ScrollFade({
 
   useEffect(() => pararRolagemContinua, []);
 
+  // O esmaecimento das bordas são overlays de gradiente (cor `--gdt-fade`, próxima do fundo
+  // claro) e NÃO uma máscara no scroller: `mask-image` cria um "backdrop root", e aí o
+  // backdrop-filter das colunas de vidro não enxergaria o fundo do shell atrás delas.
   return (
     <div className="relative min-h-0 min-w-0 flex-1">
       <div ref={ref} className={cn("scrollbar-fina h-full overflow-x-auto", className)}>
@@ -106,16 +107,14 @@ export function ScrollFade({
       <div
         aria-hidden
         className={cn(
-          "pointer-events-none absolute inset-y-0 left-0 w-10 bg-gradient-to-r to-transparent opacity-0 transition-opacity duration-200",
-          fadeFrom,
+          "pointer-events-none absolute inset-y-0 left-0 w-10 bg-linear-to-r from-(--gdt-fade) to-transparent opacity-0 transition-opacity duration-200",
           canScrollLeft && "opacity-100"
         )}
       />
       <div
         aria-hidden
         className={cn(
-          "pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l to-transparent opacity-0 transition-opacity duration-200",
-          fadeFrom,
+          "pointer-events-none absolute inset-y-0 right-0 w-10 bg-linear-to-l from-(--gdt-fade) to-transparent opacity-0 transition-opacity duration-200",
           canScrollRight && "opacity-100"
         )}
       />

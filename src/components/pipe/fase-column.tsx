@@ -18,9 +18,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
+import { textoSobre } from "@/lib/cor-fase";
 
 const FOCUS_RING =
-  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1";
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:ring-offset-1";
 
 export function FaseColumn({
   fase,
@@ -68,30 +69,36 @@ export function FaseColumn({
   });
   const { setNodeRef: setDroppableRef } = useDroppable({ id: fase.id });
 
+  // `--fase` / `--fase-texto` alimentam todo o visual da coluna e dos cards (globals.css, gdt-*).
+  // Só leitura de fase.cor: nada aqui altera o dado.
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
+    "--fase": fase.cor,
+    "--fase-texto": textoSobre(fase.cor),
     ...(animarEntrada ? { animationDelay: `${Math.min(indice, 6) * 45}ms` } : null),
-  };
+  } as React.CSSProperties;
 
   return (
     <div
       ref={setNodeRef}
       style={style}
       className={cn(
-        "flex h-full w-[280px] shrink-0 flex-col",
+        // gdt-coluna-vidro: material de vidro (blur moderado) só nas colunas do Kanban.
+        "gdt-coluna gdt-coluna-vidro flex h-full w-[280px] shrink-0 flex-col",
+        isDropTarget && "gdt-coluna-alvo",
         animarEntrada && "anim-coluna-entra",
         isDragging && "opacity-50"
       )}
     >
-      <div className="h-1 shrink-0" style={{ backgroundColor: fase.cor }} />
+      <div className="gdt-coluna-topo shrink-0" />
 
-      <div className="group flex h-10 shrink-0 items-center gap-1 border-y border-[rgb(220,223,229)] bg-white px-2">
+      <div className="group flex h-11 shrink-0 items-center gap-1 px-3">
         <button
           {...attributes}
           {...listeners}
           className={cn(
-            "cursor-grab touch-none rounded p-1 text-slate-400 hover:bg-slate-100 active:cursor-grabbing",
+            "cursor-grab touch-none rounded-md p-1 text-slate-400 transition-colors duration-(--duracao-rapida) hover:bg-white/70 hover:text-slate-600 active:cursor-grabbing",
             FOCUS_RING
           )}
           aria-label="Arrastar fase"
@@ -105,16 +112,14 @@ export function FaseColumn({
           onConfigurar={() => setConfigurando(true)}
         />
 
-        <span className="ml-auto rounded bg-[rgb(237,239,243)] px-1 py-0.5 text-xs font-normal tabular-nums text-[rgb(16,24,32)] transition-colors duration-(--duracao-rapida)">
-          {cards.length}
-        </span>
+        <span className="gdt-contador ml-auto">{cards.length}</span>
 
         <div className="flex items-center opacity-0 transition-opacity duration-(--duracao-rapida) focus-within:opacity-100 group-hover:opacity-100">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button
                 className={cn(
-                  "flex h-6 w-6 items-center justify-center rounded-full text-[rgb(75,88,99)] hover:bg-slate-100",
+                  "flex h-6 w-6 items-center justify-center rounded-full text-[rgb(75,88,99)] transition-colors duration-(--duracao-rapida) hover:bg-white/70",
                   FOCUS_RING
                 )}
                 aria-label={`Mais opções da fase ${fase.nome}`}
@@ -142,7 +147,7 @@ export function FaseColumn({
             <button
               onClick={() => onCreateCard(fase.id)}
               className={cn(
-                "flex h-6 w-6 items-center justify-center rounded-full text-[rgb(75,88,99)] hover:bg-slate-100",
+                "flex h-6 w-6 items-center justify-center rounded-full text-[rgb(75,88,99)] transition-colors duration-(--duracao-rapida) hover:bg-white/70",
                 FOCUS_RING
               )}
               aria-label={`Criar novo card na fase ${fase.nome}`}
@@ -153,19 +158,17 @@ export function FaseColumn({
         </div>
       </div>
 
-      <div
-        className={cn(
-          "flex flex-1 flex-col overflow-hidden rounded-b border border-t-0 border-borda bg-quadro transition-colors duration-(--duracao-base)",
-          isDropTarget && "bg-blue-50 ring-2 ring-inset ring-blue-300"
-        )}
-      >
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-b-[19px]">
         {fase.permiteCriarCards && (
-          <div className="shrink-0 px-3 pb-2 pt-3">
+          <div className="shrink-0 px-3 pb-3 pt-1">
             <Button
               onClick={() => onCreateCard(fase.id)}
               size="pill"
+              style={{ color: "var(--fase-texto)" }}
+              // transition-[...] substitui o `transition-colors` do Button, que impediria animar
+              // a elevação/glow do .gdt-botao-fase no hover.
               className={cn(
-                "w-full gap-1.5 rounded-md bg-[#1d4ed8] hover:bg-[#1a44bd]",
+                "gdt-botao-fase w-full gap-1.5 rounded-xl font-semibold transition-[translate,box-shadow,filter] duration-(--duracao-rapida)",
                 FOCUS_RING
               )}
             >
@@ -177,7 +180,7 @@ export function FaseColumn({
 
         <div
           ref={setDroppableRef}
-          className="scrollbar-fina flex min-h-[8px] flex-1 flex-col gap-2 overflow-y-auto px-3 pb-3 pt-0"
+          className="scrollbar-fina flex min-h-[8px] flex-1 flex-col gap-2.5 overflow-y-auto px-3 pb-3 pt-0"
         >
           <SortableContext items={cards.map((c) => c.id)} strategy={verticalListSortingStrategy}>
             {cards.map((card, i) => (
@@ -211,7 +214,7 @@ export function FaseColumn({
         {/* Descrição da fase como rodapé fixo (padrão Pipefy). Antes ela só aparecia
             quando a coluna estava vazia, então sumia justamente quando havia trabalho. */}
         {fase.descricao && (
-          <p className="shrink-0 border-t border-borda px-3 py-2.5 text-center text-[11px] leading-4 text-slate-400">
+          <p className="shrink-0 border-t border-[color-mix(in_srgb,var(--fase)_18%,white)] px-3 py-2.5 text-center text-[11px] leading-4 text-slate-500">
             {fase.descricao}
           </p>
         )}

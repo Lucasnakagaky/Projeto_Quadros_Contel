@@ -18,7 +18,7 @@ export function ColumnVisibilityPopover({
       trigger={({ toggle }) => (
         <button
           onClick={toggle}
-          className="flex items-center gap-1.5 rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50"
+          className="gdt-focus flex cursor-pointer items-center gap-1.5 rounded-xl border border-white/80 bg-white/85 px-3 py-1.5 text-sm font-medium text-slate-600 shadow-(--gdt-sombra-1) transition-[background-color,color] duration-(--duracao-rapida) hover:bg-white hover:text-indigo-700"
         >
           <Columns3 size={14} />
           Colunas

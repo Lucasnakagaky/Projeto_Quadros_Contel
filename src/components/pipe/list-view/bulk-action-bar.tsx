@@ -32,7 +32,7 @@ export function BulkActionBar({
   return (
     <>
       <div className="pointer-events-none fixed inset-x-0 bottom-6 z-40 flex justify-center">
-        <div className="pointer-events-auto flex items-center divide-x divide-white/15 rounded-full bg-slate-900 px-1 text-white shadow-xl">
+        <div className="pointer-events-auto flex items-center divide-x divide-white/15 rounded-full bg-slate-900/95 px-1 text-white shadow-[0_16px_34px_-12px_rgb(76_81_191/0.6)]">
           <span className="px-4 py-2 text-sm font-medium whitespace-nowrap">
             {quantidade} {quantidade === 1 ? "card selecionado" : "cards selecionados"}
           </span>

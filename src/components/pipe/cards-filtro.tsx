@@ -20,7 +20,7 @@ export function CardsFiltro({
     <div className="relative w-full sm:w-56 md:w-64">
       <Search
         size={14}
-        className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+        className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
       />
       <Input
         type="text"
@@ -29,14 +29,17 @@ export function CardsFiltro({
         onKeyDown={(e) => e.key === "Escape" && onChange("")}
         aria-label="Pesquisar cards ou etiquetas"
         placeholder="Pesquisar cards ou etiquetas..."
-        className={cn("pl-8", valor && "pr-9")}
+        className={cn(
+          "rounded-full border-white/80 bg-white/90 pl-9 shadow-(--gdt-sombra-1) transition-[border-color,box-shadow] duration-(--duracao-base) placeholder:text-slate-400 focus:border-indigo-300 focus:ring-indigo-100",
+          valor && "pr-9"
+        )}
       />
       {valor && (
         <button
           type="button"
           onClick={() => onChange("")}
           aria-label="Limpar filtro"
-          className="absolute right-0 top-0 flex h-9 w-9 items-center justify-center rounded-r-md text-slate-400 hover:text-slate-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 cursor-pointer"
+          className="absolute right-0 top-0 flex h-9 w-9 items-center justify-center rounded-r-full text-slate-400 hover:text-slate-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 cursor-pointer"
         >
           <X size={14} />
         </button>

@@ -149,12 +149,10 @@ export function CardChip({
       onClick={onOpen}
       onKeyDown={dragOverlay ? undefined : handleKeyDown}
       className={cn(
-        "group/card relative flex cursor-grab touch-none flex-col gap-1.5 rounded-md border border-borda bg-white p-3 shadow-[0_1px_2px_0_rgba(38,50,56,0.08)]",
-        // transform entra na lista porque o hover agora levanta o card; antes só a sombra
-        // transicionava e a cor da borda mudava de estalo.
-        "transition-[box-shadow,border-color,transform] duration-(--duracao-rapida) ease-(--ease-entrada)",
-        "hover:-translate-y-0.5 hover:border-borda-forte hover:shadow-[0_4px_12px_0_rgba(38,50,56,0.14)]",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 active:cursor-grabbing",
+        // gdt-card (globals.css): superfície, raio, sombra e hover tingido pela cor da fase
+        // (`--fase` vem da coluna). Mantém `cursor-grab`: os e2e localizam o card por ele.
+        "gdt-card group/card relative flex cursor-grab touch-none flex-col gap-2 p-3.5",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:ring-offset-1 active:cursor-grabbing",
         animarEntrada && !dragOverlay && "anim-card-entra",
         // durante o arraste, o card de origem vira um fantasma tracejado no lugar de onde saiu
         isDragging && "cursor-grabbing border-dashed opacity-40 shadow-none"
@@ -200,8 +198,8 @@ export function CardChip({
                 }}
                 title={`Filtrar por etiqueta ${etiqueta.nome}`}
                 aria-label={`Filtrar por etiqueta ${etiqueta.nome}`}
-                className="cursor-pointer rounded-full px-2 py-0.5 text-[10px] font-semibold leading-4 transition-[opacity,transform] duration-(--duracao-rapida) hover:-translate-y-px hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
-                style={{ backgroundColor: `${etiqueta.cor}1f`, color: etiqueta.cor }}
+                className="gdt-etiqueta cursor-pointer rounded-full px-2.5 py-0.5 text-[11px] font-semibold leading-4 transition-[opacity,translate] duration-(--duracao-rapida) hover:-translate-y-px hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:ring-offset-1"
+                style={{ "--cor": etiqueta.cor } as React.CSSProperties}
               >
                 {etiqueta.nome}
               </button>
@@ -210,7 +208,7 @@ export function CardChip({
         </div>
       )}
 
-      <p className="line-clamp-2 pr-4 text-sm font-semibold leading-5 text-titulo">{card.titulo}</p>
+      <p className="line-clamp-2 pr-4 text-[15px] font-medium leading-5 text-titulo">{card.titulo}</p>
 
       {filhos.length > 0 && (
         <div className="flex flex-col items-start gap-1">

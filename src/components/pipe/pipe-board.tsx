@@ -417,7 +417,7 @@ export function PipeBoard({
   }
 
   return (
-    <div className="flex h-dvh flex-col overflow-hidden">
+    <div className="gdt-shell flex h-dvh flex-col overflow-hidden">
       <PipeHeader
         pipe={pipe}
         onAbrirCampos={() => setCamposAberto(true)}
@@ -439,11 +439,11 @@ export function PipeBoard({
           }
         />
 
-        <TabsContent value="kanban" className="flex flex-1 flex-col overflow-hidden bg-neutral-50">
+        <TabsContent value="kanban" className="flex flex-1 flex-col overflow-hidden">
           {filtroAtivo && totalFiltrado === 0 && (
             <div
               data-testid="filtro-sem-resultados"
-              className="mx-6 mt-4 flex flex-wrap items-center gap-3 rounded-md border border-slate-200 bg-white px-4 py-3 text-sm text-slate-600"
+              className="mx-4 mt-4 flex flex-wrap items-center gap-3 rounded-2xl border border-white/80 bg-white/85 px-4 py-3 text-sm text-slate-600 shadow-(--gdt-sombra-1)"
             >
               <SearchX size={16} className="shrink-0 text-slate-400" />
               {/* role/aria-live só no texto: uma live region não deve envolver o botão */}
@@ -470,7 +470,7 @@ export function PipeBoard({
             onDragOver={handleDragOver}
             onDragEnd={handleDragEnd}
           >
-            <ScrollFade className="flex items-stretch gap-2 px-6 py-4" fadeFrom="from-neutral-50" passoScroll={288}>
+            <ScrollFade className="flex items-stretch gap-4 px-4 py-4" passoScroll={296}>
               <SortableContext items={faseIds} strategy={horizontalListSortingStrategy}>
                 {fases.map((fase, i) => (
                   <FaseColumn
@@ -497,7 +497,7 @@ export function PipeBoard({
 
               <button
                 onClick={() => setNovaFaseAberta(true)}
-                className="flex h-10 w-[280px] shrink-0 items-center gap-1.5 rounded-lg bg-slate-100/70 px-3 text-sm font-medium text-slate-500 hover:bg-slate-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
+                className="flex h-11 w-[280px] shrink-0 items-center gap-1.5 rounded-[20px] border border-dashed border-slate-300/80 bg-white/50 px-4 text-sm font-medium text-slate-500 transition-[background-color,border-color,color] duration-(--duracao-base) hover:border-indigo-300 hover:bg-white/80 hover:text-indigo-700 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:ring-offset-1"
               >
                 <Plus size={16} />
                 Adicionar Fase
@@ -506,7 +506,18 @@ export function PipeBoard({
 
             <DragOverlay>
               {activeCard ? (
-                <div className="w-[256px] rotate-2 scale-105 opacity-95 drop-shadow-[0_12px_24px_rgba(38,50,56,0.25)]">
+                <div
+                  className="w-[256px] rotate-2 scale-105 opacity-95"
+                  style={
+                    {
+                      // O overlay fica fora da coluna, então herda a cor da fase de onde o card está agora.
+                      "--fase": fases.find((f) => columns[f.id]?.includes(activeCard.id))?.cor ?? "#6366f1",
+                      // 1 único elemento (o card levantado): profundidade + glow da fase.
+                      filter:
+                        "drop-shadow(0 18px 26px rgb(30 41 90 / 0.28)) drop-shadow(0 0 12px color-mix(in srgb, var(--fase) calc(45% * var(--gdt-glow)), transparent))",
+                    } as React.CSSProperties
+                  }
+                >
                   <CardChip
                     card={activeCard}
                     campos={campos}
@@ -517,7 +528,15 @@ export function PipeBoard({
                 </div>
               ) : null}
               {activeFase ? (
-                <div className="w-[280px] rotate-1 scale-105 rounded border border-divisor bg-white p-3 opacity-95 drop-shadow-[0_12px_24px_rgba(38,50,56,0.25)]">
+                <div
+                  className="w-[280px] rotate-1 scale-105 rounded-[20px] border border-white/80 bg-white/95 p-3 opacity-95"
+                  style={{
+                    filter:
+                      "drop-shadow(0 18px 26px rgb(30 41 90 / 0.28)) drop-shadow(0 0 12px color-mix(in srgb, " +
+                      activeFase.cor +
+                      " calc(45% * var(--gdt-glow)), transparent))",
+                  }}
+                >
                   <span className="font-semibold text-slate-700">{activeFase.nome}</span>
                 </div>
               ) : null}

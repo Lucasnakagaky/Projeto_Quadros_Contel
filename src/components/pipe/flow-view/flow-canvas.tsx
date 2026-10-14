@@ -92,7 +92,7 @@ export function FlowCanvas({
   }
 
   return (
-    <div className="relative flex flex-1 flex-col overflow-hidden bg-slate-50">
+    <div className="relative flex flex-1 flex-col overflow-hidden">
       <div
         className="relative flex-1 overflow-hidden"
         style={{ cursor: arrastando ? "grabbing" : "grab" }}
@@ -115,7 +115,7 @@ export function FlowCanvas({
                     onAdicionarCampos={onAbrirCampos}
                     onAtribuirMembros={() => setMembrosFaseId(fase.id)}
                   />
-                  {i < fases.length - 1 && <FlowConnector />}
+                  {i < fases.length - 1 && <FlowConnector de={fase.cor} para={fases[i + 1].cor} />}
                 </div>
               ))}
             </SortableContext>
