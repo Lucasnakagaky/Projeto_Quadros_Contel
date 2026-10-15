@@ -33,14 +33,27 @@ import { MoverFasePopover } from "./mover-fase-popover";
 import { ChecklistSection } from "./checklist-section";
 import { CommentsSection } from "./comments-section";
 import { AttachmentsSection } from "./attachments-section";
+import { FOCO } from "./estilos";
 
-const CLASSE_ABA =
-  "group/aba mr-1.5 mb-1.5 flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full border border-slate-200 bg-white px-2.5 py-1 text-xs font-medium text-slate-600 transition-[background-color,color,border-color,transform] duration-(--duracao-rapida) hover:-translate-y-px hover:bg-slate-50 hover:text-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 data-[state=active]:border-blue-200 data-[state=active]:bg-blue-50 data-[state=active]:font-semibold data-[state=active]:text-blue-700";
+// Abas do card: mesma linguagem das abas do shell (azul → índigo → violeta), em escala menor.
+// O ui/tabs não muda: o cn()/twMerge só sobrepõe estas classes aqui.
+const CLASSE_ABA = `group/aba mr-1.5 mb-1.5 flex shrink-0 cursor-pointer items-center gap-1 whitespace-nowrap rounded-full border border-slate-200 bg-white/80 px-2.5 py-1 text-xs font-medium text-slate-600 transition-[background-color,color,border-color,translate,box-shadow] duration-(--duracao-rapida) hover:-translate-y-px hover:border-indigo-200 hover:bg-indigo-50/70 hover:text-indigo-700 ${FOCO} data-[state=active]:border-transparent data-[state=active]:bg-transparent data-[state=active]:bg-linear-to-r data-[state=active]:from-(--gdt-aba-1) data-[state=active]:via-(--gdt-aba-2) data-[state=active]:to-(--gdt-aba-3) data-[state=active]:font-semibold data-[state=active]:text-white data-[state=active]:shadow-(--gdt-aba-sombra-sm)`;
+
+// Ação do trilho lateral (Action Rail): neutra; só o vermelho de ação destrutiva aparece em hover/foco.
+const ACAO_TRILHO = `group/acao flex w-full items-center gap-2.5 rounded-xl px-1.5 py-1.5 text-left text-sm font-medium text-slate-600 transition-[background-color,color,box-shadow] duration-(--duracao-rapida) hover:bg-white hover:text-indigo-700 hover:shadow-(--gdt-sombra-1) ${FOCO} cursor-pointer`;
+const ACAO_TRILHO_PERIGO = `group/acao flex w-full items-center gap-2.5 rounded-xl px-1.5 py-1.5 text-left text-sm font-medium text-slate-600 transition-[background-color,color,box-shadow] duration-(--duracao-rapida) hover:bg-red-50 hover:text-red-600 focus-visible:bg-red-50 focus-visible:text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-1 cursor-pointer`;
+const ICONE_TRILHO =
+  "flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white text-slate-500 ring-1 ring-slate-200/70 transition-colors duration-(--duracao-rapida) group-hover/acao:text-indigo-600 group-focus-visible/acao:text-indigo-600";
+const ICONE_TRILHO_PERIGO =
+  "flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white text-slate-500 ring-1 ring-slate-200/70 transition-colors duration-(--duracao-rapida) group-hover/acao:text-red-600 group-focus-visible/acao:text-red-600";
+
+// Linha hairline (substitui o divisor rgb(220,223,229) repetido 7×): some nas pontas.
+const SEPARADOR = "h-px shrink-0 bg-linear-to-r from-transparent via-slate-300/70 to-transparent";
 
 function ContadorAba({ valor }: { valor: number }) {
   if (valor <= 0) return null;
   return (
-    <span className="rounded-full bg-slate-200 px-1.5 py-px text-[11px] font-semibold tabular-nums text-slate-600 transition-colors duration-(--duracao-rapida) group-data-[state=active]/aba:bg-blue-100 group-data-[state=active]/aba:text-blue-700">
+    <span className="rounded-full bg-slate-200/80 px-1.5 py-px text-[11px] font-semibold tabular-nums text-slate-600 transition-colors duration-(--duracao-rapida) group-data-[state=active]/aba:bg-white/25 group-data-[state=active]/aba:text-white">
       {valor}
     </span>
   );
@@ -220,8 +233,8 @@ export function CardDetailModal({
     requestAnimationFrame(() => {
       const el = document.getElementById(`campo-${campo.id}`);
       el?.scrollIntoView({ behavior: "smooth", block: "center" });
-      el?.classList.add("bg-blue-50");
-      setTimeout(() => el?.classList.remove("bg-blue-50"), 1200);
+      el?.classList.add("bg-blue-50", "gdt-campo-destaque");
+      setTimeout(() => el?.classList.remove("bg-blue-50", "gdt-campo-destaque"), 1200);
     });
   }
 
@@ -317,9 +330,14 @@ export function CardDetailModal({
   if (loading || !detail) {
     return (
       <Dialog open onOpenChange={handleOpenChange}>
-        <DialogContent className="flex h-64 max-w-4xl items-center justify-center">
+        {/* mesma largura (max-w-6xl) do modal carregado: sem salto de tamanho ao abrir */}
+        <DialogContent
+          className="gdt-modal scrollbar-fina flex h-64 w-[calc(100vw-1rem)] max-w-6xl items-center justify-center"
+          overlayClassName="gdt-modal-overlay"
+          closeClassName="gdt-modal-fechar"
+        >
           <DialogTitle className="sr-only">Carregando card</DialogTitle>
-          <span className="text-sm text-slate-400">Carregando card...</span>
+          <span className="text-sm font-medium text-slate-500">Carregando card...</span>
         </DialogContent>
       </Dialog>
     );
@@ -341,7 +359,12 @@ export function CardDetailModal({
     <>
     <Dialog open onOpenChange={handleOpenChange}>
       <DialogContent
-        className="max-w-6xl"
+        // gdt-modal*: casca de vidro, overlay frio e Geist (o modal é um portal fora do
+        // .gdt-shell). `--fase` só alimenta a luz contextual (faixa superior, pills, marcadores).
+        className="gdt-modal gdt-modal-luz scrollbar-fina w-[calc(100vw-1rem)] max-w-6xl"
+        overlayClassName="gdt-modal-overlay"
+        closeClassName="gdt-modal-fechar"
+        style={{ "--fase": faseAtual?.cor ?? "#6366f1" } as React.CSSProperties}
         onEscapeKeyDown={(e) => {
           if (etiquetaEmEdicaoRef.current) e.preventDefault();
         }}
@@ -350,11 +373,28 @@ export function CardDetailModal({
         <DialogDescription className="sr-only">
           Detalhes, campos e atividades do card {card.titulo}
         </DialogDescription>
-        {/* 3 colunas independentes (padrão Pipefy): card | fase atual | ações da fase.
-            Divididas por borda (não gap), cada uma com seu próprio padding interno. */}
-        <div className="grid grid-cols-1 md:grid-cols-[minmax(0,4fr)_minmax(0,5fr)_240px]">
+        {/* 3 colunas independentes (padrão Pipefy): card | fase atual | ações da fase — a ordem
+            do DOM não muda. Visualmente são 3 painéis flutuantes sobre a casca de vidro:
+            conteúdo principal (maior peso), contexto/descrição e trilho de ações (compacto). */}
+        <div className="grid grid-cols-1 gap-2 p-2 md:grid-cols-[minmax(0,4fr)_minmax(0,5fr)_240px] md:gap-3 md:p-3">
           {/* Coluna 1 — Card */}
-          <div className="flex min-w-0 flex-col gap-3 px-5 py-6">
+          <div className="gdt-modal-painel flex min-w-0 flex-col gap-3 px-5 py-5">
+            {/* Chip de fase no topo do cabeçalho (só visual: o rótulo "Fase atual" e a pill
+                oficial continuam na coluna 2). */}
+            {faseAtual && (
+              <span
+                aria-hidden="true"
+                className="gdt-fase-pill flex w-fit items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold"
+              >
+                <span
+                  className="h-1.5 w-1.5 rounded-full"
+                  style={{ backgroundColor: "var(--fase)", boxShadow: "0 0 6px var(--fase)" }}
+                />
+                {faseAtual.nome}
+              </span>
+            )}
+
+            {/* O título continua sendo o 1º input/textarea do dialog (contrato dos testes). */}
             <Textarea
               ref={tituloRef}
               rows={1}
@@ -367,14 +407,14 @@ export function CardDetailModal({
                   e.currentTarget.blur();
                 }
               }}
-              className="h-auto shrink-0 resize-none overflow-hidden border-none px-0 py-0 text-xl font-bold shadow-none focus:ring-0"
+              className="-mx-2 h-auto w-[calc(100%+1rem)] shrink-0 resize-none overflow-hidden rounded-lg border-0 bg-transparent px-2 py-1 pr-10 text-2xl font-bold leading-tight tracking-tight text-slate-900 shadow-none transition-colors duration-(--duracao-rapida) hover:bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-200"
             />
 
             <div className="flex flex-wrap items-center gap-2">
               <Button
                 variant="outline"
                 size="sm"
-                className="h-7 px-2 text-xs"
+                className={`h-7 rounded-full border-slate-200 bg-white/80 px-2.5 text-xs text-slate-600 transition-[background-color,border-color,color] duration-(--duracao-rapida) hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-700 ${FOCO}`}
                 onClick={() => focarCampo("data_vencimento")}
               >
                 <CalendarClock size={12} />
@@ -396,7 +436,7 @@ export function CardDetailModal({
               emEdicaoRef={etiquetaEmEdicaoRef}
             />
 
-            <div className="border-t border-[rgb(220,223,229)]" />
+            <div className={SEPARADOR} />
 
             {/* Barra de funcionalidades do card — navegação (padrão Pipefy: Form,
                 Atividades, Anexos, Checklists, Comentários). Quebra para a segunda linha
@@ -428,7 +468,7 @@ export function CardDetailModal({
                 </TabsTrigger>
               </TabsList>
 
-              <div className="mt-2 border-t border-[rgb(220,223,229)]" />
+              <div className={`mt-1 ${SEPARADOR}`} />
 
               <TabsContent value="form" className="pt-2">
                 <div className="flex flex-col gap-2">
@@ -517,15 +557,12 @@ export function CardDetailModal({
               que o Grid estique esta coluna para acompanhar a altura da coluna 1 quando ela
               tem muito conteúdo — sem isso, o scroll compartilhado deixava um vão enorme de
               espaço em branco abaixo do texto curto desta coluna. */}
-          <div className="flex min-w-0 flex-col border-t border-[rgb(220,223,229)] md:self-start md:border-l md:border-t-0">
-            <div className="flex shrink-0 items-center justify-between gap-2 border-b border-[rgb(220,223,229)] p-5 pt-6">
-              <div className="flex flex-col gap-1">
+          <div className="gdt-modal-contexto flex min-w-0 flex-col md:self-start">
+            <div className="flex shrink-0 items-center justify-between gap-2 border-b border-slate-200/70 p-5 pt-5">
+              <div className="flex flex-col gap-1.5">
                 <span className="text-xs font-semibold text-slate-500">Fase atual</span>
                 {faseAtual && (
-                  <span
-                    className="w-fit rounded-full px-2.5 py-1 text-xs font-semibold"
-                    style={{ backgroundColor: `${faseAtual.cor}22`, color: faseAtual.cor }}
-                  >
+                  <span className="gdt-fase-pill w-fit rounded-full px-2.5 py-1 text-xs font-semibold">
                     {faseAtual.nome}
                   </span>
                 )}
@@ -535,20 +572,24 @@ export function CardDetailModal({
                 disabled
                 title="Configurações da fase — em breve"
                 aria-label="Configurações da fase (em breve)"
-                className="shrink-0 cursor-not-allowed rounded-md p-1.5 text-slate-300"
+                className="shrink-0 cursor-not-allowed rounded-lg p-1.5 text-slate-300"
               >
                 <Settings2 size={16} />
               </button>
             </div>
-            <div className="flex flex-1 flex-col gap-2 p-5 pb-6">
+            <div className="flex flex-1 flex-col gap-3 p-5 pb-5">
               {faseAtual?.descricao ? (
-                <p className="whitespace-pre-wrap text-sm text-slate-600">{faseAtual.descricao}</p>
+                <p className="whitespace-pre-wrap text-sm leading-relaxed text-slate-600">
+                  {faseAtual.descricao}
+                </p>
               ) : (
                 <p className="text-sm text-slate-400">Nenhuma informação adicional desta fase.</p>
               )}
 
               {campoDescricao && (
-                <div className="border-t border-[rgb(220,223,229)] pt-3">
+                // Área de trabalho da Descrição: superfície branca sólida (o campo `#campo-<id>`
+                // continua dentro dela, visível sem abrir aba — contrato dos testes).
+                <div className="rounded-xl border border-slate-200/80 bg-white p-3.5 shadow-(--gdt-sombra-1)">
                   <CampoValueRow
                     campo={campoDescricao}
                     cardId={card.id}
@@ -571,41 +612,46 @@ export function CardDetailModal({
               dropdown do Popover é posicionado com position:absolute (não usa portal) — um
               ancestral com overflow-y-auto cortaria o dropdown, já que "overflow-y: auto"
               força o browser a clipar também o eixo X. */}
-          <div className="flex flex-col border-t border-[rgb(220,223,229)] px-5 py-6 md:self-start md:border-l md:border-t-0">
-            <div className="flex shrink-0 flex-col gap-3">
-              <span className="text-sm font-semibold text-slate-800">Mover card para fase</span>
+          <div className="gdt-modal-trilho flex flex-col px-4 py-5 md:self-start">
+            <div className="flex shrink-0 flex-col gap-2.5">
+              <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-500">
+                Mover card para fase
+              </span>
               <MoverFasePopover fases={fases} faseAtualId={card.faseId} onMover={moverFase} />
             </div>
 
-            <div className="flex min-h-0 flex-1 flex-col gap-4 pb-4 md:overflow-y-auto">
-              <div className="mt-4 border-t border-[rgb(220,223,229)] pt-4">
-                <button
-                  onClick={() => setConfigurandoCampos(true)}
-                  className="flex items-center gap-1.5 self-start rounded-md px-1 py-1.5 text-left text-sm text-slate-500 hover:bg-slate-100 hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
-                >
+            <div className="flex min-h-0 flex-1 flex-col gap-1 pb-1 md:overflow-y-auto">
+              <div className={`mb-2 mt-4 ${SEPARADOR}`} />
+
+              <button onClick={() => setConfigurandoCampos(true)} className={ACAO_TRILHO}>
+                <span className={ICONE_TRILHO}>
                   <Settings2 size={14} />
-                  Configurações
-                </button>
-              </div>
+                </span>
+                Configurações
+              </button>
 
               <button
                 onClick={arquivarCard}
-                className="flex items-center gap-1.5 self-start rounded-md px-1 py-1.5 text-left text-sm text-slate-500 hover:bg-slate-100 hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
+                className={ACAO_TRILHO}
                 aria-label="Arquivar card"
                 title="Arquivar card"
               >
-                <Archive size={14} />
+                <span className={ICONE_TRILHO}>
+                  <Archive size={14} />
+                </span>
                 Arquivado
               </button>
 
               {faseAtual?.ehFinal && (
                 <button
                   onClick={moverParaLixeira}
-                  className="mt-auto flex items-center gap-1.5 self-start rounded-md px-1 py-1.5 text-sm text-red-500 hover:bg-red-50 hover:text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-1"
+                  className={`mt-3 ${ACAO_TRILHO_PERIGO}`}
                   aria-label="Mover card para a lixeira"
                   title="Mover card para a lixeira"
                 >
-                  <Trash2 size={14} />
+                  <span className={ICONE_TRILHO_PERIGO}>
+                    <Trash2 size={14} />
+                  </span>
                   Mover para a lixeira
                 </button>
               )}

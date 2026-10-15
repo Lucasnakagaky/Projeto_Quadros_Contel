@@ -13,11 +13,21 @@ export function DialogContent({
   className,
   children,
   showClose = true,
+  overlayClassName,
+  closeClassName,
   ...props
-}: DialogPrimitive.DialogContentProps & { showClose?: boolean }) {
+}: DialogPrimitive.DialogContentProps & {
+  showClose?: boolean;
+  /** Opcional: classes extras do overlay (só o Card Aberto usa; sem ela o overlay é idêntico ao de sempre). */
+  overlayClassName?: string;
+  /** Opcional: classes extras do botão X (idem). */
+  closeClassName?: string;
+}) {
   return (
     <DialogPrimitive.Portal>
-      <DialogPrimitive.Overlay className="anim-overlay fixed inset-0 z-50 bg-black/50" />
+      <DialogPrimitive.Overlay
+        className={cn("anim-overlay fixed inset-0 z-50 bg-black/50", overlayClassName)}
+      />
       <DialogPrimitive.Content
         className={cn(
           "anim-modal fixed left-1/2 top-1/2 z-50 max-h-[90vh] w-full -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-xl bg-white shadow-xl focus:outline-none",
@@ -27,7 +37,13 @@ export function DialogContent({
       >
         {children}
         {showClose && (
-          <DialogPrimitive.Close className="absolute right-4 top-4 rounded-md p-1 text-slate-400 transition-colors duration-(--duracao-rapida) hover:bg-slate-100 hover:text-slate-600 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1">
+          <DialogPrimitive.Close
+            aria-label="Fechar"
+            className={cn(
+              "absolute right-4 top-4 rounded-md p-1 text-slate-400 transition-colors duration-(--duracao-rapida) hover:bg-slate-100 hover:text-slate-600 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1",
+              closeClassName
+            )}
+          >
             <X size={18} />
           </DialogPrimitive.Close>
         )}

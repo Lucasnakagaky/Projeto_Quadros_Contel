@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { ImageLightbox, ImagemAmpliada } from "./image-lightbox";
 
 const CLASSES_CONTEUDO =
-  "[&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_img]:max-w-full [&_img]:rounded [&_img]:cursor-zoom-in";
+  "[&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_img]:max-w-full [&_img]:rounded-xl [&_img]:cursor-zoom-in [&_img]:my-1.5 [&_img]:ring-1 [&_img]:ring-indigo-200/70 [&_img]:shadow-(--gdt-sombra-1) [&_img]:transition-shadow [&_img]:duration-(--duracao-rapida) [&_img:hover]:shadow-(--gdt-sombra-2) [&_img:focus-visible]:outline-none [&_img:focus-visible]:ring-2 [&_img:focus-visible]:ring-indigo-400 [&_li]:my-0.5";
 
 /**
  * Exibe HTML sanitizado (negrito/itálico/listas/imagem) com zoom de imagem ao clicar/Enter —

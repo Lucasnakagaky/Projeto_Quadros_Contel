@@ -3,6 +3,7 @@
 import { AlertTriangle, Boxes, X } from "lucide-react";
 import { cn, dataPorExtenso } from "@/lib/utils";
 import { ChipOptionsMenu } from "./chip-options-menu";
+import { CARD_SOLIDO, CARD_SOLIDO_HOVER, ICONE_REMOVER } from "./estilos";
 
 export interface CardConexaoChipProps {
   cardId: string;
@@ -29,9 +30,13 @@ function CardConexaoChip({
   return (
     <div
       onClick={() => !quebrada && onAbrirCard()}
+      // --fase: hover com a borda tingida pela fase do card ligado (linguagem dos cards do Kanban)
+      style={{ "--fase": faseCor } as React.CSSProperties}
       className={cn(
-        "flex flex-col gap-2 rounded-lg border bg-white p-3 transition-colors",
-        quebrada ? "border-red-200 bg-red-50" : "cursor-pointer border-slate-200 hover:border-slate-300 hover:bg-slate-50"
+        "flex flex-col gap-2 p-3",
+        quebrada
+          ? "rounded-xl border border-red-200 bg-red-50/80"
+          : `cursor-pointer ${CARD_SOLIDO} ${CARD_SOLIDO_HOVER}`
       )}
     >
       <div className="flex items-start justify-between gap-2">
@@ -46,7 +51,7 @@ function CardConexaoChip({
                 e.stopPropagation();
                 onRemover();
               }}
-              className="rounded p-1 text-slate-400 hover:bg-slate-100 hover:text-red-600"
+              className={`p-1 ${ICONE_REMOVER}`}
               aria-label="Remover conexão"
             >
               <X size={14} />
@@ -65,7 +70,7 @@ function CardConexaoChip({
           <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
             <div className="flex flex-col gap-0.5">
               <span className="text-[11px] font-medium text-slate-400">Pipe</span>
-              <span className="flex w-fit items-center gap-1 rounded-md bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
+              <span className="flex w-fit items-center gap-1 rounded-md bg-slate-100/80 px-2 py-0.5 text-xs font-medium text-slate-600 ring-1 ring-slate-200/60">
                 <Boxes size={11} />
                 {pipeNome}
               </span>
@@ -79,7 +84,7 @@ function CardConexaoChip({
             <span className="text-[11px] font-medium text-slate-400">Fase</span>
             <span
               className="w-fit rounded-full px-2 py-0.5 text-xs font-semibold"
-              style={{ backgroundColor: `${faseCor}1f`, color: faseCor }}
+              style={{ backgroundColor: `color-mix(in srgb, ${faseCor} 14%, white)`, color: `color-mix(in srgb, ${faseCor} 66%, #0f172a)`, boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${faseCor} 24%, transparent)` }}
             >
               {faseNome}
             </span>

@@ -6,6 +6,7 @@ import { Paperclip, Plus, Trash2, UploadCloud } from "lucide-react";
 import { api } from "@/lib/api-client";
 import { Anexo } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { CARD_SOLIDO, FOCO, ICONE_REMOVER, LINK_ACAO, TITULO_SECAO } from "./estilos";
 
 function formatBytes(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
@@ -69,7 +70,7 @@ export function AttachmentsSection({
 
   return (
     <div className="flex flex-col gap-2">
-      <span className="text-xs font-semibold text-slate-500">Anexos</span>
+      <span className={TITULO_SECAO}>Anexos</span>
 
       {/* Input escondido único, compartilhado pela dropzone (sem anexos) e pelo link
           "+ Adicionar anexo" (com anexos) — mesma lógica de upload de antes. */}
@@ -90,7 +91,7 @@ export function AttachmentsSection({
             {anexos.map((a) => (
               <li
                 key={a.id}
-                className="flex items-center gap-2 rounded-md border border-slate-200 px-2 py-1.5 text-sm"
+                className={`flex items-center gap-2.5 px-2 py-1.5 text-sm hover:border-indigo-200 hover:shadow-(--gdt-sombra-2) ${CARD_SOLIDO}`}
               >
                 {a.tipo.startsWith("image/") ? (
                   <img
@@ -99,23 +100,25 @@ export function AttachmentsSection({
                     width={36}
                     height={36}
                     loading="lazy"
-                    className="h-9 w-9 shrink-0 rounded object-cover"
+                    className="h-9 w-9 shrink-0 rounded-lg object-cover ring-1 ring-indigo-200/70"
                   />
                 ) : (
-                  <Paperclip size={14} className="shrink-0 text-slate-400" />
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-50 text-slate-400 ring-1 ring-slate-200/70">
+                    <Paperclip size={14} />
+                  </span>
                 )}
                 <a
                   href={a.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex-1 truncate text-blue-600 hover:underline"
+                  className={`flex-1 truncate rounded font-medium text-indigo-600 hover:text-indigo-800 hover:underline ${FOCO}`}
                 >
                   {a.nome}
                 </a>
                 <span className="text-xs text-slate-400">{formatBytes(a.tamanho)}</span>
                 <button
                   onClick={() => remover(a.id)}
-                  className="text-slate-400 hover:text-red-600"
+                  className={ICONE_REMOVER}
                   aria-label="Remover anexo"
                 >
                   <Trash2 size={14} />
@@ -128,7 +131,7 @@ export function AttachmentsSection({
             type="button"
             onClick={() => inputRef.current?.click()}
             disabled={enviando}
-            className="flex w-fit items-center gap-1 self-start text-xs text-blue-600 hover:underline disabled:cursor-not-allowed disabled:opacity-50"
+            className={`flex w-fit items-center gap-1 self-start disabled:cursor-not-allowed disabled:opacity-50 ${LINK_ACAO}`}
           >
             <Plus size={12} />
             {enviando ? "Enviando..." : "Adicionar anexo"}
@@ -148,8 +151,10 @@ export function AttachmentsSection({
             if (e.dataTransfer.files?.length) upload(e.dataTransfer.files);
           }}
           className={cn(
-            "flex cursor-pointer items-center gap-2 rounded-md border-2 border-dashed border-slate-300 px-3 py-1.5 text-sm text-slate-400 hover:border-slate-400",
-            dragOver && "border-blue-400 bg-blue-50"
+            "flex cursor-pointer items-center gap-2 rounded-xl border-2 border-dashed border-slate-300 bg-linear-to-br from-white to-indigo-50/40 px-3 py-2.5 text-sm text-slate-500 transition-[border-color,background-color,box-shadow] duration-(--duracao-rapida) hover:border-indigo-300 hover:text-indigo-700",
+            // glow só durante o arraste (nada de brilho em repouso)
+            dragOver &&
+              "border-indigo-400 bg-indigo-50 text-indigo-700 shadow-[0_0_0_3px_rgb(129_140_248/0.22),0_8px_20px_-10px_rgb(99_102_241/0.5)]"
           )}
         >
           <UploadCloud size={16} className="shrink-0" />

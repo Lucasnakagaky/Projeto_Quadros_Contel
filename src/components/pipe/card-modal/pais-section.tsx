@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { CardLinkResolvida, ConexaoResolvida } from "./types";
 import { ParentCardChip } from "./card-conexao-chip";
 import { CardLinkPickerModal } from "./card-link-picker-modal";
+import { CARD_SOLIDO, CARD_SOLIDO_HOVER, FOCO, ICONE_REMOVER, ICONE_SECAO_VIOLETA, LINK_ACAO } from "./estilos";
 
 function CardLinkRow({
   titulo,
@@ -27,25 +28,27 @@ function CardLinkRow({
 }) {
   return (
     <div
+      // --fase: o hover tinge a borda com a fase do card ligado (mesma ideia dos cards do Kanban)
+      style={faseCor ? ({ "--fase": faseCor } as React.CSSProperties) : undefined}
       className={cn(
-        "flex items-center gap-2 rounded-md border px-3 py-2 transition-colors",
+        "flex items-center gap-2 px-3 py-2",
         quebrada
-          ? "border-red-200 bg-red-50"
-          : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50"
+          ? "rounded-xl border border-red-200 bg-red-50/80"
+          : `${CARD_SOLIDO} ${CARD_SOLIDO_HOVER}`
       )}
     >
       <button
         type="button"
         onClick={onAbrir}
         disabled={quebrada}
-        className="flex min-w-0 flex-1 items-center gap-2 text-left disabled:cursor-default"
+        className={`flex min-w-0 flex-1 cursor-pointer items-center gap-2 rounded text-left disabled:cursor-default ${FOCO}`}
       >
         {quebrada && <AlertTriangle size={13} className="shrink-0 text-red-500" />}
         <span className="truncate text-sm font-medium text-slate-800">{titulo}</span>
         {!quebrada && faseNome && (
           <span
             className="ml-auto shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold"
-            style={{ backgroundColor: `${faseCor}1f`, color: faseCor }}
+            style={{ backgroundColor: `color-mix(in srgb, ${faseCor} 14%, white)`, color: `color-mix(in srgb, ${faseCor} 66%, #0f172a)`, boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${faseCor} 24%, transparent)` }}
           >
             {faseNome}
           </span>
@@ -55,7 +58,7 @@ function CardLinkRow({
         type="button"
         onClick={onRemover}
         aria-label={`Remover vínculo com ${titulo}`}
-        className="shrink-0 text-slate-400 hover:text-red-600"
+        className={`shrink-0 ${ICONE_REMOVER}`}
       >
         <X size={14} />
       </button>
@@ -156,7 +159,7 @@ export function PaisSection({
           direções/significados diferentes. Cards vinculados (sem hierarquia) entram aqui também,
           numa seção única de conexões. */}
       <div className="flex items-center gap-2">
-        <span className="flex h-6 w-6 items-center justify-center rounded-md bg-violet-50 text-violet-600">
+        <span className={ICONE_SECAO_VIOLETA}>
           <CornerDownRight size={13} />
         </span>
         <span className="flex-1 text-sm font-semibold text-slate-800">Este card está conectado a</span>
@@ -200,7 +203,7 @@ export function PaisSection({
         <button
           type="button"
           onClick={abrirPicker}
-          className="flex w-fit items-center gap-1 self-start text-xs text-blue-600 hover:underline"
+          className={`flex w-fit items-center gap-1 self-start ${LINK_ACAO}`}
         >
           <Plus size={12} />
           Conectar card

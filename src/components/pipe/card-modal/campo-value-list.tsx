@@ -29,16 +29,16 @@ export function CampoValueList({
   );
 
   return (
-    <div className="flex flex-col divide-y divide-slate-100">
+    <div className="flex flex-col divide-y divide-slate-200/60">
       {visiveis.map((campo) =>
         campo.tipo === "data_vencimento" ? (
           <div key={campo.id} className="grid grid-cols-2 gap-2">
-            <div className="flex items-start gap-2 py-1">
+            <div className="flex items-start gap-2 py-1.5">
               <div className="mt-1">
                 <CalendarPlus size={14} className="shrink-0 text-slate-400" />
               </div>
               <div className="min-w-0 flex-1">
-                <span className="block text-[10px] font-semibold uppercase tracking-wide text-slate-400">Criação do card</span>
+                <span className="block text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-500">Criação do card</span>
                 <span className="text-sm text-slate-700">{formatarData(card.criadoEm)}</span>
               </div>
             </div>

@@ -14,6 +14,7 @@ import { api } from "@/lib/api-client";
 import { Campo, Card, Etiqueta, Fase, Pipe, Usuario } from "@/lib/types";
 import { ConexaoResolvida } from "./types";
 import { ChildCardChip } from "./card-conexao-chip";
+import { FOCO, ICONE_SECAO_AZUL, LINK_ACAO } from "./estilos";
 import { ChildCardInlineForm } from "./child-card-inline-form";
 
 export function ChildCardsField({
@@ -142,14 +143,14 @@ export function ChildCardsField({
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center gap-2">
-        <span className="flex h-6 w-6 items-center justify-center rounded-md bg-blue-50 text-blue-600">
+        <span className={ICONE_SECAO_AZUL}>
           <Link2 size={13} />
         </span>
         <span className="flex-1 text-sm font-semibold text-slate-800">{nomeConexao}</span>
         {relacionadas.length > 0 && (
           <button
             onClick={() => setEdicaoAtiva((v) => !v)}
-            className="flex items-center gap-1 text-xs font-medium text-blue-600 hover:underline"
+            className={`flex items-center gap-1 ${LINK_ACAO}`}
           >
             <Pencil size={12} />
             {edicaoAtiva ? "Concluir" : "Editar"}
@@ -179,7 +180,7 @@ export function ChildCardsField({
       {mostrarBotaoAdicionar && (
         <button
           onClick={abrirFormulario}
-          className="flex items-center gap-1 self-start text-sm text-blue-600 hover:underline"
+          className={`flex items-center gap-1 self-start text-sm ${LINK_ACAO}`}
         >
           <Plus size={14} />
           Criar card Filho
@@ -192,13 +193,13 @@ export function ChildCardsField({
             <div className="flex gap-1 text-xs">
               <button
                 onClick={() => setModo("criar")}
-                className={`rounded-full px-2.5 py-1 font-medium ${modo === "criar" ? "bg-blue-600 text-white" : "bg-slate-100 text-slate-500"}`}
+                className={`rounded-full px-2.5 py-1 font-medium transition-colors duration-(--duracao-rapida) ${FOCO} ${modo === "criar" ? "gdt-modal-btn" : "bg-slate-100 text-slate-500 hover:bg-indigo-50 hover:text-indigo-700"}`}
               >
                 Criar novo
               </button>
               <button
                 onClick={() => setModo("existente")}
-                className={`rounded-full px-2.5 py-1 font-medium ${modo === "existente" ? "bg-blue-600 text-white" : "bg-slate-100 text-slate-500"}`}
+                className={`rounded-full px-2.5 py-1 font-medium transition-colors duration-(--duracao-rapida) ${FOCO} ${modo === "existente" ? "gdt-modal-btn" : "bg-slate-100 text-slate-500 hover:bg-indigo-50 hover:text-indigo-700"}`}
               >
                 Conectar existente
               </button>
@@ -208,7 +209,7 @@ export function ChildCardsField({
           {carregando ? (
             <span className="text-sm text-slate-400">Carregando...</span>
           ) : modo === "existente" ? (
-            <div className="flex flex-col gap-2 rounded-md bg-slate-50 p-2">
+            <div className="flex flex-col gap-2 rounded-xl border border-slate-200/70 bg-slate-50/80 p-2.5">
               <Select value={cardFilhoId} onValueChange={setCardFilhoId}>
                 <SelectTrigger className="h-8 text-sm">
                   <SelectValue placeholder="Selecione um card..." />
@@ -223,7 +224,7 @@ export function ChildCardsField({
                           {fase && (
                             <span
                               className="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold"
-                              style={{ backgroundColor: `${fase.cor}1f`, color: fase.cor }}
+                              style={{ backgroundColor: `color-mix(in srgb, ${fase.cor} 14%, white)`, color: `color-mix(in srgb, ${fase.cor} 66%, #0f172a)`, boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${fase.cor} 24%, transparent)` }}
                             >
                               {fase.nome}
                             </span>
@@ -237,13 +238,13 @@ export function ChildCardsField({
               <div className="flex gap-2">
                 <button
                   onClick={conectarExistente}
-                  className="rounded-full bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700"
+                  className={`gdt-modal-btn rounded-full px-3 py-1.5 text-sm font-medium ${FOCO}`}
                 >
                   Conectar
                 </button>
                 <button
                   onClick={() => setFormAberto(false)}
-                  className="rounded-full px-3 py-1.5 text-sm font-medium text-slate-500 hover:bg-slate-100"
+                  className={`rounded-full px-3 py-1.5 text-sm font-medium text-slate-500 transition-colors duration-(--duracao-rapida) hover:bg-indigo-50 hover:text-indigo-700 ${FOCO}`}
                 >
                   Cancelar
                 </button>

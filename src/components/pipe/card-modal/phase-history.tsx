@@ -1,6 +1,7 @@
 import { Plus } from "lucide-react";
 import { EventoHistorico, Fase } from "@/lib/types";
 import { dataCurta, duracaoEntre } from "@/lib/utils";
+import { LINK_ACAO } from "./estilos";
 
 export interface HistoricoItem {
   faseId: string;
@@ -39,24 +40,34 @@ export function PhaseHistory({
 
   return (
     <div className="flex flex-col gap-3">
-      <h3 className="text-base font-bold text-slate-900">Histórico</h3>
+      <h3 className="text-base font-bold tracking-tight text-slate-900">Histórico</h3>
 
       {itens.length === 0 ? (
         <p className="text-sm text-slate-400">Nenhum histórico ainda.</p>
       ) : (
-        <ul className="flex flex-col gap-2">
+        <ul className="relative flex flex-col gap-3 before:absolute before:bottom-3 before:left-[7px] before:top-3 before:w-px before:bg-linear-to-b before:from-slate-200 before:via-slate-300/80 before:to-slate-200">
           {itens.map((item, i) => (
             <li
               key={`${item.faseId}-${item.entrouEm.toISOString()}-${i}`}
-              className="flex flex-col gap-1 rounded-lg border border-slate-200 bg-slate-50 p-3"
+              className="relative flex flex-col gap-1 pl-7"
             >
+              {/* marcador na cor da fase (só visual) */}
+              <span
+                aria-hidden="true"
+                className="absolute left-0 top-1.5 h-[15px] w-[15px] rounded-full border-2 border-white"
+                style={{ backgroundColor: item.faseCor, boxShadow: `0 0 0 1px ${item.faseCor}55, 0 0 8px ${item.faseCor}66` }}
+              />
               <span
                 className="w-fit rounded-full px-2.5 py-1 text-xs font-bold whitespace-nowrap"
-                style={{ backgroundColor: `${item.faseCor}1f`, color: item.faseCor }}
+                style={{
+                  backgroundColor: `color-mix(in srgb, ${item.faseCor} 14%, white)`,
+                  color: `color-mix(in srgb, ${item.faseCor} 66%, #0f172a)`,
+                  boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${item.faseCor} 24%, transparent)`,
+                }}
               >
                 {item.faseNome}
               </span>
-              <span className="text-xs text-slate-400">
+              <span className="text-xs text-slate-500">
                 {duracaoEntre(item.entrouEm, item.saiuEm ?? new Date())}
               </span>
               <span className="text-xs text-slate-400">
@@ -70,7 +81,7 @@ export function PhaseHistory({
       <button
         type="button"
         onClick={onEditarVisualizacao}
-        className="flex w-fit items-center gap-1 self-start text-xs text-blue-600 hover:underline"
+        className={`flex w-fit items-center gap-1 self-start ${LINK_ACAO}`}
       >
         <Plus size={12} />
         Editar visualização do card

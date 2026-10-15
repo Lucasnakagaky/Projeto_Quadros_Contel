@@ -8,6 +8,7 @@ import { api } from "@/lib/api-client";
 import { sanitizeHtml } from "@/lib/sanitize-html";
 import { Anexo } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { BTN_PRIMARIO, BTN_SECUNDARIO, FOCO } from "./estilos";
 import { ImageLightbox, ImagemAmpliada } from "./image-lightbox";
 
 const BOTOES_FORMATACAO = [
@@ -324,7 +325,7 @@ export function RichTextEditor({
       <div
         role="toolbar"
         aria-label="Formatação de texto"
-        className="flex items-center gap-0.5 rounded-t-md border border-b-0 border-slate-200 bg-slate-50 p-1"
+        className="flex items-center gap-0.5 rounded-t-xl border border-b-0 border-slate-200 bg-linear-to-b from-white to-slate-50 p-1 shadow-[inset_0_1px_0_rgb(255_255_255)]"
       >
         {BOTOES_FORMATACAO.map(({ comando, label, Icone }) => (
           <button
@@ -335,7 +336,7 @@ export function RichTextEditor({
             // evita que o botão roube o foco do editor (perderia a seleção de texto)
             onMouseDown={(e) => e.preventDefault()}
             onClick={() => formatar(comando)}
-            className="rounded p-1.5 text-slate-500 hover:bg-slate-200 hover:text-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+            className={`rounded-lg p-1.5 text-slate-500 transition-colors duration-(--duracao-rapida) hover:bg-indigo-50 hover:text-indigo-700 ${FOCO}`}
           >
             <Icone size={14} />
           </button>
@@ -347,7 +348,7 @@ export function RichTextEditor({
           disabled={enviando}
           onMouseDown={(e) => e.preventDefault()}
           onClick={() => inputRef.current?.click()}
-          className="rounded p-1.5 text-slate-500 hover:bg-slate-200 hover:text-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
+          className={`rounded-lg p-1.5 text-slate-500 transition-colors duration-(--duracao-rapida) hover:bg-indigo-50 hover:text-indigo-700 ${FOCO} disabled:cursor-not-allowed disabled:opacity-50`}
         >
           <ImageIcon size={14} />
         </button>
@@ -374,20 +375,20 @@ export function RichTextEditor({
         onMouseDown={aoPressionarBotaoMouseNoEditor}
         onClick={aoClicarNoEditor}
         className={cn(
-          "min-h-[160px] rounded-b-md border border-slate-200 p-2 text-sm text-slate-700",
-          "focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500",
+          "min-h-[160px] rounded-b-xl border border-slate-200 bg-white p-3 text-sm leading-relaxed text-slate-700 transition-[border-color,box-shadow] duration-(--duracao-rapida)",
+          "focus:outline-none focus-visible:border-indigo-300 focus-visible:ring-2 focus-visible:ring-indigo-300",
           "[&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5",
-          "[&_img]:max-w-full [&_img]:rounded [&_img]:cursor-zoom-in"
+          "[&_img]:max-w-full [&_img]:rounded-xl [&_img]:cursor-zoom-in [&_img]:my-1.5 [&_img]:ring-1 [&_img]:ring-indigo-200/70 [&_img]:shadow-(--gdt-sombra-1)"
         )}
       />
       <ImageLightbox imagem={imagemAmpliada} onOpenChange={(open) => !open && setImagemAmpliada(null)} />
 
       <div className="flex gap-2">
-        <Button size="sm" onClick={salvar} disabled={enviando || desabilitado}>
+        <Button size="sm" className={BTN_PRIMARIO} onClick={salvar} disabled={enviando || desabilitado}>
           {labelSalvar}
         </Button>
         {mostrarCancelar && (
-          <Button size="sm" variant="ghost" onClick={onCancelar}>
+          <Button size="sm" variant="ghost" className={BTN_SECUNDARIO} onClick={onCancelar}>
             Cancelar
           </Button>
         )}

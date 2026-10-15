@@ -1,6 +1,7 @@
 "use client";
 
 import { ExternalLink, MoreVertical } from "lucide-react";
+import { FOCO } from "./estilos";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,7 +15,7 @@ export function ChipOptionsMenu({ onAbrirCard }: { onAbrirCard: () => void }) {
       <DropdownMenuTrigger asChild>
         <button
           onClick={(e) => e.stopPropagation()}
-          className="rounded p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+          className={`cursor-pointer rounded p-1 text-slate-400 transition-colors duration-(--duracao-rapida) hover:bg-indigo-50 hover:text-indigo-700 ${FOCO}`}
           aria-label="Mais opções"
         >
           <MoreVertical size={15} />

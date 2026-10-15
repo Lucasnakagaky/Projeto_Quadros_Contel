@@ -12,6 +12,7 @@ import { campoPorTipo, stringArray } from "@/lib/campo-utils";
 import { cn } from "@/lib/utils";
 import { Campo, Card, CORES_ETIQUETA, Etiqueta } from "@/lib/types";
 import { EtiquetaFormModal } from "../etiquetas/etiqueta-form-modal";
+import { FOCO, LINK_ACAO } from "./estilos";
 
 /**
  * Cabeçalho de etiquetas do card: pills aplicadas (ou o link discreto de adicionar, se
@@ -46,12 +47,15 @@ export function EtiquetasPopover({
 
   return (
     <Popover
+      // Só acabamento (vidro). As classes estruturais `absolute z-50 w-72 mt-2` vêm do ui/popover
+      // e são contrato dos testes e2e — não repetir/sobrepor w-*, mt-*, z-* nem position aqui.
+      className="rounded-xl border-white/80 bg-white/95 shadow-(--gdt-sombra-3)"
       trigger={({ toggle }) =>
         etiquetasSelecionadas.length === 0 ? (
           <button
             type="button"
             onClick={toggle}
-            className="flex items-center gap-1 text-xs font-medium text-slate-500 hover:text-slate-700"
+            className={`flex items-center gap-1 rounded-full px-1 py-0.5 text-xs font-medium text-slate-500 transition-colors duration-(--duracao-rapida) hover:text-indigo-700 ${FOCO}`}
           >
             <Tag size={12} />+ Adicionar etiquetas
           </button>
@@ -62,8 +66,8 @@ export function EtiquetasPopover({
                 key={e.id}
                 type="button"
                 onClick={toggle}
-                className="rounded-full px-2.5 py-0.5 text-xs font-medium hover:opacity-80"
-                style={{ backgroundColor: `${e.cor}1f`, color: e.cor }}
+                className={`gdt-etiqueta cursor-pointer rounded-full px-2.5 py-0.5 text-xs font-medium transition-opacity duration-(--duracao-rapida) hover:opacity-80 ${FOCO}`}
+                style={{ "--cor": e.cor } as React.CSSProperties}
               >
                 {e.nome}
               </button>
@@ -73,7 +77,7 @@ export function EtiquetasPopover({
               onClick={toggle}
               aria-label="Adicionar etiquetas"
               title="Adicionar etiquetas"
-              className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+              className={`flex h-5 w-5 shrink-0 cursor-pointer items-center justify-center rounded-full text-slate-400 transition-colors duration-(--duracao-rapida) hover:bg-indigo-50 hover:text-indigo-700 ${FOCO}`}
             >
               <Plus size={12} />
             </button>
@@ -245,14 +249,14 @@ function Conteudo({
   return (
     <>
       <div className="flex flex-col gap-2">
-        <span className="text-xs font-semibold text-slate-500">Etiquetas</span>
+        <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-500">Etiquetas</span>
 
         <Input
           autoFocus
           placeholder="Buscar etiqueta..."
           value={busca}
           onChange={(e) => setBusca(e.target.value)}
-          className="h-8 text-sm"
+          className="h-8 rounded-lg border-slate-200 text-sm focus:border-indigo-400 focus:ring-indigo-100"
         />
 
         {etiquetas.length === 0 && !busca && (
@@ -263,7 +267,7 @@ function Conteudo({
           <button
             type="button"
             onClick={() => abrirCriacao(busca.trim())}
-            className="flex items-center gap-1 self-start text-xs text-blue-600 hover:underline"
+            className={`flex items-center gap-1 self-start ${LINK_ACAO}`}
           >
             <Plus size={12} />
             Criar etiqueta &quot;{busca.trim()}&quot;
@@ -329,14 +333,14 @@ function Conteudo({
                   ) : (
                     <div
                       key={e.id}
-                      className="group flex items-center gap-1 rounded px-1.5 py-1.5 hover:bg-slate-50"
+                      className="group flex items-center gap-1 rounded-lg px-1.5 py-1.5 transition-colors duration-(--duracao-rapida) hover:bg-indigo-50/60"
                     >
                       <button
                         type="button"
                         onClick={() => aoClicarLinha(e.id)}
                         onDoubleClick={() => aoDarDuploClique(e)}
                         aria-pressed={selecionadas.includes(e.id)}
-                        className="flex min-w-0 flex-1 items-center gap-2 text-left"
+                        className={`flex min-w-0 flex-1 cursor-pointer items-center gap-2 rounded text-left ${FOCO}`}
                       >
                         <span
                           className="h-3 w-3 shrink-0 rounded-full"
@@ -346,14 +350,14 @@ function Conteudo({
                           {e.nome}
                         </span>
                         {selecionadas.includes(e.id) && (
-                          <Check size={14} className="shrink-0 text-blue-600" />
+                          <Check size={14} className="shrink-0 text-indigo-600" />
                         )}
                       </button>
                       <button
                         type="button"
                         onClick={() => setEtiquetaParaExcluir(e)}
                         aria-label={`Excluir etiqueta ${e.nome}`}
-                        className="shrink-0 text-slate-400 hover:text-red-600"
+                        className="shrink-0 cursor-pointer rounded p-0.5 text-slate-400 transition-colors duration-(--duracao-rapida) hover:text-red-600 focus-visible:text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
                       >
                         <X size={14} />
                       </button>
@@ -366,7 +370,7 @@ function Conteudo({
             <button
               type="button"
               onClick={() => abrirCriacao("")}
-              className="flex items-center gap-1 self-start text-xs text-blue-600 hover:underline"
+              className={`flex items-center gap-1 self-start ${LINK_ACAO}`}
             >
               <Plus size={12} />
               Criar nova etiqueta

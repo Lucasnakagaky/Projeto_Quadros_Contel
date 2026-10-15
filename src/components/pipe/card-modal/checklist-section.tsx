@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { api } from "@/lib/api-client";
 import { Checklist } from "@/lib/types";
+import { BTN_PRIMARIO, CARD_SOLIDO, CHECK_MODAL, ICONE_REMOVER, INPUT_MODAL, TITULO_SECAO } from "./estilos";
 
 export function ChecklistSection({
   cardId,
@@ -82,8 +83,13 @@ export function ChecklistSection({
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between">
-        <span className="text-xs font-semibold text-slate-500">Checklists</span>
-        <Button size="sm" variant="outline" onClick={adicionarChecklist}>
+        <span className={TITULO_SECAO}>Checklists</span>
+        <Button
+          size="sm"
+          variant="outline"
+          className="rounded-full border-slate-200 bg-white/80 text-slate-600 transition-colors duration-(--duracao-rapida) hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-700"
+          onClick={adicionarChecklist}
+        >
           <Plus size={14} />
           Adicionar Checklist
         </Button>
@@ -97,19 +103,19 @@ export function ChecklistSection({
             const total = checklist.itens.length;
             const feitos = checklist.itens.filter((i) => i.concluido).length;
             return (
-              <div key={checklist.id} className="flex flex-col gap-2">
+              <div key={checklist.id} className={`flex flex-col gap-2 p-3 ${CARD_SOLIDO}`}>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-slate-700">
+                  <span className="text-sm font-semibold text-slate-800">
                     {checklist.titulo}{" "}
                     {total > 0 && (
-                      <span className="text-xs font-normal text-slate-400">
+                      <span className="rounded-full bg-indigo-50 px-1.5 py-px text-[11px] font-semibold tabular-nums text-indigo-600">
                         ({feitos}/{total})
                       </span>
                     )}
                   </span>
                   <button
                     onClick={() => excluirChecklist(checklist.id)}
-                    className="text-slate-400 hover:text-red-600"
+                    className={ICONE_REMOVER}
                     aria-label="Excluir checklist"
                   >
                     <Trash2 size={14} />
@@ -118,21 +124,24 @@ export function ChecklistSection({
 
                 <ul className="flex flex-col gap-1">
                   {checklist.itens.map((item) => (
-                    <li key={item.id} className="flex items-center gap-2">
-                      <Checkbox
+                    <li
+                      key={item.id}
+                      className="flex items-center gap-2 rounded-lg px-1 py-0.5 transition-colors duration-(--duracao-rapida) hover:bg-slate-50"
+                    >
+                      <Checkbox className={CHECK_MODAL}
                         checked={item.concluido}
                         onCheckedChange={() => alternarItem(checklist.id, item.id)}
                       />
                       <span
-                        className={`flex-1 text-sm ${
-                          item.concluido ? "text-slate-400 line-through" : "text-slate-700"
+                        className={`flex-1 text-sm transition-colors duration-(--duracao-rapida) ${
+                          item.concluido ? "text-slate-400 line-through decoration-slate-300" : "font-medium text-slate-700"
                         }`}
                       >
                         {item.texto}
                       </span>
                       <button
                         onClick={() => excluirItem(checklist.id, item.id)}
-                        className="text-slate-300 hover:text-red-600"
+                        className={ICONE_REMOVER}
                         aria-label="Remover item"
                       >
                         <Trash2 size={12} />
@@ -143,6 +152,7 @@ export function ChecklistSection({
 
                 <div className="flex gap-2">
                   <Input
+                    className={INPUT_MODAL}
                     placeholder="Adicionar item..."
                     value={novoItemPorChecklist[checklist.id] ?? ""}
                     onChange={(e) =>
@@ -155,7 +165,7 @@ export function ChecklistSection({
                       if (e.key === "Enter") adicionarItem(checklist.id);
                     }}
                   />
-                  <Button size="sm" onClick={() => adicionarItem(checklist.id)}>
+                  <Button size="sm" className={BTN_PRIMARIO} onClick={() => adicionarItem(checklist.id)}>
                     Adicionar
                   </Button>
                 </div>

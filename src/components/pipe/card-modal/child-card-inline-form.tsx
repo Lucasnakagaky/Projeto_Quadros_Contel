@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/select";
 import { Campo, Etiqueta, Fase, Usuario } from "@/lib/types";
 import { CampoDraftRow } from "./campo-draft-row";
+import { BTN_PRIMARIO, BTN_SECUNDARIO, INPUT_MODAL } from "./estilos";
 
 export function ChildCardInlineForm({
   pipeDestinoId,
@@ -62,8 +63,8 @@ export function ChildCardInlineForm({
   }
 
   return (
-    <div className="flex flex-col gap-3 rounded-lg border border-slate-200 bg-white">
-      <div className="flex items-center gap-2 rounded-t-lg bg-slate-50 px-3 py-2">
+    <div className="flex flex-col gap-3 rounded-xl border border-slate-200/80 bg-white shadow-(--gdt-sombra-1)">
+      <div className="flex items-center gap-2 rounded-t-xl bg-linear-to-r from-indigo-50/70 to-violet-50/40 px-3 py-2">
         <Boxes size={14} className="text-slate-400" />
         <span className="text-xs font-semibold text-slate-600">{pipeDestinoNome}</span>
       </div>
@@ -74,11 +75,11 @@ export function ChildCardInlineForm({
           placeholder="Título do card"
           value={titulo}
           onChange={(e) => setTitulo(e.target.value)}
-          className="font-medium"
+          className={`font-medium ${INPUT_MODAL}`}
         />
 
         <Select value={faseId} onValueChange={setFaseId}>
-          <SelectTrigger className="h-8 max-w-xs text-sm">
+          <SelectTrigger className={`h-8 max-w-xs text-sm ${INPUT_MODAL}`}>
             <SelectValue placeholder="Fase" />
           </SelectTrigger>
           <SelectContent>
@@ -107,10 +108,10 @@ export function ChildCardInlineForm({
       </div>
 
       <div className="flex items-center gap-2 px-3 pb-3">
-        <Button onClick={submeter} disabled={salvando || !titulo.trim()} className="rounded-full">
+        <Button onClick={submeter} disabled={salvando || !titulo.trim()} className={`rounded-full ${BTN_PRIMARIO}`}>
           Criar novo card
         </Button>
-        <Button variant="ghost" onClick={pedirFechar}>
+        <Button variant="ghost" className={BTN_SECUNDARIO} onClick={pedirFechar}>
           Cancelar
         </Button>
       </div>

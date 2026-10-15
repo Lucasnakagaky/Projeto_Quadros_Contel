@@ -22,6 +22,17 @@ import { Anexo as AnexoReal, Campo, Usuario } from "@/lib/types";
 import { stringArray } from "@/lib/campo-utils";
 import { htmlEstaVazio, sanitizeHtml } from "@/lib/sanitize-html";
 import { cn, formatarVencimento, iniciais, parseDataSolta } from "@/lib/utils";
+import {
+  BTN_PRIMARIO,
+  BTN_SECUNDARIO,
+  BTN_VALOR,
+  BTN_VALOR_VAZIO,
+  CHECK_MODAL,
+  FOCO,
+  ICONE_REMOVER,
+  INPUT_MODAL,
+  LINK_ACAO,
+} from "./estilos";
 
 type Anexo = { nome: string; url: string };
 type RelacaoExterna = { id: string; rotulo: string };
@@ -139,18 +150,21 @@ export function CampoValueRow({
       </>
     );
     return (
-      <div id={`campo-${campo.id}`} className="flex items-start gap-2 py-1 scroll-mt-4 transition-colors">
+      <div
+        id={`campo-${campo.id}`}
+        className="-mx-1.5 flex items-start gap-2 rounded-lg px-1.5 py-1.5 scroll-mt-4 transition-[background-color,box-shadow] duration-(--duracao-rapida) hover:bg-slate-50/70"
+      >
         <div className="mt-1">
           <CampoIcon tipo={campo.tipo} />
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             {opts?.htmlForLabel ? (
-              <label htmlFor={opts.htmlForLabel} className="block text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+              <label htmlFor={opts.htmlForLabel} className="block text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-500">
                 {rotulo}
               </label>
             ) : (
-              <span className="block text-[10px] font-semibold uppercase tracking-wide text-slate-400">{rotulo}</span>
+              <span className="block text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-500">{rotulo}</span>
             )}
             {opts?.acao}
           </div>
@@ -169,7 +183,7 @@ export function CampoValueRow({
   if (campo.tipo === "checkbox") {
     return linha(
       <label className="flex cursor-pointer items-center gap-2">
-        <Checkbox checked={Boolean(valor)} onCheckedChange={(v) => onSave(Boolean(v))} />
+        <Checkbox className={CHECK_MODAL} checked={Boolean(valor)} onCheckedChange={(v) => onSave(Boolean(v))} />
         <span className="text-sm text-slate-700">{valor ? "Sim" : "Não"}</span>
       </label>
     );
@@ -183,7 +197,7 @@ export function CampoValueRow({
         {usuarios.length === 0 && <p className="text-sm text-slate-400">Nenhum usuário</p>}
         {usuarios.map((u) => (
           <label key={u.id} className="flex cursor-pointer items-center gap-2">
-            <Checkbox
+            <Checkbox className={CHECK_MODAL}
               checked={ids.includes(u.id)}
               onCheckedChange={() =>
                 onSave(ids.includes(u.id) ? ids.filter((id) => id !== u.id) : [...ids, u.id])
@@ -211,7 +225,7 @@ export function CampoValueRow({
         {opcoes.length === 0 && <p className="text-sm text-slate-400">Nenhuma opção configurada</p>}
         {opcoes.map((opcao) => (
           <label key={opcao} className="flex cursor-pointer items-center gap-2">
-            <Checkbox
+            <Checkbox className={CHECK_MODAL}
               checked={selecionadas.includes(opcao)}
               onCheckedChange={() =>
                 onSave(
@@ -233,7 +247,7 @@ export function CampoValueRow({
     const opcoes = campo.config.opcoes ?? [];
     return linha(
       <Select value={typeof valor === "string" ? valor : undefined} onValueChange={(v) => onSave(v)}>
-        <SelectTrigger className="h-8 max-w-xs text-sm">
+        <SelectTrigger className={`h-8 max-w-xs text-sm ${INPUT_MODAL}`}>
           <SelectValue placeholder="Selecione..." />
         </SelectTrigger>
         <SelectContent>
@@ -254,15 +268,15 @@ export function CampoValueRow({
       anexo ? (
         <div className="flex items-center gap-2 text-sm">
           <Paperclip size={13} className="text-slate-400" />
-          <a href={anexo.url} target="_blank" rel="noopener noreferrer" className="truncate text-blue-600 hover:underline">
+          <a href={anexo.url} target="_blank" rel="noopener noreferrer" className="truncate text-indigo-600 hover:text-indigo-800 hover:underline">
             {anexo.nome}
           </a>
-          <button onClick={() => onSave(null)} className="text-slate-400 hover:text-red-600" aria-label="Remover">
+          <button onClick={() => onSave(null)} className={ICONE_REMOVER} aria-label="Remover">
             <X size={13} />
           </button>
         </div>
       ) : (
-        <label className="inline-flex cursor-pointer items-center gap-1.5 text-sm text-blue-600 hover:underline">
+        <label className="inline-flex cursor-pointer items-center gap-1.5 text-sm text-indigo-600 hover:text-indigo-800 hover:underline">
           {enviando ? "Enviando..." : "Clique aqui para adicionar"}
           <input
             type="file"
@@ -318,17 +332,17 @@ export function CampoValueRow({
               onChange={(e) => setNovaRelacaoDb(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && adicionarRelacaoDb()}
             />
-            <Button size="sm" onClick={adicionarRelacaoDb}>
+            <Button size="sm" className={BTN_PRIMARIO} onClick={adicionarRelacaoDb}>
               Adicionar
             </Button>
-            <Button size="sm" variant="ghost" onClick={() => setRelacionandoDb(false)}>
+            <Button size="sm" variant="ghost" className={BTN_SECUNDARIO} onClick={() => setRelacionandoDb(false)}>
               Cancelar
             </Button>
           </div>
         ) : (
           <button
             onClick={() => setRelacionandoDb(true)}
-            className="self-start text-xs text-blue-600 hover:underline"
+            className={`self-start ${LINK_ACAO}`}
           >
             {relacoes.length === 0 ? "Nenhum registro relacionado — " : ""}+ Relacionar registro externo
           </button>
@@ -358,11 +372,11 @@ export function CampoValueRow({
     if (!editing) {
       return linha(
         vazio ? (
-          <button onClick={iniciarEdicaoData} className="text-sm text-slate-400 hover:text-slate-600">
+          <button onClick={iniciarEdicaoData} className={BTN_VALOR_VAZIO}>
             Clique aqui para adicionar
           </button>
         ) : (
-          <button onClick={iniciarEdicaoData} className="text-sm text-slate-700 hover:underline">
+          <button onClick={iniciarEdicaoData} className={BTN_VALOR}>
             {campo.tipo === "data_vencimento"
               ? formatarVencimento(valor as string)
               : campo.tipo === "data_hora"
@@ -387,13 +401,14 @@ export function CampoValueRow({
           // espaço extra pro ícone/segmentos), e isso empurrava o Salvar/Cancelar pro lado.
           className={cn(
             "h-8 shrink-0 text-sm",
+            INPUT_MODAL,
             inputType === "datetime-local" ? "w-52" : "w-36"
           )}
         />
-        <Button size="sm" className="shrink-0" onClick={salvar}>
+        <Button size="sm" className={`shrink-0 ${BTN_PRIMARIO}`} onClick={salvar}>
           Salvar
         </Button>
-        <Button size="sm" variant="ghost" className="shrink-0" onClick={cancelar}>
+        <Button size="sm" variant="ghost" className={`shrink-0 ${BTN_SECUNDARIO}`} onClick={cancelar}>
           Cancelar
         </Button>
       </div>
@@ -405,7 +420,7 @@ export function CampoValueRow({
     const codigoMoeda = campo.config.moeda || "BRL";
     if (!editing) {
       return linha(
-        <button onClick={iniciarEdicao} className="text-sm text-slate-700 hover:underline">
+        <button onClick={iniciarEdicao} className={BTN_VALOR}>
           {vazio ? (
             <span className="text-slate-400">Clique aqui para adicionar</span>
           ) : (
@@ -424,12 +439,12 @@ export function CampoValueRow({
           value={rascunho}
           onChange={(e) => setRascunho(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && salvar()}
-          className="h-8 max-w-xs text-sm"
+          className={`h-8 max-w-xs text-sm ${INPUT_MODAL}`}
         />
-        <Button size="sm" onClick={salvar}>
+        <Button size="sm" className={BTN_PRIMARIO} onClick={salvar}>
           Salvar
         </Button>
-        <Button size="sm" variant="ghost" onClick={cancelar}>
+        <Button size="sm" variant="ghost" className={BTN_SECUNDARIO} onClick={cancelar}>
           Cancelar
         </Button>
       </div>
@@ -446,7 +461,7 @@ export function CampoValueRow({
         // ponto do texto continua abrindo a edição normalmente.
         <button
           onClick={iniciarEdicao}
-          className="w-full rounded px-1 -mx-1 text-left text-sm text-slate-700 hover:bg-slate-50"
+          className={`-mx-2 w-full rounded-lg px-2 py-1 text-left text-sm leading-relaxed text-slate-700 transition-colors duration-(--duracao-rapida) hover:bg-indigo-50/40 ${FOCO}`}
         >
           {htmlEstaVazio(html) ? (
             <span className="text-slate-400">Clique aqui para adicionar</span>
@@ -482,7 +497,7 @@ export function CampoValueRow({
       return linha(
         <button
           onClick={iniciarEdicao}
-          className="w-full text-left text-sm text-slate-700 hover:bg-slate-50 rounded px-1 -mx-1"
+          className={`-mx-2 w-full rounded-lg px-2 py-1 text-left text-sm text-slate-700 transition-colors duration-(--duracao-rapida) hover:bg-indigo-50/40 ${FOCO}`}
         >
           {vazio ? (
             <span className="text-slate-400">Clique aqui para adicionar</span>
@@ -499,7 +514,7 @@ export function CampoValueRow({
                 iniciarEdicao();
               }}
               aria-label={`Editar ${campo.titulo}`}
-              className="text-xs font-medium text-blue-600 hover:underline"
+              className={LINK_ACAO}
             >
               Editar
             </button>
@@ -516,13 +531,13 @@ export function CampoValueRow({
           placeholder="Digite aqui..."
           value={rascunho}
           onChange={(e) => setRascunho(e.target.value)}
-          className="resize-y"
+          className={`resize-y ${INPUT_MODAL}`}
         />
         <div className="flex gap-2">
-          <Button size="sm" onClick={salvar}>
+          <Button size="sm" className={BTN_PRIMARIO} onClick={salvar}>
             Salvar
           </Button>
-          <Button size="sm" variant="ghost" onClick={cancelar}>
+          <Button size="sm" variant="ghost" className={BTN_SECUNDARIO} onClick={cancelar}>
             Cancelar
           </Button>
         </div>
@@ -535,7 +550,7 @@ export function CampoValueRow({
   if (TIPOS_TEXTO.has(campo.tipo)) {
     if (!editing) {
       return linha(
-        <button onClick={iniciarEdicao} className="text-sm text-slate-700 hover:underline">
+        <button onClick={iniciarEdicao} className={BTN_VALOR}>
           {vazio ? <span className="text-slate-400">Clique aqui para adicionar</span> : String(valor)}
         </button>
       );
@@ -548,12 +563,12 @@ export function CampoValueRow({
           value={rascunho}
           onChange={(e) => setRascunho(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && salvar()}
-          className="h-8 max-w-xs text-sm"
+          className={`h-8 max-w-xs text-sm ${INPUT_MODAL}`}
         />
-        <Button size="sm" onClick={salvar}>
+        <Button size="sm" className={BTN_PRIMARIO} onClick={salvar}>
           Salvar
         </Button>
-        <Button size="sm" variant="ghost" onClick={cancelar}>
+        <Button size="sm" variant="ghost" className={BTN_SECUNDARIO} onClick={cancelar}>
           Cancelar
         </Button>
       </div>
