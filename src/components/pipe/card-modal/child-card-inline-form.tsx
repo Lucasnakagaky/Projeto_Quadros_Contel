@@ -82,7 +82,7 @@ export function ChildCardInlineForm({
           <SelectTrigger className={`h-8 max-w-xs text-sm ${INPUT_MODAL}`}>
             <SelectValue placeholder="Fase" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="max-w-[min(28rem,calc(100vw-2rem))]">
             {fases.map((f) => (
               <SelectItem key={f.id} value={f.id}>
                 {f.nome}
@@ -117,7 +117,11 @@ export function ChildCardInlineForm({
       </div>
 
       <Dialog open={confirmandoFechar} onOpenChange={setConfirmandoFechar}>
-        <DialogContent className="max-w-sm">
+        <DialogContent
+          className="gdt-modal max-w-[calc(100vw-2rem)] sm:max-w-sm"
+          overlayClassName="gdt-modal-overlay"
+          closeClassName="gdt-modal-fechar"
+        >
           <DialogHeader>
             <DialogTitle className="text-lg font-bold">Deseja fechar o Formulário Inicial?</DialogTitle>
           </DialogHeader>
@@ -126,7 +130,7 @@ export function ChildCardInlineForm({
               Se você fechar agora, todos os dados preenchidos serão perdidos.
             </p>
             <div className="flex items-center justify-end gap-2">
-              <Button variant="ghost" onClick={() => setConfirmandoFechar(false)}>
+              <Button variant="ghost" className={BTN_SECUNDARIO} onClick={() => setConfirmandoFechar(false)}>
                 Cancelar
               </Button>
               <Button

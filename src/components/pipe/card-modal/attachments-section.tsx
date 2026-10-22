@@ -111,11 +111,11 @@ export function AttachmentsSection({
                   href={a.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`flex-1 truncate rounded font-medium text-indigo-600 hover:text-indigo-800 hover:underline ${FOCO}`}
+                  className={`min-w-0 flex-1 truncate rounded font-medium text-indigo-600 hover:text-indigo-800 hover:underline ${FOCO}`}
                 >
                   {a.nome}
                 </a>
-                <span className="text-xs text-slate-400">{formatBytes(a.tamanho)}</span>
+                <span className="shrink-0 text-xs text-slate-500">{formatBytes(a.tamanho)}</span>
                 <button
                   onClick={() => remover(a.id)}
                   className={ICONE_REMOVER}

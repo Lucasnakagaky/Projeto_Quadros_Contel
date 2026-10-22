@@ -12,7 +12,7 @@ import { campoPorTipo, stringArray } from "@/lib/campo-utils";
 import { cn } from "@/lib/utils";
 import { Campo, Card, CORES_ETIQUETA, Etiqueta } from "@/lib/types";
 import { EtiquetaFormModal } from "../etiquetas/etiqueta-form-modal";
-import { FOCO, LINK_ACAO } from "./estilos";
+import { BTN_SECUNDARIO, FOCO, ICONE_REMOVER, LINK_ACAO } from "./estilos";
 
 /**
  * Cabeçalho de etiquetas do card: pills aplicadas (ou o link discreto de adicionar, se
@@ -357,7 +357,7 @@ function Conteudo({
                         type="button"
                         onClick={() => setEtiquetaParaExcluir(e)}
                         aria-label={`Excluir etiqueta ${e.nome}`}
-                        className="shrink-0 cursor-pointer rounded p-0.5 text-slate-400 transition-colors duration-(--duracao-rapida) hover:text-red-600 focus-visible:text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
+                        className={`shrink-0 cursor-pointer ${ICONE_REMOVER}`}
                       >
                         <X size={14} />
                       </button>
@@ -390,7 +390,11 @@ function Conteudo({
         open={etiquetaParaExcluir !== null}
         onOpenChange={(o) => !o && setEtiquetaParaExcluir(null)}
       >
-        <DialogContent className="max-w-sm">
+        <DialogContent
+          className="gdt-modal max-w-[calc(100vw-2rem)] sm:max-w-sm"
+          overlayClassName="gdt-modal-overlay"
+          closeClassName="gdt-modal-fechar"
+        >
           <DialogHeader>
             <DialogTitle className="text-lg font-bold">Excluir etiqueta</DialogTitle>
           </DialogHeader>
@@ -398,7 +402,14 @@ function Conteudo({
             {etiquetaParaExcluir && (
               <p className="text-sm text-slate-600">
                 A etiqueta{" "}
-                <span className="font-semibold" style={{ color: etiquetaParaExcluir.cor }}>
+                <span
+                  className="rounded-full px-2 py-0.5 text-xs font-semibold"
+                  style={{
+                    backgroundColor: `color-mix(in srgb, ${etiquetaParaExcluir.cor} 14%, white)`,
+                    color: `color-mix(in srgb, ${etiquetaParaExcluir.cor} 66%, #0f172a)`,
+                    boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${etiquetaParaExcluir.cor} 24%, transparent)`,
+                  }}
+                >
                   {etiquetaParaExcluir.nome}
                 </span>{" "}
                 é usada em{" "}
@@ -410,7 +421,7 @@ function Conteudo({
               </p>
             )}
             <div className="flex items-center justify-end gap-2">
-              <Button variant="ghost" onClick={() => setEtiquetaParaExcluir(null)}>
+              <Button variant="ghost" className={BTN_SECUNDARIO} onClick={() => setEtiquetaParaExcluir(null)}>
                 Cancelar
               </Button>
               <Button variant="destructive" onClick={confirmarExclusao}>

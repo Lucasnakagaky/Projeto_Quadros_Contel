@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, Fase } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { BTN_PRIMARIO, BTN_SECUNDARIO, CHECK_MODAL, INPUT_MODAL } from "./estilos";
 
 export function CardLinkPickerModal({
   open,
@@ -65,7 +66,11 @@ export function CardLinkPickerModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent
+        className="gdt-modal max-w-[calc(100vw-2rem)] sm:max-w-md"
+        overlayClassName="gdt-modal-overlay"
+        closeClassName="gdt-modal-fechar"
+      >
         <DialogHeader>
           <DialogTitle className="text-lg font-bold">{titulo}</DialogTitle>
         </DialogHeader>
@@ -81,7 +86,7 @@ export function CardLinkPickerModal({
               placeholder="Buscar por título..."
               value={busca}
               onChange={(e) => setBusca(e.target.value)}
-              className="pl-8"
+              className={cn("pl-8", INPUT_MODAL)}
             />
           </div>
 
@@ -102,16 +107,19 @@ export function CardLinkPickerModal({
                   <label
                     key={c.id}
                     className={cn(
-                      "flex cursor-pointer items-center gap-2 rounded-md px-2 py-2 hover:bg-slate-50",
-                      marcado && "bg-blue-50/60"
+                      "flex cursor-pointer items-center gap-2 rounded-lg px-2 py-2 hover:bg-slate-50 focus-within:ring-2 focus-within:ring-indigo-400",
+                      marcado && "bg-indigo-50/60"
                     )}
                   >
-                    <Checkbox checked={marcado} onCheckedChange={() => alternar(c.id)} />
+                    <Checkbox className={CHECK_MODAL} checked={marcado} onCheckedChange={() => alternar(c.id)} />
                     <span className="min-w-0 flex-1 truncate text-sm text-slate-700">{c.titulo}</span>
                     {fase && (
                       <span
                         className="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold"
-                        style={{ backgroundColor: `${fase.cor}1f`, color: fase.cor }}
+                        style={{
+                          backgroundColor: `color-mix(in srgb, ${fase.cor} 14%, white)`,
+                          color: `color-mix(in srgb, ${fase.cor} 66%, #0f172a)`,
+                        }}
                       >
                         {fase.nome}
                       </span>
@@ -123,10 +131,10 @@ export function CardLinkPickerModal({
           </div>
 
           <div className="flex items-center justify-end gap-2 pt-1">
-            <Button variant="ghost" onClick={() => onOpenChange(false)}>
+            <Button variant="ghost" className={BTN_SECUNDARIO} onClick={() => onOpenChange(false)}>
               Cancelar
             </Button>
-            <Button onClick={confirmar} disabled={selecionados.length === 0}>
+            <Button className={BTN_PRIMARIO} onClick={confirmar} disabled={selecionados.length === 0}>
               Vincular{selecionados.length > 0 ? ` (${selecionados.length})` : ""}
             </Button>
           </div>

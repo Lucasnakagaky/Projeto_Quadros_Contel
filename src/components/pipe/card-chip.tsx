@@ -198,7 +198,7 @@ export function CardChip({
                 }}
                 title={`Filtrar por etiqueta ${etiqueta.nome}`}
                 aria-label={`Filtrar por etiqueta ${etiqueta.nome}`}
-                className="gdt-etiqueta cursor-pointer rounded-full px-2.5 py-0.5 text-[11px] font-semibold leading-4 transition-[opacity,translate] duration-(--duracao-rapida) hover:-translate-y-px hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:ring-offset-1"
+                className="gdt-etiqueta max-w-full cursor-pointer truncate rounded-full px-2.5 py-0.5 text-[11px] font-semibold leading-4 transition-[opacity,translate] duration-(--duracao-rapida) hover:-translate-y-px hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:ring-offset-1"
                 style={{ "--cor": etiqueta.cor } as React.CSSProperties}
               >
                 {etiqueta.nome}
@@ -208,7 +208,7 @@ export function CardChip({
         </div>
       )}
 
-      <p className="line-clamp-2 pr-4 text-[15px] font-medium leading-5 text-titulo">{card.titulo}</p>
+      <p className="line-clamp-2 break-words pr-4 text-[15px] [overflow-wrap:anywhere] font-medium leading-5 text-titulo">{card.titulo}</p>
 
       {filhos.length > 0 && (
         <div className="flex flex-col items-start gap-1">
@@ -217,14 +217,14 @@ export function CardChip({
               key={f.id}
               onClick={(e) => abrirRelacionado(e, f.id)}
               title={`Card filho: ${f.titulo}`}
-              className="inline-flex w-fit max-w-full items-center gap-1 rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-medium text-blue-600 transition-colors duration-(--duracao-rapida) hover:bg-blue-100"
+              className="inline-flex w-fit max-w-full items-center gap-1 rounded-full bg-indigo-50 px-2 py-0.5 text-[10px] font-medium text-indigo-600 transition-colors duration-(--duracao-rapida) hover:bg-indigo-100 gdt-focus"
             >
               <Link2 size={10} className="shrink-0" />
               <span className="truncate">Card Filho: {f.titulo}</span>
             </button>
           ))}
           {filhos.length > 2 && (
-            <span className="text-[10px] font-medium text-slate-400">
+            <span className="text-[10px] font-medium text-slate-500">
               +{filhos.length - 2} card(s) filho(s)
             </span>
           )}
@@ -241,7 +241,7 @@ export function CardChip({
                 <CampoIcon tipo={campo.tipo} size={12} />
               </span>
               <div className="min-w-0 flex-1">
-                <p className="truncate text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+                <p className="truncate text-[10px] font-semibold uppercase tracking-wide text-slate-500">
                   {campo.titulo}
                 </p>
                 <p className="truncate text-[13px] leading-4 text-slate-700">

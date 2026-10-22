@@ -450,7 +450,7 @@ export function PipeBoard({
               <span role="status">Nenhum card encontrado para este filtro.</span>
               <button
                 onClick={() => setFiltro("")}
-                className="ml-auto rounded-md px-2 py-1 text-sm font-medium text-blue-600 hover:bg-blue-50 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
+                className="ml-auto rounded-md px-2 py-1 text-sm font-medium text-indigo-600 hover:bg-indigo-50 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-1"
               >
                 Limpar filtro
               </button>
@@ -588,7 +588,11 @@ export function PipeBoard({
       />
 
       <Dialog open={camposAberto} onOpenChange={setCamposAberto}>
-        <DialogContent className="max-w-4xl">
+        <DialogContent
+          className="gdt-modal max-w-4xl overflow-hidden"
+          overlayClassName="gdt-modal-overlay"
+          closeClassName="gdt-modal-fechar"
+        >
           <DialogHeader>
             <DialogTitle className="text-lg font-bold">Campos do formulário</DialogTitle>
           </DialogHeader>

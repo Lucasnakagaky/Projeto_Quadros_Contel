@@ -56,7 +56,7 @@ export function EtiquetaFormModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-sm">
+      <DialogContent className="gdt-modal max-w-[calc(100vw-2rem)] sm:max-w-sm" overlayClassName="gdt-modal-overlay" closeClassName="gdt-modal-fechar">
         <DialogHeader>
           <DialogTitle className="text-lg font-bold">
             {etiqueta ? "Editar etiqueta" : "Nova etiqueta"}
@@ -100,7 +100,7 @@ export function EtiquetaFormModal({
                   onClick={() => setCor(c)}
                   aria-label={`Usar cor ${c}`}
                   className={cn(
-                    "h-6 w-6 rounded-full",
+                    "gdt-focus h-6 w-6 rounded-full",
                     cor.toLowerCase() === c && "ring-2 ring-slate-900 ring-offset-1"
                   )}
                   style={{ backgroundColor: c }}
@@ -113,7 +113,7 @@ export function EtiquetaFormModal({
             <Button variant="ghost" onClick={() => onOpenChange(false)}>
               Cancelar
             </Button>
-            <Button onClick={submit}>Salvar</Button>
+            <Button className="gdt-modal-btn" onClick={submit}>Salvar</Button>
           </div>
         </div>
       </DialogContent>

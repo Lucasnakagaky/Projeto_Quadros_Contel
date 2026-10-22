@@ -18,6 +18,7 @@ import { api } from "@/lib/api-client";
 import { Campo, CORES_ETIQUETA, Etiqueta, Usuario } from "@/lib/types";
 import { stringArray } from "@/lib/campo-utils";
 import { cn } from "@/lib/utils";
+import { BTN_PRIMARIO, BTN_SECUNDARIO, CARD_SOLIDO, FOCO, INPUT_MODAL, LINK_ACAO } from "./estilos";
 
 const TIPOS_INERTES = new Set(["id", "anexo", "documentos", "conexao_pipe", "conexao_database"]);
 
@@ -122,13 +123,14 @@ export function CampoDraftRow({
         ))}
 
         {criandoEtiqueta ? (
-          <div className="flex flex-col gap-2 rounded-md border border-slate-200 p-2">
+          <div className={`flex flex-col gap-2 rounded-xl p-2 ${CARD_SOLIDO}`}>
             <Input
               autoFocus
               placeholder="Nome da etiqueta"
               value={nomeEtiqueta}
               onChange={(e) => setNomeEtiqueta(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && criarEtiqueta()}
+              className={INPUT_MODAL}
             />
             <div className="flex flex-wrap gap-1.5">
               {CORES_ETIQUETA.map((c) => (
@@ -136,22 +138,23 @@ export function CampoDraftRow({
                   key={c}
                   type="button"
                   onClick={() => setCorEtiqueta(c)}
-                  className={cn("h-6 w-6 rounded-full", corEtiqueta === c && "ring-2 ring-slate-900 ring-offset-1")}
+                  aria-label={`Cor ${c}`}
+                  className={cn("h-6 w-6 rounded-full", FOCO, corEtiqueta === c && "ring-2 ring-slate-900 ring-offset-1")}
                   style={{ backgroundColor: c }}
                 />
               ))}
             </div>
             <div className="flex gap-2">
-              <Button size="sm" onClick={criarEtiqueta}>
+              <Button size="sm" className={BTN_PRIMARIO} onClick={criarEtiqueta}>
                 Salvar
               </Button>
-              <Button size="sm" variant="ghost" onClick={() => setCriandoEtiqueta(false)}>
+              <Button size="sm" variant="ghost" className={BTN_SECUNDARIO} onClick={() => setCriandoEtiqueta(false)}>
                 Cancelar
               </Button>
             </div>
           </div>
         ) : (
-          <button onClick={() => setCriandoEtiqueta(true)} className="self-start text-xs text-blue-600 hover:underline">
+          <button onClick={() => setCriandoEtiqueta(true)} className={`self-start ${LINK_ACAO}`}>
             + Criar nova etiqueta
           </button>
         )}
@@ -188,10 +191,10 @@ export function CampoDraftRow({
     const opcoes = campo.config.opcoes ?? [];
     return linha(
       <Select value={typeof valor === "string" ? valor : undefined} onValueChange={onChange}>
-        <SelectTrigger className="h-8 max-w-xs text-sm">
+        <SelectTrigger className={`h-8 max-w-xs text-sm ${INPUT_MODAL}`}>
           <SelectValue placeholder="Selecione..." />
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent className="max-w-[min(28rem,calc(100vw-2rem))]">
           {opcoes.map((opcao) => (
             <SelectItem key={opcao} value={opcao}>
               {opcao}

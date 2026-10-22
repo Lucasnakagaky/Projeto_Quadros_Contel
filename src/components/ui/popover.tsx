@@ -8,11 +8,13 @@ export function Popover({
   children,
   align = "start",
   className,
+  wrapperClassName,
 }: {
   trigger: (state: { open: boolean; toggle: () => void }) => ReactNode;
   children: (state: { close: () => void }) => ReactNode;
   align?: "start" | "end";
   className?: string;
+  wrapperClassName?: string;
 }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -40,7 +42,7 @@ export function Popover({
   }, [open]);
 
   return (
-    <div ref={ref} className="relative inline-block">
+    <div ref={ref} className={cn("relative inline-block", wrapperClassName)}>
       {trigger({ open, toggle: () => setOpen((v) => !v) })}
       {open && (
         <div

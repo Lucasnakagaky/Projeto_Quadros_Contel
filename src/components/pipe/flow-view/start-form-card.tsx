@@ -10,7 +10,7 @@ export function StartFormCard({
   return (
     <button
       onClick={onAbrirCampos}
-      className="flex w-64 shrink-0 flex-col overflow-hidden rounded-xl border border-slate-200 bg-white text-left shadow-sm transition-shadow hover:shadow-md"
+      className="gdt-card gdt-focus flex w-64 shrink-0 cursor-pointer flex-col overflow-hidden text-left"
     >
       <div className="flex items-center gap-2 bg-violet-50 px-4 py-2.5">
         <PlayCircle size={16} className="text-violet-500" />

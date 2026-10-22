@@ -33,10 +33,11 @@ export default function NewPipePage() {
   }
 
   return (
+    <div className="gdt-shell min-h-dvh">
     <div className="mx-auto w-full max-w-2xl flex-1 px-6 py-10">
       <h1 className="mb-6 text-2xl font-bold text-slate-900">Novo Pipe</h1>
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+      <form onSubmit={handleSubmit} className="gdt-painel flex flex-col gap-5 p-6">
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="nome">Nome</Label>
           <Input
@@ -54,16 +55,15 @@ export default function NewPipePage() {
         </p>
 
         <div className="mt-4 flex justify-end gap-3">
-          <Link href="/pipes">
-            <Button type="button" variant="outline">
-              Cancelar
-            </Button>
+          <Link href="/pipes" className="inline-flex h-9 items-center gap-2 rounded-md border border-slate-300 bg-white px-4 text-sm font-medium text-slate-700 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2">
+            Cancelar
           </Link>
           <Button type="submit" disabled={loading}>
             {loading ? "Criando..." : "Criar Pipe"}
           </Button>
         </div>
       </form>
+    </div>
     </div>
   );
 }

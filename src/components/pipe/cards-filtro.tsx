@@ -39,7 +39,7 @@ export function CardsFiltro({
           type="button"
           onClick={() => onChange("")}
           aria-label="Limpar filtro"
-          className="absolute right-0 top-0 flex h-9 w-9 items-center justify-center rounded-r-full text-slate-400 hover:text-slate-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 cursor-pointer"
+          className="absolute right-0 top-0 flex h-9 w-9 items-center justify-center rounded-r-full text-slate-400 hover:text-slate-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-1 cursor-pointer"
         >
           <X size={14} />
         </button>

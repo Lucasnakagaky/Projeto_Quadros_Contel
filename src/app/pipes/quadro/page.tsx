@@ -82,7 +82,7 @@ function PipeBoardContent() {
     return (
       <div className="flex flex-1 flex-col items-center justify-center gap-3 p-10 text-center">
         <p className="text-slate-500">Pipe não encontrado.</p>
-        <Link href="/pipes" className="text-sm text-blue-600 hover:underline">
+        <Link href="/pipes" className="text-sm gdt-focus rounded text-indigo-600 hover:underline">
           Voltar aos pipes
         </Link>
       </div>
@@ -90,7 +90,7 @@ function PipeBoardContent() {
   }
   if (!props) {
     return (
-      <div className="flex flex-1 items-center justify-center p-10 text-sm text-slate-400">
+      <div className="flex flex-1 items-center justify-center p-10 text-sm text-slate-500">
         Carregando quadro…
       </div>
     );
@@ -102,7 +102,7 @@ export default function PipeQuadroPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex flex-1 items-center justify-center p-10 text-sm text-slate-400">
+        <div className="flex flex-1 items-center justify-center p-10 text-sm text-slate-500">
           Carregando quadro…
         </div>
       }

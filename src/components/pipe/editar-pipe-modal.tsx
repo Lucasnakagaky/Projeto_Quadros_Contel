@@ -34,9 +34,9 @@ export function EditarPipeModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-sm">
+      <DialogContent className="gdt-modal max-w-[calc(100vw-2rem)] sm:max-w-sm" overlayClassName="gdt-modal-overlay" closeClassName="gdt-modal-fechar">
         <DialogHeader>
-          <DialogTitle className="text-lg font-bold">Editar Pipe</DialogTitle>
+          <DialogTitle className="pr-8 text-lg font-bold">Editar Pipe</DialogTitle>
         </DialogHeader>
         <div className="flex flex-col gap-4 px-6 pb-6">
           <div className="flex flex-col gap-1.5">
@@ -54,7 +54,7 @@ export function EditarPipeModal({
             <Button variant="outline" onClick={() => onOpenChange(false)}>
               Cancelar
             </Button>
-            <Button onClick={submit}>Salvar</Button>
+            <Button className="gdt-modal-btn" onClick={submit}>Salvar</Button>
           </div>
         </div>
       </DialogContent>

@@ -10,7 +10,7 @@ export function FlowConnector({ de, para }: { de?: string; para?: string }) {
   return (
     <div className="flex w-10 shrink-0 items-center self-center">
       <div
-        className="h-0.5 w-full rounded-full bg-slate-300"
+        className="h-0.5 w-full rounded-full bg-(--gdt-linha)"
         style={
           fundo
             ? {

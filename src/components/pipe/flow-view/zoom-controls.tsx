@@ -25,7 +25,7 @@ export function ZoomControls({
       <button onClick={onZoomIn} className={BOTAO} aria-label="Aumentar zoom">
         <Plus size={15} />
       </button>
-      <div className="mx-1 h-5 w-px bg-slate-200" />
+      <div className="mx-1 h-5 w-px bg-(--gdt-linha)" />
       <button onClick={onReset} className={BOTAO} aria-label="Ajustar à tela">
         <Maximize2 size={14} />
       </button>

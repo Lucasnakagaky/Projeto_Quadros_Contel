@@ -30,7 +30,7 @@ export function PipeCard({
   return (
     <Link
       href={`/pipes/quadro?id=${pipe.id}`}
-      className="group flex flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
+      className="gdt-focus group flex flex-col overflow-hidden rounded-(--gdt-raio-card) border border-slate-200 bg-white shadow-(--gdt-sombra-2) transition-all hover:-translate-y-0.5 hover:shadow-(--gdt-sombra-3)"
     >
       <div className="h-1.5 shrink-0" style={{ backgroundColor: cor }} />
 
@@ -42,13 +42,13 @@ export function PipeCard({
           >
             <Boxes size={18} />
           </span>
-          <h3 className="min-w-0 flex-1 truncate text-lg font-bold text-slate-900">{pipe.nome}</h3>
+          <h3 className="min-w-0 flex-1 truncate text-lg font-bold text-slate-900" title={pipe.nome}>{pipe.nome}</h3>
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button
                 onClick={(e) => e.stopPropagation()}
-                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-slate-500 hover:bg-slate-100 hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                 aria-label={`Ações do pipe ${pipe.nome}`}
               >
                 <MoreVertical size={18} />

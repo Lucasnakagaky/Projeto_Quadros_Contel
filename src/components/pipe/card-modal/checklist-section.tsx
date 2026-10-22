@@ -134,7 +134,7 @@ export function ChecklistSection({
                       />
                       <span
                         className={`flex-1 text-sm transition-colors duration-(--duracao-rapida) ${
-                          item.concluido ? "text-slate-400 line-through decoration-slate-300" : "font-medium text-slate-700"
+                          item.concluido ? "text-slate-500 line-through decoration-slate-300" : "font-medium text-slate-700"
                         }`}
                       >
                         {item.texto}

@@ -32,7 +32,7 @@ export function CampoValueList({
     <div className="flex flex-col divide-y divide-slate-200/60">
       {visiveis.map((campo) =>
         campo.tipo === "data_vencimento" ? (
-          <div key={campo.id} className="grid grid-cols-2 gap-2">
+          <div key={campo.id} className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             <div className="flex items-start gap-2 py-1.5">
               <div className="mt-1">
                 <CalendarPlus size={14} className="shrink-0 text-slate-400" />

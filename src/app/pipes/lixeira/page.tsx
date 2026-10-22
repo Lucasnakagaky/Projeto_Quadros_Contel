@@ -41,30 +41,33 @@ function LixeiraContent() {
 
   if (!pipeId || erro) {
     return (
+      <div className="gdt-shell min-h-dvh">
       <div className="mx-auto w-full max-w-3xl flex-1 px-6 py-10 text-center text-slate-500">
         Pipe não encontrado.{" "}
         <Link href="/pipes" className="text-blue-600 hover:underline">
           Voltar
         </Link>
       </div>
+      </div>
     );
   }
 
   return (
+    <div className="gdt-shell min-h-dvh">
     <div className="mx-auto w-full max-w-3xl flex-1 px-6 py-10">
       <Link
         href={`/pipes/quadro?id=${pipeId}`}
-        className="mb-2 inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-700"
+        className="mb-2 inline-flex max-w-full items-center gap-1 rounded-sm text-sm text-slate-500 hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
       >
-        <ArrowLeft size={16} />
-        Voltar para {pipe?.nome ?? "o pipe"}
+        <ArrowLeft size={16} className="shrink-0" />
+        <span className="truncate">Voltar para {pipe?.nome ?? "o pipe"}</span>
       </Link>
       <h1 className="mb-8 text-2xl font-bold text-slate-900">Lixeira</h1>
 
       {cards === null ? (
-        <p className="text-sm text-slate-400">Carregando…</p>
+        <p className="text-sm text-slate-500">Carregando…</p>
       ) : cards.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-slate-300 py-20 text-center">
+        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-300 py-20 text-center">
           <p className="text-slate-500">A lixeira está vazia.</p>
         </div>
       ) : (
@@ -79,12 +82,13 @@ function LixeiraContent() {
         </div>
       )}
     </div>
+    </div>
   );
 }
 
 export default function LixeiraPage() {
   return (
-    <Suspense fallback={<p className="p-10 text-sm text-slate-400">Carregando…</p>}>
+    <Suspense fallback={<div className="gdt-shell min-h-dvh"><p className="mx-auto w-full max-w-3xl px-6 py-10 text-sm text-slate-500">Carregando…</p></div>}>
       <LixeiraContent />
     </Suspense>
   );

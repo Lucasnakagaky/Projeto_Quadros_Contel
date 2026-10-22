@@ -70,7 +70,7 @@ export function PhaseHistory({
               <span className="text-xs text-slate-500">
                 {duracaoEntre(item.entrouEm, item.saiuEm ?? new Date())}
               </span>
-              <span className="text-xs text-slate-400">
+              <span className="text-xs text-slate-500">
                 {dataCurta(item.entrouEm)}
               </span>
             </li>

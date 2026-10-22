@@ -82,7 +82,7 @@ export function CommentsSection({
             >
               <div className="min-w-0 flex-1">
                 <HtmlFormatadoView html={c.texto} className="text-sm text-slate-700" />
-                <span className="mt-1 block text-xs text-slate-400">
+                <span className="mt-1 block text-xs text-slate-500">
                   {new Date(c.criadoEm).toLocaleString("pt-BR")}
                 </span>
               </div>

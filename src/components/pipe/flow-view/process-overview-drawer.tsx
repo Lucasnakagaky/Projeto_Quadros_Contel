@@ -47,10 +47,10 @@ export function ProcessOverviewDrawer({
   return (
     <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
       <DialogPrimitive.Portal>
-        <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/30" />
+        <DialogPrimitive.Overlay className="gdt-modal-overlay fixed inset-0 z-50" />
         <DialogPrimitive.Content
           className={cn(
-            "fixed right-0 top-0 z-50 flex h-full flex-col bg-white shadow-2xl focus:outline-none",
+            "gdt-modal fixed right-0 top-0 z-50 flex h-full max-w-full flex-col rounded-l-[20px] rounded-r-none focus:outline-none",
             expandido ? "w-[640px]" : "w-96"
           )}
         >
@@ -58,7 +58,7 @@ export function ProcessOverviewDrawer({
             <button
               onClick={onVoltar}
               disabled={!podeVoltar}
-              className="rounded p-1.5 text-slate-400 hover:bg-slate-100 disabled:opacity-30"
+              className="gdt-focus rounded p-1.5 text-slate-400 hover:bg-slate-100 disabled:opacity-30"
               aria-label="Fase anterior"
             >
               <ArrowLeft size={16} />
@@ -66,13 +66,13 @@ export function ProcessOverviewDrawer({
             <span className="flex-1" />
             <button
               onClick={() => setExpandido((v) => !v)}
-              className="rounded p-1.5 text-slate-400 hover:bg-slate-100"
+              className="gdt-focus rounded p-1.5 text-slate-400 hover:bg-slate-100"
               aria-label="Expandir painel"
             >
               {expandido ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
             </button>
             <DialogPrimitive.Close
-              className="rounded p-1.5 text-slate-400 hover:bg-slate-100"
+              className="gdt-focus rounded p-1.5 text-slate-400 hover:bg-slate-100"
               aria-label="Fechar"
             >
               <X size={16} />
@@ -87,13 +87,13 @@ export function ProcessOverviewDrawer({
 
             <section className="flex flex-col gap-2">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold tracking-wide text-slate-400 uppercase">
+                <span className="text-xs font-semibold tracking-wide text-slate-500 uppercase">
                   Descrição
                 </span>
                 {!editandoDescricao && (
                   <button
                     onClick={() => setEditandoDescricao(true)}
-                    className="text-slate-400 hover:text-slate-700"
+                    className="gdt-focus rounded text-slate-400 hover:text-slate-700"
                     aria-label="Editar descrição"
                   >
                     <Pencil size={13} />
@@ -139,12 +139,12 @@ export function ProcessOverviewDrawer({
 
             <section className="flex flex-col gap-2">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold tracking-wide text-slate-400 uppercase">
+                <span className="text-xs font-semibold tracking-wide text-slate-500 uppercase">
                   Pessoas
                 </span>
                 <button
                   onClick={onAbrirMembros}
-                  className="text-slate-400 hover:text-slate-700"
+                  className="gdt-focus rounded text-slate-400 hover:text-slate-700"
                   aria-label="Editar pessoas"
                 >
                   <Pencil size={13} />
@@ -168,7 +168,7 @@ export function ProcessOverviewDrawer({
 
             <button
               onClick={() => toast("Enviar feedback — em breve")}
-              className="mt-auto self-start text-xs text-blue-600 hover:underline"
+              className="mt-auto self-start text-xs text-indigo-600 hover:underline"
             >
               Enviar feedback
             </button>

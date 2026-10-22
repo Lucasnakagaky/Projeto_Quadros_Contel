@@ -19,10 +19,12 @@ export function BulkMovePopover({
       trigger={({ toggle }) => (
         <button
           onClick={toggle}
-          className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-white hover:bg-white/10"
+          aria-label="Mover cards"
+          title="Mover cards"
+          className="flex items-center gap-1.5 rounded-l-full px-3 py-2 text-sm font-medium text-white hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
         >
           <ArrowRight size={14} />
-          Mover cards
+          <span className="hidden sm:inline">Mover cards</span>
         </button>
       )}
     >
@@ -38,7 +40,7 @@ export function BulkMovePopover({
                 onMover(f.id);
                 close();
               }}
-              className="flex items-center gap-2 rounded px-2 py-1.5 text-left text-sm text-slate-700 hover:bg-slate-100"
+              className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-left text-sm text-slate-700 hover:bg-indigo-50/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400"
             >
               <ArrowRight size={14} className="text-slate-400" />
               <span className="h-2 w-2 rounded-full" style={{ backgroundColor: f.cor }} />

@@ -41,10 +41,10 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex flex-1 items-center justify-center px-6 py-16">
+    <div className="gdt-shell flex min-h-dvh flex-1 items-center justify-center px-6 py-16">
       <form
         onSubmit={entrar}
-        className="w-full max-w-sm rounded-lg border border-slate-200 bg-white p-6 shadow-sm"
+        className="w-full max-w-sm gdt-painel p-6"
       >
         <h1 className="text-xl font-bold text-slate-900">Entrar</h1>
         <p className="mt-1 text-sm text-slate-500">Gestão de Demandas de TI</p>

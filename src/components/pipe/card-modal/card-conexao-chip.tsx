@@ -69,19 +69,19 @@ function CardConexaoChip({
         <>
           <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
             <div className="flex flex-col gap-0.5">
-              <span className="text-[11px] font-medium text-slate-400">Pipe</span>
+              <span className="text-[11px] font-medium text-slate-500">Pipe</span>
               <span className="flex w-fit items-center gap-1 rounded-md bg-slate-100/80 px-2 py-0.5 text-xs font-medium text-slate-600 ring-1 ring-slate-200/60">
                 <Boxes size={11} />
                 {pipeNome}
               </span>
             </div>
             <div className="flex flex-col gap-0.5">
-              <span className="text-[11px] font-medium text-slate-400">Criado em</span>
+              <span className="text-[11px] font-medium text-slate-500">Criado em</span>
               <span className="text-xs text-slate-700">{dataPorExtenso(criadoEm)}</span>
             </div>
           </div>
           <div className="flex flex-col gap-0.5">
-            <span className="text-[11px] font-medium text-slate-400">Fase</span>
+            <span className="text-[11px] font-medium text-slate-500">Fase</span>
             <span
               className="w-fit rounded-full px-2 py-0.5 text-xs font-semibold"
               style={{ backgroundColor: `color-mix(in srgb, ${faseCor} 14%, white)`, color: `color-mix(in srgb, ${faseCor} 66%, #0f172a)`, boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${faseCor} 24%, transparent)` }}

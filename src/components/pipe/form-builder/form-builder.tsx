@@ -62,7 +62,7 @@ function PaletteItem({ tipo, label, onAdd }: { tipo: TipoCampo; label: string; o
       type="button"
       onClick={onAdd}
       className={cn(
-        "flex w-full cursor-grab items-center gap-2 rounded-md border border-slate-200 bg-white px-2.5 py-2 text-left text-sm text-slate-700 transition-colors hover:border-blue-300 hover:bg-blue-50/60 active:cursor-grabbing",
+        "flex w-full cursor-grab items-center gap-2 rounded-md border border-slate-200 bg-white px-2.5 py-2 text-left text-sm text-slate-700 transition-colors hover:border-indigo-300 hover:bg-indigo-50/60 active:cursor-grabbing",
         isDragging && "opacity-40"
       )}
     >
@@ -84,7 +84,7 @@ function Canvas({ vazio, isOver, setNodeRef, children }: {
       className={cn(
         "flex min-h-[220px] flex-1 flex-col gap-2 rounded-lg border-2 border-dashed p-3 transition-colors",
         vazio ? "items-center justify-center text-center" : "border-transparent p-0",
-        isOver && "border-blue-400 bg-blue-50/60"
+        isOver && "border-indigo-400 bg-indigo-50/60"
       )}
     >
       {children}
@@ -123,7 +123,7 @@ function CampoRow({
       <button
         {...attributes}
         {...listeners}
-        className="cursor-grab touch-none text-slate-300 hover:text-slate-500 active:cursor-grabbing"
+        className="gdt-focus cursor-grab touch-none rounded text-slate-300 hover:text-slate-500 active:cursor-grabbing"
         aria-label={`Arrastar campo ${campo.titulo}`}
       >
         <GripVertical size={16} />
@@ -139,7 +139,7 @@ function CampoRow({
       </span>
       <button
         onClick={onEdit}
-        className="text-slate-300 hover:text-slate-600"
+        className="gdt-focus rounded text-slate-300 hover:text-slate-600"
         aria-label={`Editar campo ${campo.titulo}`}
       >
         <Pencil size={14} />
@@ -147,7 +147,7 @@ function CampoRow({
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <button
-            className="text-slate-300 hover:text-slate-600"
+            className="gdt-focus rounded text-slate-300 hover:text-slate-600"
             aria-label={`Mais ações para o campo ${campo.titulo}`}
           >
             <MoreVertical size={16} />
@@ -354,7 +354,7 @@ export function FormBuilder({
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
           <div className="flex w-full shrink-0 flex-col gap-4 lg:w-56">
             <div className="flex flex-col gap-2">
-              <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+              <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">
                 Tipos de campo
               </span>
               <div className="flex flex-col gap-1.5">
@@ -371,10 +371,10 @@ export function FormBuilder({
 
             <div className="flex flex-col gap-2">
               <div className="flex flex-col gap-0.5">
-                <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">
                   Campos de conexão
                 </span>
-                <span className="text-[11px] text-slate-400">
+                <span className="text-[11px] text-slate-500">
                   Adicione esses tipos de campo para trocar dados entre pipes e databases
                 </span>
               </div>
@@ -393,7 +393,7 @@ export function FormBuilder({
 
           <div className="flex min-w-0 flex-1 flex-col gap-3">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+              <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">
                 Campos ativos
               </span>
               <Button size="sm" variant="outline" onClick={abrirCriacao}>
@@ -405,7 +405,7 @@ export function FormBuilder({
             <SortableContext items={ativos.map((c) => c.id)} strategy={verticalListSortingStrategy}>
               <Canvas vazio={ativos.length === 0} isOver={canvasIsOver} setNodeRef={setCanvasRef}>
                 {ativos.length === 0 ? (
-                  <div className="flex flex-col items-center gap-1.5 text-sm text-slate-400">
+                  <div className="flex flex-col items-center gap-1.5 text-sm text-slate-500">
                     <LayoutGrid size={22} className="text-slate-300" />
                     Arraste e solte campos aqui, ou clique num tipo ao lado
                   </div>
@@ -431,7 +431,7 @@ export function FormBuilder({
                 <button
                   onClick={() => setArquivadosAbertos((v) => !v)}
                   aria-expanded={arquivadosAbertos}
-                  className="flex items-center gap-1.5 text-left text-xs font-semibold text-slate-500 hover:text-slate-700"
+                  className="gdt-focus flex items-center gap-1.5 rounded text-left text-xs font-semibold text-slate-500 hover:text-slate-700"
                 >
                   <Archive size={13} />
                   Campos arquivados ({arquivados.length})
@@ -446,7 +446,7 @@ export function FormBuilder({
                       <span className="flex-1 truncate text-sm text-slate-500">{campo.titulo}</span>
                       <button
                         onClick={() => restaurar(campo)}
-                        className="flex items-center gap-1 text-xs font-medium text-blue-600 hover:underline"
+                        className="gdt-focus flex items-center gap-1 rounded text-xs font-medium text-indigo-600 hover:underline"
                       >
                         <ArchiveRestore size={13} />
                         Restaurar
@@ -460,7 +460,7 @@ export function FormBuilder({
 
         <DragOverlay>
           {paletaArrastando ? (
-            <div className="flex items-center gap-2 rounded-md border border-blue-300 bg-white px-2.5 py-2 text-sm text-slate-700 shadow-lg">
+            <div className="flex items-center gap-2 rounded-lg border border-indigo-300 bg-white px-2.5 py-2 text-sm text-slate-700 shadow-(--gdt-sombra-3)">
               <CampoIcon tipo={paletaArrastando.tipo} size={15} />
               {paletaArrastando.label}
             </div>

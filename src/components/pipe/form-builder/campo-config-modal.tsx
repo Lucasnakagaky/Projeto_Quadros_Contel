@@ -172,7 +172,7 @@ export function CampoConfigModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="gdt-modal max-w-[calc(100vw-2rem)] sm:max-w-lg" overlayClassName="gdt-modal-overlay" closeClassName="gdt-modal-fechar">
         <DialogHeader>
           <DialogTitle className="text-lg font-bold">
             {campo ? "Editar campo" : "Novo campo"}
@@ -224,7 +224,7 @@ export function CampoConfigModal({
                   onChange={(e) => setNovaOpcao(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && adicionarOpcao()}
                 />
-                <Button size="sm" onClick={adicionarOpcao}>
+                <Button size="sm" className="gdt-modal-btn" onClick={adicionarOpcao}>
                   Adicionar
                 </Button>
               </div>
@@ -260,8 +260,8 @@ export function CampoConfigModal({
                   <button
                     onClick={() => setModoConexao("criar")}
                     className={cn(
-                      "rounded-full px-2.5 py-1 font-medium",
-                      modoConexao === "criar" ? "bg-blue-600 text-white" : "bg-slate-100 text-slate-500"
+                      "rounded-full px-2.5 py-1 font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:ring-offset-1",
+                      modoConexao === "criar" ? "bg-indigo-600 text-white" : "bg-slate-100 text-slate-500"
                     )}
                   >
                     Criar novos cards
@@ -269,9 +269,9 @@ export function CampoConfigModal({
                   <button
                     onClick={() => setModoConexao("pesquisar_criar")}
                     className={cn(
-                      "rounded-full px-2.5 py-1 font-medium",
+                      "rounded-full px-2.5 py-1 font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:ring-offset-1",
                       modoConexao === "pesquisar_criar"
-                        ? "bg-blue-600 text-white"
+                        ? "bg-indigo-600 text-white"
                         : "bg-slate-100 text-slate-500"
                     )}
                   >
@@ -286,8 +286,8 @@ export function CampoConfigModal({
                   <button
                     onClick={() => setCardinalidade("unico")}
                     className={cn(
-                      "rounded-full px-2.5 py-1 font-medium",
-                      cardinalidade === "unico" ? "bg-blue-600 text-white" : "bg-slate-100 text-slate-500"
+                      "rounded-full px-2.5 py-1 font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:ring-offset-1",
+                      cardinalidade === "unico" ? "bg-indigo-600 text-white" : "bg-slate-100 text-slate-500"
                     )}
                   >
                     Um único card
@@ -295,8 +295,8 @@ export function CampoConfigModal({
                   <button
                     onClick={() => setCardinalidade("varios")}
                     className={cn(
-                      "rounded-full px-2.5 py-1 font-medium",
-                      cardinalidade === "varios" ? "bg-blue-600 text-white" : "bg-slate-100 text-slate-500"
+                      "rounded-full px-2.5 py-1 font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:ring-offset-1",
+                      cardinalidade === "varios" ? "bg-indigo-600 text-white" : "bg-slate-100 text-slate-500"
                     )}
                   >
                     Vários cards
@@ -329,7 +329,7 @@ export function CampoConfigModal({
                   onChange={(e) => setCampoIdentificador(e.target.value)}
                   placeholder="Ex.: external_id"
                 />
-                <span className="text-xs text-slate-400">
+                <span className="text-xs text-slate-500">
                   Nome do campo usado para casar o registro no sistema externo.
                 </span>
               </div>
@@ -344,8 +344,8 @@ export function CampoConfigModal({
                   <button
                     onClick={() => setCardinalidade("unico")}
                     className={cn(
-                      "rounded-full px-2.5 py-1 font-medium",
-                      cardinalidade === "unico" ? "bg-blue-600 text-white" : "bg-slate-100 text-slate-500"
+                      "rounded-full px-2.5 py-1 font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:ring-offset-1",
+                      cardinalidade === "unico" ? "bg-indigo-600 text-white" : "bg-slate-100 text-slate-500"
                     )}
                   >
                     Um único card
@@ -353,8 +353,8 @@ export function CampoConfigModal({
                   <button
                     onClick={() => setCardinalidade("varios")}
                     className={cn(
-                      "rounded-full px-2.5 py-1 font-medium",
-                      cardinalidade === "varios" ? "bg-blue-600 text-white" : "bg-slate-100 text-slate-500"
+                      "rounded-full px-2.5 py-1 font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:ring-offset-1",
+                      cardinalidade === "varios" ? "bg-indigo-600 text-white" : "bg-slate-100 text-slate-500"
                     )}
                   >
                     Vários cards
@@ -366,7 +366,7 @@ export function CampoConfigModal({
                 Vínculo bidirecional
                 <Checkbox checked={bidirecional} onCheckedChange={(v) => setBidirecional(Boolean(v))} />
               </label>
-              <span className="text-xs text-slate-400">
+              <span className="text-xs text-slate-500">
                 Quando ativado, o card vinculado também exibe este campo com a relação inversa.
                 Quando desativado, o vínculo só aparece no card de origem.
               </span>
@@ -434,7 +434,7 @@ export function CampoConfigModal({
                 onChange={(e) => setValidacaoCustomizada(e.target.value)}
                 placeholder="Expressão regular, ex.: ^[0-9]+$"
               />
-              <span className="text-xs text-slate-400">
+              <span className="text-xs text-slate-500">
                 O valor digitado precisa combinar com esta expressão regular (regex).
               </span>
             </div>
@@ -457,7 +457,7 @@ export function CampoConfigModal({
             type="button"
             disabled
             title="Em breve"
-            className="self-start text-xs text-slate-400 cursor-not-allowed"
+            className="self-start text-xs text-slate-500 cursor-not-allowed"
             onClick={(e) => e.preventDefault()}
           >
             Dependências do campo
@@ -467,7 +467,7 @@ export function CampoConfigModal({
             <Button variant="ghost" onClick={() => onOpenChange(false)}>
               Cancelar
             </Button>
-            <Button onClick={submit}>Salvar</Button>
+            <Button className="gdt-modal-btn" onClick={submit}>Salvar</Button>
           </div>
         </div>
       </DialogContent>

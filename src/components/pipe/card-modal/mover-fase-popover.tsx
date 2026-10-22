@@ -44,7 +44,7 @@ export function MoverFasePopover({
     >
       {({ close }) => (
         <div className="flex flex-col gap-1">
-          <span className="px-1 text-xs font-semibold text-slate-500">Mover card para fase</span>
+          <span className="px-1 pr-8 text-xs font-semibold text-slate-500">Mover card para fase</span>
           {destinos.length === 0 && (
             <p className="px-1 text-sm text-slate-400">Nenhuma outra fase disponível</p>
           )}

@@ -29,10 +29,12 @@ export function BulkActionBar({
 
   if (quantidade === 0) return null;
 
+  const textoLixeira = `Mover ${quantidade} ${quantidade === 1 ? "card" : "cards"} para a lixeira`;
+
   return (
     <>
       <div className="pointer-events-none fixed inset-x-0 bottom-6 z-40 flex justify-center">
-        <div className="pointer-events-auto flex items-center divide-x divide-white/15 rounded-full bg-slate-900/95 px-1 text-white shadow-[0_16px_34px_-12px_rgb(76_81_191/0.6)]">
+        <div className="pointer-events-auto flex max-w-[calc(100vw-1.5rem)] items-center overflow-x-auto divide-x divide-white/15 rounded-full bg-slate-900/95 px-1 text-white shadow-[0_16px_34px_-12px_rgb(76_81_191/0.6)]">
           <span className="px-4 py-2 text-sm font-medium whitespace-nowrap">
             {quantidade} {quantidade === 1 ? "card selecionado" : "cards selecionados"}
           </span>
@@ -41,18 +43,22 @@ export function BulkActionBar({
 
           <button
             onClick={() => setEdicaoAberta(true)}
-            className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium hover:bg-white/10"
+            aria-label="Edição em massa"
+            title="Edição em massa"
+            className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
           >
             <Pencil size={14} />
-            Edição em massa
+            <span className="hidden sm:inline">Edição em massa</span>
           </button>
 
           <button
             onClick={onExcluir}
-            className="flex items-center gap-1.5 rounded-r-full px-3 py-2 text-sm font-medium text-red-400 hover:bg-white/10"
+            aria-label={textoLixeira}
+            title={textoLixeira}
+            className="flex items-center gap-1.5 rounded-r-full px-3 py-2 text-sm font-medium text-red-400 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
           >
             <Trash2 size={14} />
-            Mover {quantidade} {quantidade === 1 ? "card" : "cards"} para a lixeira
+            <span className="hidden sm:inline">{textoLixeira}</span>
           </button>
         </div>
       </div>

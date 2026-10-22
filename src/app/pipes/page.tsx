@@ -20,6 +20,7 @@ export default function PipesPage() {
   }, [session]);
 
   return (
+    <div className="gdt-shell min-h-dvh">
     <div className="mx-auto w-full max-w-6xl flex-1 px-6 py-10">
       <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
         <div>
@@ -27,11 +28,9 @@ export default function PipesPage() {
           <p className="text-sm text-slate-500">Gerencie seus processos com pipes estilo Kanban</p>
         </div>
         <div className="flex items-center gap-2">
-          <Link href="/pipes/new">
-            <Button>
-              <Plus size={16} />
-              Novo Pipe
-            </Button>
+          <Link href="/pipes/new" className="gdt-modal-btn inline-flex h-9 items-center gap-2 rounded-md px-4 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2">
+            <Plus size={16} />
+            Novo Pipe
           </Link>
           <Button variant="ghost" onClick={sair}>
             Sair
@@ -40,20 +39,19 @@ export default function PipesPage() {
       </div>
 
       {pipes === null ? (
-        <p className="text-sm text-slate-400">Carregando…</p>
+        <p className="text-sm text-slate-500">Carregando…</p>
       ) : pipes.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-slate-300 py-20 text-center">
+        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-300 py-20 text-center">
           <p className="text-slate-500">Você ainda não tem nenhum pipe.</p>
-          <Link href="/pipes/new" className="mt-4">
-            <Button>
-              <Plus size={16} />
-              Criar meu primeiro pipe
-            </Button>
+          <Link href="/pipes/new" className="mt-4 gdt-modal-btn inline-flex h-9 items-center gap-2 rounded-md px-4 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2">
+            <Plus size={16} />
+            Criar meu primeiro pipe
           </Link>
         </div>
       ) : (
         <PipesList initialPipes={pipes} />
       )}
+    </div>
     </div>
   );
 }

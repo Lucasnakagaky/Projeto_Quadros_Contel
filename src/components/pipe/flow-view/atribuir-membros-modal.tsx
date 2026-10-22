@@ -34,7 +34,7 @@ export function AtribuirMembrosModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-sm">
+      <DialogContent className="gdt-modal max-w-[calc(100vw-2rem)] sm:max-w-sm" overlayClassName="gdt-modal-overlay" closeClassName="gdt-modal-fechar">
         <DialogHeader>
           <DialogTitle className="text-lg font-bold">
             Atribuir membros {fase ? `· ${fase.nome}` : ""}
@@ -42,11 +42,11 @@ export function AtribuirMembrosModal({
         </DialogHeader>
         <div className="flex flex-col gap-4 px-6 pb-6">
           <div className="flex flex-col gap-1">
-            {usuarios.length === 0 && <p className="text-sm text-slate-400">Nenhum usuário</p>}
+            {usuarios.length === 0 && <p className="text-sm text-slate-500">Nenhum usuário</p>}
             {usuarios.map((u) => (
               <label
                 key={u.id}
-                className="flex cursor-pointer items-center gap-2 rounded px-1 py-1.5 hover:bg-slate-50"
+                className="flex cursor-pointer items-center gap-2 rounded-lg px-1 py-1.5 hover:bg-indigo-50/60"
               >
                 <Checkbox checked={selecionados.includes(u.id)} onCheckedChange={() => alternar(u.id)} />
                 <Avatar nome={u.nome} cor={u.corAvatar} size={22} />
@@ -60,6 +60,7 @@ export function AtribuirMembrosModal({
               Cancelar
             </Button>
             <Button
+              className="gdt-modal-btn"
               onClick={() => {
                 onSalvar(selecionados);
                 onOpenChange(false);

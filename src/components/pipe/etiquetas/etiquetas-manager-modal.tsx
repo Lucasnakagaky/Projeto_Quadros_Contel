@@ -95,20 +95,20 @@ export function EtiquetasManagerModal({
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="gdt-modal max-w-[calc(100vw-2rem)] sm:max-w-md" overlayClassName="gdt-modal-overlay" closeClassName="gdt-modal-fechar">
           <DialogHeader>
             <DialogTitle className="text-lg font-bold">Gerenciar etiquetas</DialogTitle>
           </DialogHeader>
 
           <div className="flex flex-col gap-3 px-6 pb-6">
             {etiquetas.length === 0 ? (
-              <p className="text-sm text-slate-400">Nenhuma etiqueta cadastrada neste pipe</p>
+              <p className="text-sm text-slate-500">Nenhuma etiqueta cadastrada neste pipe</p>
             ) : (
               <div className="flex flex-col gap-1">
                 {etiquetas.map((e) => (
                   <div
                     key={e.id}
-                    className="group flex items-center gap-2 rounded-md px-2 py-1.5 hover:bg-slate-50"
+                    className="group flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-indigo-50/60"
                   >
                     <span
                       className="h-3 w-3 shrink-0 rounded-full"
@@ -119,7 +119,7 @@ export function EtiquetasManagerModal({
                       type="button"
                       onClick={() => abrirEdicao(e)}
                       aria-label={`Editar etiqueta ${e.nome}`}
-                      className="shrink-0 text-slate-400 hover:text-slate-700"
+                      className="gdt-focus shrink-0 rounded text-slate-400 hover:text-slate-700"
                     >
                       <Pencil size={14} />
                     </button>
@@ -127,7 +127,7 @@ export function EtiquetasManagerModal({
                       type="button"
                       onClick={() => setEtiquetaParaExcluir(e)}
                       aria-label={`Excluir etiqueta ${e.nome}`}
-                      className="shrink-0 text-slate-400 hover:text-red-600"
+                      className="gdt-focus shrink-0 rounded text-slate-400 hover:text-red-600"
                     >
                       <Trash2 size={14} />
                     </button>
@@ -155,7 +155,7 @@ export function EtiquetasManagerModal({
         open={etiquetaParaExcluir !== null}
         onOpenChange={(o) => !o && setEtiquetaParaExcluir(null)}
       >
-        <DialogContent className="max-w-sm">
+        <DialogContent className="gdt-modal max-w-[calc(100vw-2rem)] sm:max-w-sm" overlayClassName="gdt-modal-overlay" closeClassName="gdt-modal-fechar">
           <DialogHeader>
             <DialogTitle className="text-lg font-bold">Excluir etiqueta</DialogTitle>
           </DialogHeader>

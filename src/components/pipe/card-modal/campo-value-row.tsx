@@ -250,7 +250,7 @@ export function CampoValueRow({
         <SelectTrigger className={`h-8 max-w-xs text-sm ${INPUT_MODAL}`}>
           <SelectValue placeholder="Selecione..." />
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent className="max-w-[min(28rem,calc(100vw-2rem))]">
           {opcoes.map((opcao) => (
             <SelectItem key={opcao} value={opcao}>
               {opcao}
@@ -266,9 +266,9 @@ export function CampoValueRow({
     const anexo = valor as Anexo | undefined | null;
     return linha(
       anexo ? (
-        <div className="flex items-center gap-2 text-sm">
-          <Paperclip size={13} className="text-slate-400" />
-          <a href={anexo.url} target="_blank" rel="noopener noreferrer" className="truncate text-indigo-600 hover:text-indigo-800 hover:underline">
+        <div className="flex min-w-0 items-center gap-2 text-sm">
+          <Paperclip size={13} className="shrink-0 text-slate-400" />
+          <a href={anexo.url} target="_blank" rel="noopener noreferrer" className="min-w-0 truncate text-indigo-600 hover:text-indigo-800 hover:underline">
             {anexo.nome}
           </a>
           <button onClick={() => onSave(null)} className={ICONE_REMOVER} aria-label="Remover">
@@ -276,11 +276,11 @@ export function CampoValueRow({
           </button>
         </div>
       ) : (
-        <label className="inline-flex cursor-pointer items-center gap-1.5 text-sm text-indigo-600 hover:text-indigo-800 hover:underline">
+        <label className="inline-flex cursor-pointer items-center gap-1.5 rounded text-sm text-indigo-600 hover:text-indigo-800 hover:underline focus-within:ring-2 focus-within:ring-indigo-400">
           {enviando ? "Enviando..." : "Clique aqui para adicionar"}
           <input
             type="file"
-            className="hidden"
+            className="sr-only"
             disabled={enviando}
             onChange={(e) => {
               const file = e.target.files?.[0];
@@ -309,10 +309,11 @@ export function CampoValueRow({
             {relacoes.map((r) => (
               <span
                 key={r.id}
-                className="flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-xs text-slate-700"
+                className="flex max-w-full min-w-0 items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-xs text-slate-700"
               >
-                {r.rotulo}
+                <span className="truncate">{r.rotulo}</span>
                 <button
+                  className={`shrink-0 ${ICONE_REMOVER}`}
                   onClick={() => onSave(relacoes.filter((x) => x.id !== r.id))}
                   aria-label={`Remover relação com ${r.rotulo}`}
                 >
@@ -400,9 +401,9 @@ export function CampoValueRow({
           // largura automática muda de tamanho entre fechado e focado (o navegador reserva
           // espaço extra pro ícone/segmentos), e isso empurrava o Salvar/Cancelar pro lado.
           className={cn(
-            "h-8 shrink-0 text-sm",
+            "h-8 w-full min-w-0 text-sm",
             INPUT_MODAL,
-            inputType === "datetime-local" ? "w-52" : "w-36"
+            inputType === "datetime-local" ? "max-w-52" : "max-w-36"
           )}
         />
         <Button size="sm" className={`shrink-0 ${BTN_PRIMARIO}`} onClick={salvar}>

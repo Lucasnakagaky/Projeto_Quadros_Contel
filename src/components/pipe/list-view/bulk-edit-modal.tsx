@@ -72,7 +72,7 @@ export function BulkEditModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="gdt-modal max-w-[calc(100vw-2rem)] sm:max-w-md" overlayClassName="gdt-modal-overlay" closeClassName="gdt-modal-fechar">
         <DialogHeader>
           <DialogTitle className="text-lg font-bold">
             Edição em massa · {quantidade} {quantidade === 1 ? "card" : "cards"}
@@ -219,7 +219,7 @@ export function BulkEditModal({
             <Button variant="ghost" onClick={() => onOpenChange(false)}>
               Cancelar
             </Button>
-            <Button onClick={submit} disabled={!campo}>
+            <Button className="gdt-modal-btn" onClick={submit} disabled={!campo}>
               Aplicar a {quantidade} {quantidade === 1 ? "card" : "cards"}
             </Button>
           </div>

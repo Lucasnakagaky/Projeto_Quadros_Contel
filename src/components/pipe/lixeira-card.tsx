@@ -43,12 +43,12 @@ export function LixeiraCard({ card, onRemovido }: { card: Card; onRemovido: () =
   }
 
   return (
-    <div className="flex items-center justify-between gap-3 rounded-md border border-slate-200 bg-white px-4 py-3">
+    <div className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm sm:flex-row sm:items-center sm:justify-between">
       <div className="min-w-0">
-        <p className="truncate font-medium text-slate-800">{card.titulo}</p>
-        <span className="text-xs text-slate-400">Excluído {tempoRelativo(card.excluidoEm)}</span>
+        <p className="truncate font-medium text-slate-800" title={card.titulo}>{card.titulo}</p>
+        <span className="text-xs text-slate-500">Excluído {tempoRelativo(card.excluidoEm)}</span>
       </div>
-      <div className="flex shrink-0 gap-2">
+      <div className="flex shrink-0 flex-wrap gap-2">
         <Button size="sm" variant="outline" disabled={loading} onClick={restaurar}>
           <ArchiveRestore size={14} />
           Restaurar

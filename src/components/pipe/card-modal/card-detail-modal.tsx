@@ -384,10 +384,10 @@ export function CardDetailModal({
             {faseAtual && (
               <span
                 aria-hidden="true"
-                className="gdt-fase-pill flex w-fit items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold"
+                className="gdt-fase-pill flex w-fit max-w-[calc(100%-2.5rem)] items-center gap-1.5 truncate rounded-full px-2.5 py-1 text-[11px] font-semibold"
               >
                 <span
-                  className="h-1.5 w-1.5 rounded-full"
+                  className="h-1.5 w-1.5 shrink-0 rounded-full"
                   style={{ backgroundColor: "var(--fase)", boxShadow: "0 0 6px var(--fase)" }}
                 />
                 {faseAtual.nome}
@@ -468,11 +468,11 @@ export function CardDetailModal({
                 </TabsTrigger>
               </TabsList>
 
-              <div className={`mt-1 ${SEPARADOR}`} />
+              <div className={SEPARADOR} />
 
-              <TabsContent value="form" className="pt-2">
+              <TabsContent value="form" className="pt-3">
                 <div className="flex flex-col gap-2">
-                  <div className="text-xs text-slate-400">
+                  <div className="text-xs text-slate-500">
                     Formulário Inicial — Criado por{" "}
                     <span className="font-medium text-slate-600">{criador?.nome ?? "—"}</span> •{" "}
                     {tempoRelativo(card.criadoEm)}
@@ -515,7 +515,7 @@ export function CardDetailModal({
                 </div>
               </TabsContent>
 
-              <TabsContent value="atividades" className="pt-2">
+              <TabsContent value="atividades" className="pt-3">
                 <PhaseHistory
                   historico={card.historico}
                   fases={fases}
@@ -523,7 +523,7 @@ export function CardDetailModal({
                 />
               </TabsContent>
 
-              <TabsContent value="anexos" className="pt-2">
+              <TabsContent value="anexos" className="pt-3">
                 <AttachmentsSection
                   cardId={cardId}
                   anexos={anexos}
@@ -531,7 +531,7 @@ export function CardDetailModal({
                 />
               </TabsContent>
 
-              <TabsContent value="checklists" className="pt-2">
+              <TabsContent value="checklists" className="pt-3">
                 <ChecklistSection
                   cardId={cardId}
                   checklists={checklists}
@@ -539,7 +539,7 @@ export function CardDetailModal({
                 />
               </TabsContent>
 
-              <TabsContent value="comentarios" className="pt-2">
+              <TabsContent value="comentarios" className="pt-3">
                 <CommentsSection
                   cardId={cardId}
                   comentarios={comentarios}
@@ -559,10 +559,10 @@ export function CardDetailModal({
               espaço em branco abaixo do texto curto desta coluna. */}
           <div className="gdt-modal-contexto flex min-w-0 flex-col md:self-start">
             <div className="flex shrink-0 items-center justify-between gap-2 border-b border-slate-200/70 p-5 pt-5">
-              <div className="flex flex-col gap-1.5">
+              <div className="flex min-w-0 flex-col gap-1.5">
                 <span className="text-xs font-semibold text-slate-500">Fase atual</span>
                 {faseAtual && (
-                  <span className="gdt-fase-pill w-fit rounded-full px-2.5 py-1 text-xs font-semibold">
+                  <span className="gdt-fase-pill w-fit max-w-full truncate rounded-full px-2.5 py-1 text-xs font-semibold">
                     {faseAtual.nome}
                   </span>
                 )}
@@ -662,7 +662,11 @@ export function CardDetailModal({
     </Dialog>
 
     <Dialog open={configurandoCampos} onOpenChange={setConfigurandoCampos}>
-      <DialogContent className="max-w-4xl">
+      <DialogContent
+        className="gdt-modal max-w-4xl overflow-hidden"
+        overlayClassName="gdt-modal-overlay"
+        closeClassName="gdt-modal-fechar"
+      >
         <DialogHeader>
           <DialogTitle className="text-lg font-bold">Campos do formulário</DialogTitle>
         </DialogHeader>

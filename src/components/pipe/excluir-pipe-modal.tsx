@@ -31,14 +31,14 @@ export function ExcluirPipeModal({
 
   return (
     <Dialog open={open} onOpenChange={(next) => !enviando && onOpenChange(next)}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="gdt-modal max-w-[calc(100vw-2rem)] sm:max-w-md" overlayClassName="gdt-modal-overlay" closeClassName="gdt-modal-fechar">
         <DialogHeader>
-          <DialogTitle className="text-lg font-bold">Excluir Pipe?</DialogTitle>
+          <DialogTitle className="pr-8 text-lg font-bold">Excluir Pipe?</DialogTitle>
         </DialogHeader>
         <div className="flex flex-col gap-4 px-6 pb-6">
-          <DialogDescription className="text-sm text-slate-600">
+          <DialogDescription className="text-sm text-slate-600 [overflow-wrap:anywhere]">
             Tem certeza de que deseja excluir{" "}
-            <span className="font-semibold text-slate-900">&quot;{pipeNome}&quot;</span>? Esta
+            <span className="font-semibold text-slate-900 [overflow-wrap:anywhere]">&quot;{pipeNome}&quot;</span>? Esta
             ação pode afetar os dados relacionados a este Pipe e não pode ser desfeita.
           </DialogDescription>
 

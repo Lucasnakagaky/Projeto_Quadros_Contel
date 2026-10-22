@@ -73,7 +73,9 @@ export function TableRow({
                 Card filho
               </span>
             )}
-            <span className="font-medium text-slate-800">{card.titulo}</span>
+            <span title={card.titulo} className="block max-w-[360px] truncate font-medium text-slate-800">
+              {card.titulo}
+            </span>
           </div>
         );
       case "criadoEm":
@@ -97,7 +99,7 @@ export function TableRow({
         );
       case "etiquetas":
         return etiquetasCard.length > 0 ? (
-          <div className="flex flex-wrap gap-1">
+          <div className="flex max-w-[240px] flex-wrap gap-1">
             {etiquetasCard.map((e) => (
               <button
                 key={e.id}

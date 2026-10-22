@@ -20,13 +20,15 @@ export function FaseHeaderPopover({
 }) {
   return (
     <Popover
+      wrapperClassName="min-w-0 flex-1"
       trigger={({ toggle }) => (
-        <h3
+        <button
+          type="button"
           onClick={toggle}
-          className="flex-1 cursor-pointer truncate text-sm font-medium text-slate-800 hover:underline"
+          className="gdt-focus block w-full cursor-pointer truncate text-left text-sm font-medium text-slate-800 hover:underline"
         >
           {fase.nome}
-        </h3>
+        </button>
       )}
     >
       {({ close }) => (

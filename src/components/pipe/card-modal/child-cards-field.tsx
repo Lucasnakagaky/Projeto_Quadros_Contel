@@ -14,7 +14,7 @@ import { api } from "@/lib/api-client";
 import { Campo, Card, Etiqueta, Fase, Pipe, Usuario } from "@/lib/types";
 import { ConexaoResolvida } from "./types";
 import { ChildCardChip } from "./card-conexao-chip";
-import { FOCO, ICONE_SECAO_AZUL, LINK_ACAO } from "./estilos";
+import { FOCO, ICONE_SECAO_AZUL, INPUT_MODAL, LINK_ACAO } from "./estilos";
 import { ChildCardInlineForm } from "./child-card-inline-form";
 
 export function ChildCardsField({
@@ -211,10 +211,10 @@ export function ChildCardsField({
           ) : modo === "existente" ? (
             <div className="flex flex-col gap-2 rounded-xl border border-slate-200/70 bg-slate-50/80 p-2.5">
               <Select value={cardFilhoId} onValueChange={setCardFilhoId}>
-                <SelectTrigger className="h-8 text-sm">
+                <SelectTrigger className={`h-8 text-sm ${INPUT_MODAL}`}>
                   <SelectValue placeholder="Selecione um card..." />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="max-w-[min(28rem,calc(100vw-2rem))]">
                   {candidatos.map((c) => {
                     const fase = fasesDestino.find((f) => f.id === c.faseId);
                     return (

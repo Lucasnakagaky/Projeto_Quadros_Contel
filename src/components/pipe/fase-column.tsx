@@ -114,7 +114,7 @@ export function FaseColumn({
 
         <span className="gdt-contador ml-auto">{cards.length}</span>
 
-        <div className="flex items-center opacity-0 transition-opacity duration-(--duracao-rapida) focus-within:opacity-100 group-hover:opacity-100">
+        <div className="flex items-center opacity-100 transition-opacity duration-(--duracao-rapida) md:opacity-0 md:focus-within:opacity-100 md:group-hover:opacity-100">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button

@@ -31,7 +31,7 @@ export function ColumnVisibilityPopover({
           {COLUNAS.map((coluna) => (
             <label
               key={coluna.id}
-              className="flex cursor-pointer items-center gap-2 rounded px-2 py-1.5 text-sm text-slate-700 hover:bg-slate-100"
+              className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-sm text-slate-700 hover:bg-indigo-50/60 focus-within:ring-2 focus-within:ring-indigo-400"
             >
               <Checkbox
                 checked={colunasVisiveis.includes(coluna.id)}

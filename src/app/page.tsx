@@ -15,7 +15,7 @@ export default function RootPage() {
   }, [router]);
 
   return (
-    <div className="flex flex-1 items-center justify-center p-10 text-sm text-slate-400">
+    <div className="flex flex-1 items-center justify-center p-10 text-sm text-slate-500">
       Redirecionando para{" "}
       <Link href="/pipes" className="ml-1 text-blue-600 hover:underline">
         seus pipes

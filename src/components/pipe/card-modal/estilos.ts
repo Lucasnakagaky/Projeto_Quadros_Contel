@@ -43,4 +43,4 @@ export const CHECK_MODAL = `${FOCO} data-[state=checked]:border-indigo-600 data-
 
 /** Valor clicável de um campo (modo leitura): botão discreto com foco visível. */
 export const BTN_VALOR = `rounded text-sm text-slate-700 transition-colors duration-(--duracao-rapida) hover:text-indigo-700 hover:underline ${FOCO}`;
-export const BTN_VALOR_VAZIO = `rounded text-sm text-slate-400 transition-colors duration-(--duracao-rapida) hover:text-indigo-600 ${FOCO}`;
+export const BTN_VALOR_VAZIO = `rounded text-sm text-slate-500 transition-colors duration-(--duracao-rapida) hover:text-indigo-600 ${FOCO}`;

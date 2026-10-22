@@ -21,7 +21,7 @@ export function PipeHeader({
 }) {
   const { sair } = useAuth();
   return (
-    <header className="gdt-barra mx-4 mt-3 flex shrink-0 items-center gap-1 px-4 py-2.5 sm:gap-2">
+    <header className="gdt-barra mx-4 mt-3 flex shrink-0 items-center gap-1 px-3 py-2.5 sm:px-4 sm:gap-2">
       <Link
         href="/pipes"
         className="gdt-focus mr-1 rounded-xl p-2 text-slate-400 transition-colors duration-(--duracao-rapida) hover:bg-white/80 hover:text-indigo-700"
@@ -30,7 +30,7 @@ export function PipeHeader({
         <ArrowLeft size={18} />
       </Link>
 
-      <h1 className="mr-auto truncate text-lg font-bold tracking-tight text-slate-900 sm:text-xl">
+      <h1 className="mr-auto min-w-0 truncate text-lg font-bold tracking-tight text-slate-900 sm:text-xl">
         {pipe.nome}
       </h1>
 
