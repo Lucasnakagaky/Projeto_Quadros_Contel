@@ -292,3 +292,62 @@ describe("Etiquetas", () => {
     await expect(deleteLabel("etiqueta-inexistente")).resolves.not.toThrow();
   });
 });
+
+// Pipes grandes (100+ cards): os ids vão na URL do PostgREST e a lista repetida para pai e
+// filho estourava o limite do gateway, derrubando a abertura do quadro. Agora vai em lotes.
+describe("consultas por lista de ids em pipes grandes", () => {
+  async function prepararCenario(qtd: number) {
+    const { supabase, tabelas } = (await import("./supabase")) as unknown as {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      supabase: { from: (t: string) => any };
+      tabelas: Record<string, Record<string, unknown>[]>;
+    };
+    const ids = Array.from({ length: qtd }, (_, i) => `card-grande-${i}`);
+    tabelas.cards = ids.map((id, i) => ({ id, titulo: `Card ${i}` }));
+    // cada card i (par) é pai do card i+1
+    tabelas.conexoes = ids
+      .filter((_, i) => i % 2 === 0 && i + 1 < qtd)
+      .map((id, k) => ({
+        id: `cx-${k}`,
+        campo_id: "campo-x",
+        card_pai_id: id,
+        card_filho_id: ids[ids.indexOf(id) + 1],
+        criado_em: "2026-01-01T00:00:00.000Z",
+      }));
+
+    const tamanhos: number[] = [];
+    const original = supabase.from;
+    supabase.from = (t: string) => {
+      const b = original(t);
+      const orig = { or: b.or.bind(b), in: b.in.bind(b) };
+      b.or = (f: string) => (tamanhos.push(f.length), orig.or(f));
+      b.in = (c: string, a: unknown[]) => (tamanhos.push(a.join(",").length), orig.in(c, a));
+      return b;
+    };
+    return { ids, tamanhos, restaurar: () => (supabase.from = original) };
+  }
+
+  it("conexões e títulos de 250 cards não geram nenhuma consulta gigante e não perdem dados", async () => {
+    const { listConexoesEnvolvendoCards, cardTitulosPorId } = await import("./store");
+    const { ids, tamanhos, restaurar } = await prepararCenario(250);
+    try {
+      const conexoes = await listConexoesEnvolvendoCards(ids);
+      expect(conexoes).toHaveLength(125);
+
+      const titulos = await cardTitulosPorId(ids);
+      expect(Object.keys(titulos)).toHaveLength(250);
+      expect(titulos["card-grande-249"]).toBe("Card 249");
+
+      // nenhum filtro passa de ~3 KB (antes: ~19 KB só na lista de conexões)
+      expect(Math.max(...tamanhos)).toBeLessThan(3500);
+    } finally {
+      restaurar();
+    }
+  });
+
+  it("lista vazia não consulta nada", async () => {
+    const { listConexoesEnvolvendoCards, cardTitulosPorId } = await import("./store");
+    expect(await listConexoesEnvolvendoCards([])).toEqual([]);
+    expect(await cardTitulosPorId([])).toEqual({});
+  });
+});

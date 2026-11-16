@@ -21,7 +21,9 @@ function PipeBoardContent() {
   const searchParams = useSearchParams();
   const pipeId = searchParams.get("id");
   const [props, setProps] = useState<Props | null>(null);
-  const [erro, setErro] = useState(false);
+  // null = sem erro. `naoEncontrado` = o pipe não existe (404); senão foi uma falha ao carregar.
+  const [erro, setErro] = useState<{ naoEncontrado: boolean; detalhe: string } | null>(null);
+  const [tentativa, setTentativa] = useState(0);
 
   useEffect(() => {
     if (!session || !pipeId) return;
@@ -69,19 +71,41 @@ function PipeBoardContent() {
           filhosPorCardIniciais,
           paisPorCardIniciais,
         });
-      } catch {
-        if (vivo) setErro(true);
+      } catch (e) {
+        console.error("Falha ao carregar o quadro", e);
+        if (vivo) {
+          setErro({
+            naoEncontrado: (e as { status?: number })?.status === 404,
+            detalhe: e instanceof Error ? e.message : String(e),
+          });
+        }
       }
     })();
     return () => {
       vivo = false;
     };
-  }, [pipeId, session]);
+  }, [pipeId, session, tentativa]);
 
   if (!pipeId || erro) {
+    const naoEncontrado = !pipeId || !!erro?.naoEncontrado;
     return (
       <div className="flex flex-1 flex-col items-center justify-center gap-3 p-10 text-center">
-        <p className="text-slate-500">Pipe não encontrado.</p>
+        <p className="text-slate-500">
+          {naoEncontrado ? "Pipe não encontrado." : "Não foi possível carregar o quadro."}
+        </p>
+        {!naoEncontrado && erro && <p className="max-w-md text-xs text-slate-400">{erro.detalhe}</p>}
+        {!naoEncontrado && (
+          <button
+            type="button"
+            onClick={() => {
+              setErro(null);
+              setTentativa((n) => n + 1);
+            }}
+            className="text-sm gdt-focus cursor-pointer rounded text-indigo-600 hover:underline"
+          >
+            Tentar novamente
+          </button>
+        )}
         <Link href="/pipes" className="text-sm gdt-focus rounded text-indigo-600 hover:underline">
           Voltar aos pipes
         </Link>

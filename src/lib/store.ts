@@ -875,22 +875,41 @@ export async function removeConexao(id: string): Promise<void> {
 }
 
 /** Conexões onde o pai OU o filho está no conjunto de ids dado (usado pela página do quadro). */
+// Os ids vão na URL do PostgREST (GET). Num pipe grande (100+ cards) a lista — repetida para
+// pai e filho nas conexões — passa do limite de ~8 KB do gateway e a requisição falha.
+// Por isso as consultas por lista de ids são feitas em lotes pequenos.
+const IDS_POR_LOTE = 40;
+
+function emLotes(ids: string[]): string[][] {
+  const unicos = [...new Set(ids)];
+  const lotes: string[][] = [];
+  for (let i = 0; i < unicos.length; i += IDS_POR_LOTE) lotes.push(unicos.slice(i, i + IDS_POR_LOTE));
+  return lotes;
+}
+
 export async function listConexoesEnvolvendoCards(cardIds: string[]): Promise<Conexao[]> {
-  if (cardIds.length === 0) return [];
-  const lst = `(${[...new Set(cardIds)].join(",")})`;
-  const res = await supabase
-    .from("conexoes")
-    .select("*")
-    .or(`card_pai_id.in.${lst},card_filho_id.in.${lst}`);
-  return lista<any>(res).map(rowToConexao);
+  const porId = new Map<string, Conexao>();
+  for (const lote of emLotes(cardIds)) {
+    const lst = `(${lote.join(",")})`;
+    const res = await supabase
+      .from("conexoes")
+      .select("*")
+      .or(`card_pai_id.in.${lst},card_filho_id.in.${lst}`);
+    for (const row of lista<any>(res)) {
+      const cx = rowToConexao(row);
+      porId.set(cx.id, cx);
+    }
+  }
+  return [...porId.values()];
 }
 
 /** { id -> titulo } para um conjunto de cards (pode incluir cards de outros pipes). */
 export async function cardTitulosPorId(ids: string[]): Promise<Record<string, string>> {
-  if (ids.length === 0) return {};
-  const res = await supabase.from("cards").select("id, titulo").in("id", [...new Set(ids)]);
   const out: Record<string, string> = {};
-  for (const r of lista<any>(res)) out[r.id as string] = r.titulo as string;
+  for (const lote of emLotes(ids)) {
+    const res = await supabase.from("cards").select("id, titulo").in("id", lote);
+    for (const r of lista<any>(res)) out[r.id as string] = r.titulo as string;
+  }
   return out;
 }
 
