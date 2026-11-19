@@ -95,6 +95,8 @@ export function CardDetailModal({
   const [titulo, setTitulo] = useState("");
   const [tabAtiva, setTabAtiva] = useState("form");
   const [configurandoCampos, setConfigurandoCampos] = useState(false);
+  // Só visual: liga o véu de vidro do topo quando o conteúdo já rolou (ver `.gdt-modal-topo`).
+  const [rolou, setRolou] = useState(false);
   const tituloRef = useRef<HTMLTextAreaElement>(null);
   // Sinaliza (sem re-render) que o EtiquetasPopover está com uma edição inline de etiqueta em
   // andamento — usado no onEscapeKeyDown do Dialog logo abaixo. O input inline de edição não é
@@ -361,9 +363,11 @@ export function CardDetailModal({
       <DialogContent
         // gdt-modal*: casca de vidro, overlay frio e Geist (o modal é um portal fora do
         // .gdt-shell). `--fase` só alimenta a luz contextual (faixa superior, pills, marcadores).
-        className="gdt-modal gdt-modal-luz scrollbar-fina w-[calc(100vw-1rem)] max-w-6xl"
+        // Moldura fixa (flex-col + overflow-hidden): só a div interna rola, então o X (absolute
+        // dentro da moldura) fica sempre visível e conectado ao card.
+        className="gdt-modal gdt-modal-luz flex w-[calc(100vw-1rem)] max-w-6xl flex-col overflow-hidden"
         overlayClassName="gdt-modal-overlay"
-        closeClassName="gdt-modal-fechar"
+        closeClassName="gdt-modal-fechar right-3 top-3 md:right-4 md:top-4"
         style={{ "--fase": faseAtual?.cor ?? "#6366f1" } as React.CSSProperties}
         onEscapeKeyDown={(e) => {
           if (etiquetaEmEdicaoRef.current) e.preventDefault();
@@ -376,6 +380,10 @@ export function CardDetailModal({
         {/* 3 colunas independentes (padrão Pipefy): card | fase atual | ações da fase — a ordem
             do DOM não muda. Visualmente são 3 painéis flutuantes sobre a casca de vidro:
             conteúdo principal (maior peso), contexto/descrição e trilho de ações (compacto). */}
+        <div
+          className="scrollbar-fina min-h-0 flex-1 overflow-y-auto"
+          onScroll={(e) => setRolou(e.currentTarget.scrollTop > 4)}
+        >
         <div className="grid grid-cols-1 gap-2 p-2 md:grid-cols-[minmax(0,4fr)_minmax(0,5fr)_240px] md:gap-3 md:p-3">
           {/* Coluna 1 — Card */}
           <div className="gdt-modal-painel flex min-w-0 flex-col gap-3 px-5 py-5">
@@ -658,6 +666,8 @@ export function CardDetailModal({
             </div>
           </div>
         </div>
+        </div>
+        <div aria-hidden="true" data-rolou={rolou} className="gdt-modal-topo" />
       </DialogContent>
     </Dialog>
 
