@@ -37,16 +37,60 @@ async function uploadArquivo(cardId: string, file: File) {
   });
 }
 
+const TAMANHO_MAXIMO_IMAGEM = 15 * 1024 * 1024; // mesmo limite da Edge Function
+
+// Com status não-2xx o supabase-js só diz "Edge Function returned a non-2xx status code": o
+// motivo real (ex.: "Host da imagem remota não permitido") vem no corpo, em error.context.
+async function motivoDaEdgeFunction(error: unknown): Promise<string | null> {
+  const ctx = (error as { context?: Response } | null)?.context;
+  if (ctx && typeof ctx.json === "function") {
+    try {
+      const corpo = await ctx.json();
+      if (typeof corpo?.error === "string") return corpo.error;
+    } catch {
+      // corpo sem JSON — cai na mensagem genérica
+    }
+  }
+  return null;
+}
+
+// Plano B: tenta baixar direto no navegador. Só funciona se o host da imagem liberar CORS (a
+// maioria não libera — por isso o caminho principal é a Edge Function, que busca no servidor).
+async function baixarImagemNoNavegador(urlRemota: string): Promise<File | null> {
+  try {
+    const resp = await fetch(urlRemota);
+    if (!resp.ok) return null;
+    const blob = await resp.blob();
+    if (!blob.type.startsWith("image/") || blob.size > TAMANHO_MAXIMO_IMAGEM) return null;
+    const ext = blob.type.split("/")[1]?.split("+")[0] ?? "png";
+    return new File([blob], `imagem-colada.${ext}`, { type: blob.type });
+  } catch {
+    return null;
+  }
+}
+
 async function baixarImagemRemota(cardId: string, urlRemota: string) {
   // Edge Function replica a proteção SSRF do antigo src/lib/fetch-remote-image.ts.
   const { data, error } = await supabase.functions.invoke("baixar-imagem-remota", {
     body: { url: urlRemota },
   });
-  if (error) throw new Error(error.message || "Falha ao baixar a imagem remota");
-  // A função devolve { base64, tipo, nome } — reconstrói um File e sobe pro Storage.
-  const bin = Uint8Array.from(atob(data.base64), (c) => c.charCodeAt(0));
-  const file = new File([bin], data.nome ?? "imagem-colada", { type: data.tipo });
-  return uploadArquivo(cardId, file);
+  if (!error && data?.base64) {
+    // A função devolve { base64, tipo, nome } — reconstrói um File e sobe pro Storage.
+    const bin = Uint8Array.from(atob(data.base64), (c) => c.charCodeAt(0));
+    const file = new File([bin], data.nome ?? "imagem-colada", { type: data.tipo });
+    return uploadArquivo(cardId, file);
+  }
+
+  // Função indisponível (não publicada/sem rede) ou recusou a imagem: tenta o navegador.
+  const doNavegador = await baixarImagemNoNavegador(urlRemota);
+  if (doNavegador) return uploadArquivo(cardId, doNavegador);
+
+  const motivo = await motivoDaEdgeFunction(error);
+  throw new Error(
+    motivo
+      ? `Não foi possível importar a imagem colada: ${motivo}`
+      : "Não foi possível importar uma imagem colada (o serviço de download de imagens está indisponível). O texto foi mantido — anexe a imagem pelo botão de imagem ou cole a própria imagem (Ctrl+V)."
+  );
 }
 
 /* ------------------------------------------------------------------ GET ---- */

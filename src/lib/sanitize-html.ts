@@ -32,6 +32,21 @@ const TAGS_PERMITIDAS = new Set([
 // denylist, desembrulhar <style>/<script> vazaria o CSS/JS cru como texto no editor.
 const TAGS_REMOVER_POR_INTEIRO = new Set(["STYLE", "SCRIPT", "TITLE", "HEAD", "NOSCRIPT", "TEMPLATE"]);
 
+// Blocos que, ao serem descartados, NÃO podem simplesmente sumir (desembrulhar juntaria o texto de
+// dois parágrafos numa linha só): viram <div> sem atributos, preservando a quebra de linha. É o que
+// acontece ao colar do ClickUp/Bitrix/Notion/Google Docs: títulos, citações, seções, tabelas, etc.
+const TAGS_BLOCO_VIRAM_DIV = new Set([
+  "H1", "H2", "H3", "H4", "H5", "H6", "BLOCKQUOTE", "PRE", "SECTION", "ARTICLE", "HEADER", "FOOTER",
+  "ASIDE", "MAIN", "NAV", "FIGURE", "FIGCAPTION", "DL", "DT", "DD", "ADDRESS", "CAPTION", "DETAILS",
+  "SUMMARY", "TABLE", "THEAD", "TBODY", "TFOOT", "TR", "HR",
+]);
+const TAGS_TITULO = new Set(["H1", "H2", "H3", "H4", "H5", "H6"]);
+// Células de tabela: viram o texto seguido de um espaço (não de uma quebra), p/ não colar "A" "B" em "AB".
+const TAGS_CELULA = new Set(["TD", "TH"]);
+
+// Atributos onde sites com "lazy load" guardam a URL real quando o src é só um placeholder.
+const ATRIBUTOS_SRC_ALTERNATIVOS = ["data-src", "data-original", "data-lazy-src", "data-actualsrc"];
+
 const ATRIBUTOS_PERMITIDOS: Record<string, Set<string>> = {
   IMG: new Set(["src", "alt"]),
 };
@@ -68,6 +83,38 @@ function srcValido(valor: string, opts?: SanitizeHtmlOpts): boolean {
   return false;
 }
 
+// Só no paste (permitirImagemTemporaria): acha a URL real da imagem quando o src está ausente, é
+// só um placeholder (data:image minúsculo / URL inválida) ou é protocol-relative ("//host/x.png").
+// Cobre imagens "lazy" (data-src / srcset) que alguns editores/sites geram.
+function normalizarSrcImagemColada(img: HTMLElement): void {
+  const atual = img.getAttribute("src") ?? "";
+  if (atual.startsWith("//")) {
+    img.setAttribute("src", "https:" + atual);
+    return;
+  }
+  const atualEhRemoto = atual.startsWith("http:") || atual.startsWith("https:") || atual.startsWith("blob:") || atual.startsWith("/uploads/");
+  const atualEhPlaceholder = atual.startsWith("data:") && atual.length < 400;
+  if (atual && atualEhRemoto) return;
+  if (atual && !atualEhPlaceholder && atual.startsWith("data:")) return; // data: de verdade
+  const candidatos: string[] = [];
+  for (const nome of ATRIBUTOS_SRC_ALTERNATIVOS) {
+    const v = img.getAttribute(nome);
+    if (v) candidatos.push(v);
+  }
+  const srcset = img.getAttribute("srcset");
+  if (srcset) {
+    const primeira = srcset.split(",")[0]?.trim().split(/\s+/)[0];
+    if (primeira) candidatos.push(primeira);
+  }
+  for (const c of candidatos) {
+    const url = c.startsWith("//") ? "https:" + c : c;
+    if (url.startsWith("http://") || url.startsWith("https://")) {
+      img.setAttribute("src", url);
+      return;
+    }
+  }
+}
+
 function sanitizarNo(no: Node, opts?: SanitizeHtmlOpts): void {
   const filhos = Array.from(no.childNodes);
   for (const filho of filhos) {
@@ -77,13 +124,28 @@ function sanitizarNo(no: Node, opts?: SanitizeHtmlOpts): void {
         no.removeChild(el);
         continue;
       }
+      if (el.tagName === "IMG" && opts?.permitirImagemTemporaria) normalizarSrcImagemColada(el);
       // Sanitiza recursivamente ANTES de decidir descartar a tag: se ela for
       // removida (unwrap), os filhos promovidos para o nível acima já saem limpos.
       sanitizarNo(el, opts);
       if (!TAGS_PERMITIDAS.has(el.tagName)) {
-        // Tag não permitida: descarta a tag mas preserva o conteúdo (já sanitizado).
         const pai = el.parentNode;
         if (!pai) continue;
+        if (TAGS_BLOCO_VIRAM_DIV.has(el.tagName)) {
+          // Bloco descartado: vira <div> limpo (mantém a quebra de linha; títulos ficam em negrito).
+          const bloco = document.createElement("div");
+          const alvo = TAGS_TITULO.has(el.tagName) ? bloco.appendChild(document.createElement("strong")) : bloco;
+          while (el.firstChild) alvo.appendChild(el.firstChild);
+          pai.replaceChild(bloco, el);
+          continue;
+        }
+        if (TAGS_CELULA.has(el.tagName)) {
+          // Célula: conteúdo + um espaço, sem quebra de linha.
+          while (el.firstChild) pai.insertBefore(el.firstChild, el);
+          pai.replaceChild(document.createTextNode(" "), el);
+          continue;
+        }
+        // Tag não permitida: descarta a tag mas preserva o conteúdo (já sanitizado).
         while (el.firstChild) pai.insertBefore(el.firstChild, el);
         pai.removeChild(el);
         continue;

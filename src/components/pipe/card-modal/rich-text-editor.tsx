@@ -277,6 +277,7 @@ export function RichTextEditor({
     }
     if (candidatas.length === 0) return;
     setEnviando(true);
+    const falhas: string[] = [];
     try {
       for (const img of candidatas) {
         const src = img.getAttribute("src") ?? "";
@@ -290,12 +291,15 @@ export function RichTextEditor({
           // vez de deixar um src que o sanitizeHtml vai apagar silenciosamente no Salvar (sem
           // essa remoção, o texto ao redor da imagem ficaria com um "buraco" sem explicação).
           img.remove();
-          toast.error(err instanceof Error ? err.message : "Erro ao enviar imagem colada");
+          falhas.push(err instanceof Error ? err.message : "Erro ao enviar imagem colada");
         }
       }
     } finally {
       setEnviando(false);
     }
+    // Um único aviso por colagem (com várias imagens falhando, um toast por imagem lotava a tela).
+    if (falhas.length === 1) toast.error(falhas[0]);
+    else if (falhas.length > 1) toast.error(`${falhas.length} imagens não foram importadas. ${falhas[0]}`);
   }
 
   function salvar() {
